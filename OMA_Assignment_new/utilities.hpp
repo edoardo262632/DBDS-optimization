@@ -3,6 +3,8 @@
 
 #include <string>
 
+#define DEFAULT_TIMELIMIT 300
+
 
 /* ============ DATA TYPES ============ */
 
@@ -10,8 +12,10 @@
 // Wrapper structure used to hold and pass the command line execution parameters
 typedef struct
 {
-	std::string inputFileName;		// The output file name is not a parameter, can be generated as <inputFileName>_OMAAL_group04.sol
-	unsigned int timeLimit;
+	std::string inputFileName = std::string();
+	std::string outputFileName = std::string();		// Not a parameter, can be generated as <inputFileName>_OMAAL_group04.sol
+	unsigned int timeLimit = DEFAULT_TIMELIMIT;
+	bool parsingError = false;
 } Params;
 
 

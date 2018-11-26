@@ -15,7 +15,16 @@ int main(int argc, char **argv)
 	Instance problemInstance;
 
 	executionParameters = parseCommandLine(argc, argv);
-	problemInstance = readInputFile(executionParameters.inputFileName);
+	if (!executionParameters.parsingError)
+	{
+		problemInstance = readInputFile(executionParameters.inputFileName);
+	}
+	else 
+	{
+		fprintf(stderr, "\nEncountered error when parsing command line parameters, aborting...\n");
+		exit (EXIT_FAILURE);
+	} 
+	
 
 	// TODO: Instantiate the proper class and run the algorithm
 
