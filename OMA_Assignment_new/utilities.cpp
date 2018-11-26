@@ -42,13 +42,14 @@ Params parseCommandLine(int argc, char *argv[])
 
 Instance readInputFile(std::string fileName)
 {	// to TEST
-	Instance instance;
+	Instance instance = Instance();
 	FILE *fl;
-	fl = fopen(fileName.c_str(), "r");
-	if (fl == NULL) {
-			fprintf(stderr,"paolino vuole questo errore");
 
-			return Instance();
+	fl = fopen(fileName.c_str(), "r");
+	if (fl == NULL) 
+	{
+		fprintf(stderr, "Encountered an error when attempting to open and read file '%s'\n", fileName);
+		return Instance();
 	}
 
 	int l = fscanf(fl, "%*s%u",&instance.nQueries);
