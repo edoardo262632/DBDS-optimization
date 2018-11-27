@@ -25,7 +25,6 @@ int main(int argc, char **argv)
 		exit (EXIT_FAILURE);
 	} 
 	
-
 	// TODO: Instantiate the proper class and run the algorithm
 
 	return 0;

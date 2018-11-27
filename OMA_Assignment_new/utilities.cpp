@@ -2,10 +2,11 @@
 
 
 Params parseCommandLine(int argc, char *argv[])
-{
+{	// working parsing_CommandLine
+
 	Params execParams = Params();
 
-	if (argc != 2 || argc != 4)
+	if (argc != 2 && argc != 4)
 	{
 		fprintf(stderr, "Wrong command line parameters usage, expected:"
 			"\n$ODBDPsolver_OMAAL_group04.exe <instancefilename> -t <timelimit>\n");
@@ -22,7 +23,7 @@ Params parseCommandLine(int argc, char *argv[])
 				i++;
 			}
 			// Parsing the <inputfilename> parameter, also generating the output filename
-			else if (execParams.inputFileName.length == 0)		
+			else if (execParams.inputFileName.length() == 0)		
 			{
 				execParams.inputFileName = std::string(argv[i]);
 				execParams.outputFileName = execParams.inputFileName + "_OMAAL_group04.sol";
@@ -41,14 +42,15 @@ Params parseCommandLine(int argc, char *argv[])
 
 
 Instance readInputFile(std::string fileName)
-{	// to TEST
+{	// working reading_file
+
 	Instance instance = Instance();
 	FILE *fl;
 
 	fl = fopen(fileName.c_str(), "r");
 	if (fl == NULL) 
 	{
-		fprintf(stderr, "Encountered an error when attempting to open and read file '%s'\n", fileName);
+		fprintf(stderr, "Encountered an error when attempting to open and read file '%s'\n", fileName.c_str());
 		return Instance();
 	}
 
@@ -56,11 +58,12 @@ Instance readInputFile(std::string fileName)
 	l += fscanf(fl, "%*s%u",&instance.nIndexes);
 	l += fscanf(fl, "%*s%u",&instance.nConfigs);
 	l += fscanf(fl, "%*s%u",&instance.M);
-	if (l != 4)
+	if (l != 4) {
+		fprintf(stderr, "Error in the file format\n");
 		return Instance();
+	}
 	
-	fscanf(fl, "%*s");
-	
+	fscanf(fl, "%*s");	// eliminate an extra row
 
 	// reading the CONFIGURATION_INDEX_MATRIX
 	instance.configIndexesMatrix = (short int**) malloc(instance.nConfigs * sizeof(short int*));
@@ -70,7 +73,7 @@ Instance readInputFile(std::string fileName)
 			fscanf(fl, "%hd", &instance.configIndexesMatrix[i][j]);
 		}
 	}
-	fscanf(fl, "%*s");	// eliminate a extra rows
+	fscanf(fl, "%*s");	// eliminate an extra row
 
 	// alloc and read vector of Fixed_Cost for each index
 	instance.indexesFixedCost = (unsigned int*) malloc (instance.nIndexes * sizeof(unsigned int));
@@ -78,7 +81,7 @@ Instance readInputFile(std::string fileName)
 		fscanf(fl, "%u", &instance.indexesFixedCost[i]);
 	}
 
-	fscanf(fl, "%*s"); //  eliminate a extra rows
+	fscanf(fl, "%*s"); //  eliminate an extra row
 
 	// alloc and read vector of Memory needed from every index
 	instance.indexesMemoryOccupation = (unsigned int*)malloc(instance.nIndexes * sizeof(unsigned int));
@@ -86,8 +89,7 @@ Instance readInputFile(std::string fileName)
 		fscanf(fl, "%u", &instance.indexesMemoryOccupation[i]);
 	}
 
-	fscanf(fl, "%*s");	//  eliminate a extra rows
-
+	fscanf(fl, "%*s");	//  eliminate an extra row
 
 	// alloc and read the CONFIGURATION_QUERIES_GAIN
 	instance.configQueriesGain = (unsigned int **)malloc(instance.nConfigs * sizeof(unsigned int*));
