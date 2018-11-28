@@ -114,6 +114,67 @@ Instance readInputFile(std::string fileName)
 
 bool Solution::isFeasible()
 {
+	bool FF;
+	Solution s; // received as parameter
+	unsigned int ***matrX_p = &s.configsServingQueries;
+
+	Instance e = readInputFile();
+	unsigned int ***matrE_p = &e.configIndexesMatrix;
+	unsigned int ***matrG_p = &e.configQueriesGain;
+	unsigned int **vectF_p = &e.indexesFixedCost;
+	unsigned int **vectM_p = &e.indexesMemoryOccupation;
+
+	unsigned int *check4Query = malloc(e.nQueries * sizeof(unsigned int));
+
+	unsigned int *b;					
+	unsigned int i, j, mem;
+	unsigned int M = e.M;
+	
+	// allocate b vector
+	b = malloc(e.nIndexes * sizeof(unsigned int));
+
+	//	memory constraint
+	
+	//	iterate x matrix 
+
+	for (i = 0; i < s.nC; i++) {
+		for (j = 0; j < s.nQ; j++) {
+
+			if (*matrX_p[i][j] == 1) {
+
+				// configuration i serve query j
+				if (check4Query[j] = 1)
+					fprintf(stderr, "Too many configuration for query %d", &j);
+				else
+				{
+					check4Query[j] = 1;
+				}
+
+				// memory check
+				for (unsigned int k = 0; k < e.nIndexes; k++) {
+					if (*matrE_p[i][k] == 1) {
+						// index k is served by configuration i so it has to be builded
+						b[k] = 1;
+						// search for memory usage
+						mem += *vectF_p[k];
+						if (mem > M) {
+							fprintf(stderr, "Configuration %d that uses index %d for quey %d exceeds mem limit \n", &i, &k, &j);
+							return FF = false;
+						
+						}
+
+					}
+					else b[k] = 0;
+				}
+
+			}
+		}
+	}
+	
+	 
+
+
+
 	// PLEASE NOTE: the third constraint in our model is actually a way to build the 'b' vector
 	// which is then used in the objective function evaluation. Therefore, it's not something to check
 	// in order to determine the feasibility of the solution but you need to set the proper 0/1 values
