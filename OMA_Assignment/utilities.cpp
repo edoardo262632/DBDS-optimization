@@ -114,6 +114,64 @@ Instance readInputFile(std::string fileName)
 
 bool Solution::isFeasible()
 {
+	bool FF;
+	Solution s; // received as parameter
+	short int ***matrX_p = &s.configsServingQueries;		//	|C|x|Q| bool 
+
+	Instance e = readInputFile(filename);
+	short int ***matrE_p = &e.configIndexesMatrix;			//	|C|x|I|	bool
+	unsigned int **vectF_p = &e.indexesFixedCost;			//	|I|		integer
+	unsigned int **vectM_p = &e.indexesMemoryOccupation;	//	|I|		integer
+	unsigned int ***matrG_p = &e.configQueriesGain;			//	|C|x|Q| integer
+
+	//	 allocate vector for check 2nd constraint
+	unsigned int *check4Query = calloc(e.nQueries, sizeof(unsigned int)); 
+
+	unsigned int *b;					
+	unsigned int i, j, k, mem;
+	unsigned int M = e.M;
+	
+	// allocate b vector
+	b = calloc(e.nIndexes,sizeof(unsigned int));
+	
+	//	iterate x matrix 
+
+	for (i = 0; i < s.nC; i++) {
+		for (j = 0; j < s.nQ; j++) {
+
+			if (*matrX_p[i][j] == 1) {			// configuration i serve query j
+
+						///		CHECK 2ND CONSTRAINT
+				if (check4Query[j] = 1) {
+					fprintf(stderr, "Too many configuration for query %u", j);
+					return FF = false;
+				}					
+				else check4Query[j] += 1;
+						///		MEMORY CHECK
+				for (k = 0; k < e.nIndexes; k++) {
+					if (*matrE_p[i][k] == 1) {
+						// index k is served by configuration i so it has to be builded
+						b[k] = 1;
+						// search for memory usage
+						mem += *vectM_p[k];
+						if (mem > M) {
+							fprintf(stderr, "Configuration %u that uses index %u for quey %u exceeds memory limit \n", i, k, j);
+							return FF = false;
+						}
+
+					}
+					//	else b[k] = 0;
+				}
+
+			}
+
+		}
+	}
+	
+	 
+
+
+
 	// PLEASE NOTE: the third constraint in our model is actually a way to build the 'b' vector
 	// which is then used in the objective function evaluation. Therefore, it's not something to check
 	// in order to determine the feasibility of the solution but you need to set the proper 0/1 values
@@ -130,5 +188,21 @@ unsigned long int Solution::evaluateObjectiveFunction()
 
 void Solution::writeToFile(std::string fileName)
 {
-	
+
+		using namespace std;
+		ofstream myfile(fileName);
+		if (myfile.is_open())
+		{
+			for ()
+			{
+				myfile << Solution.C + " ";  //need solution to understand how to print, which variables, data and functions it is possible to use
+					cout << Solution.C;
+				myfile << Solution.Q;
+					cout << Solution.Q;
+				myfile << Solution.ecq;
+					cout << Solution.ecq;
+			}
+			myfile.close();
+		}
+		else cout << "Error: unable to open file";
 }

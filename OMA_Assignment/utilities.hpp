@@ -1,7 +1,8 @@
 #ifndef UTILITIES_HPP
 #define UTILITIES_HPP
-
 #include <string>
+#include <iostream>
+#include <fstream>
 
 #define DEFAULT_TIMELIMIT 300
 
@@ -26,7 +27,7 @@ typedef struct
 	unsigned int nQueries;		// |Q|
 	unsigned int nIndexes;		// |I|
 	unsigned int nConfigs;		// |C|
-	unsigned int M;
+	unsigned int M;							// memory
 	short int **configIndexesMatrix;		// e matrix
 	unsigned int *indexesFixedCost;			// f vector
 	unsigned int *indexesMemoryOccupation;	// m vector
@@ -63,6 +64,7 @@ public:
 	void writeToFile(std::string fileName);
 
 private:
+
 
 };
 
