@@ -1,7 +1,8 @@
 #ifndef UTILITIES_HPP
 #define UTILITIES_HPP
-
 #include <string>
+#include <iostream>
+#include <fstream>
 
 #define DEFAULT_TIMELIMIT 300
 
@@ -48,12 +49,12 @@ public:
 	short int **configsServingQueries;			// x matrix
 	short int *indexesToBuild;					// b vector
 	unsigned long int objFunctionValue = -1;
+	
 
 private:
 
-	unsigned int nC, nI, nQ;	// |C|, |I| and |Q| values, needed to iterate on the arrays/matrixes
-								// TODO: initialize these values inside the Solution class constructor
-
+	Instance *problemInstance;	// TODO: initialize these values inside the Solution class constructor
+	
 	// --- METHODS ---
 
 public:
