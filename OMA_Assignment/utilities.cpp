@@ -188,19 +188,22 @@ unsigned long int Solution::evaluateObjectiveFunction()
 
 void Solution::writeToFile(std::string fileName)
 {
-
-		using namespace std;
-		ofstream myfile(fileName);
+	using namespace std;
+	Solution s;
+		short int ***matrX_p = &s.configsServingQueries;
+		ofstream myfile
+		myfile.open(fileName.c_str());
 		if (myfile.is_open())
 		{
-			for ()
-			{
-				myfile << Solution.C + " ";  //need solution to understand how to print, which variables, data and functions it is possible to use
-					cout << Solution.C;
-				myfile << Solution.Q;
-					cout << Solution.Q;
-				myfile << Solution.ecq;
-					cout << Solution.ecq;
+			for (int i = 0; i < s.nC; i++) {
+				for (int j = 0; j < s.nQ; j++) {
+
+
+					myfile << *matrX_p[i][j] << " ";
+					cout << *matrX_p[i][j] << " ";
+				}
+				myfile << "\n";
+				cout << "\n";
 			}
 			myfile.close();
 		}
