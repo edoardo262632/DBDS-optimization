@@ -1,7 +1,8 @@
 #ifndef UTILITIES_HPP
 #define UTILITIES_HPP
-
 #include <string>
+#include <iostream>
+#include <fstream>
 
 #define DEFAULT_TIMELIMIT 300
 
