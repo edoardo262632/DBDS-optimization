@@ -116,58 +116,55 @@ bool Solution::isFeasible()
 {
 	bool FF;
 	Solution s; // received as parameter
-	unsigned int ***matrX_p = &s.configsServingQueries;
+	short int ***matrX_p = &s.configsServingQueries;		//	|C|x|Q| bool 
 
-	Instance e = readInputFile();
-	unsigned int ***matrE_p = &e.configIndexesMatrix;
-	unsigned int ***matrG_p = &e.configQueriesGain;
-	unsigned int **vectF_p = &e.indexesFixedCost;
-	unsigned int **vectM_p = &e.indexesMemoryOccupation;
+	Instance e = readInputFile(filename);
+	short int ***matrE_p = &e.configIndexesMatrix;			//	|C|x|I|	bool
+	unsigned int **vectF_p = &e.indexesFixedCost;			//	|I|		integer
+	unsigned int **vectM_p = &e.indexesMemoryOccupation;	//	|I|		integer
+	unsigned int ***matrG_p = &e.configQueriesGain;			//	|C|x|Q| integer
 
-	unsigned int *check4Query = malloc(e.nQueries * sizeof(unsigned int));
+	//	 allocate vector for check 2nd constraint
+	unsigned int *check4Query = calloc(e.nQueries, sizeof(unsigned int)); 
 
 	unsigned int *b;					
-	unsigned int i, j, mem;
+	unsigned int i, j, k, mem;
 	unsigned int M = e.M;
 	
 	// allocate b vector
-	b = malloc(e.nIndexes * sizeof(unsigned int));
-
-	//	memory constraint
+	b = calloc(e.nIndexes,sizeof(unsigned int));
 	
 	//	iterate x matrix 
 
 	for (i = 0; i < s.nC; i++) {
 		for (j = 0; j < s.nQ; j++) {
 
-			if (*matrX_p[i][j] == 1) {
+			if (*matrX_p[i][j] == 1) {			// configuration i serve query j
 
-				// configuration i serve query j
-				if (check4Query[j] = 1)
-					fprintf(stderr, "Too many configuration for query %d", &j);
-				else
-				{
-					check4Query[j] = 1;
-				}
-
-				// memory check
-				for (unsigned int k = 0; k < e.nIndexes; k++) {
+						///		CHECK 2ND CONSTRAINT
+				if (check4Query[j] = 1) {
+					fprintf(stderr, "Too many configuration for query %u", j);
+					return FF = false;
+				}					
+				else check4Query[j] += 1;
+						///		MEMORY CHECK
+				for (k = 0; k < e.nIndexes; k++) {
 					if (*matrE_p[i][k] == 1) {
 						// index k is served by configuration i so it has to be builded
 						b[k] = 1;
 						// search for memory usage
-						mem += *vectF_p[k];
+						mem += *vectM_p[k];
 						if (mem > M) {
-							fprintf(stderr, "Configuration %d that uses index %d for quey %d exceeds mem limit \n", &i, &k, &j);
+							fprintf(stderr, "Configuration %u that uses index %u for quey %u exceeds memory limit \n", i, k, j);
 							return FF = false;
-						
 						}
 
 					}
-					else b[k] = 0;
+					//	else b[k] = 0;
 				}
 
 			}
+
 		}
 	}
 	
