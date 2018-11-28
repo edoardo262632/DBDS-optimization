@@ -115,23 +115,16 @@ Instance readInputFile(std::string fileName)
 bool Solution::isFeasible()
 {
 	bool FF;
-	Solution s; // received as parameter
-	short int ***matrX_p = &s.configsServingQueries;		//	|C|x|Q| bool 
 
-	Instance e = readInputFile(filename);
-	short int ***matrE_p = &e.configIndexesMatrix;			//	|C|x|I|	bool
-	unsigned int **vectF_p = &e.indexesFixedCost;			//	|I|		integer
-	unsigned int **vectM_p = &e.indexesMemoryOccupation;	//	|I|		integer
-	unsigned int ***matrG_p = &e.configQueriesGain;			//	|C|x|Q| integer
-
+	Instance i;
 	//	 allocate vector for check 2nd constraint
 	unsigned int *check4Query = calloc(e.nQueries, sizeof(unsigned int)); 
 
 	unsigned int *b;					
 	unsigned int i, j, k, mem;
-	unsigned int M = e.M;
 	
 	// allocate b vector
+	// b vector is for all x matrix not for each row
 	b = calloc(e.nIndexes,sizeof(unsigned int));
 	
 	//	iterate x matrix 
@@ -139,7 +132,7 @@ bool Solution::isFeasible()
 	for (i = 0; i < s.nC; i++) {
 		for (j = 0; j < s.nQ; j++) {
 
-			if (*matrX_p[i][j] == 1) {			// configuration i serve query j
+			if (this->configsServingQueries[i][j] == 1) {			// configuration i serve query j
 
 						///		CHECK 2ND CONSTRAINT
 				if (check4Query[j] = 1) {
@@ -149,11 +142,11 @@ bool Solution::isFeasible()
 				else check4Query[j] += 1;
 						///		MEMORY CHECK
 				for (k = 0; k < e.nIndexes; k++) {
-					if (*matrE_p[i][k] == 1) {
+					if (i.configIndexesMatrix[i][k] == 1) {
 						// index k is served by configuration i so it has to be builded
 						b[k] = 1;
 						// search for memory usage
-						mem += *vectM_p[k];
+						mem += i.indexesMemoryOccupation[k];
 						if (mem > M) {
 							fprintf(stderr, "Configuration %u that uses index %u for quey %u exceeds memory limit \n", i, k, j);
 							return FF = false;
