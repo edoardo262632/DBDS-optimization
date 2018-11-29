@@ -48,7 +48,7 @@ public:
 
 	short int **configsServingQueries;			// x matrix
 	short int *indexesToBuild;					// b vector
-	unsigned long int objFunctionValue = -1;
+	unsigned long int objFunctionValue;
 	
 
 private:
@@ -58,6 +58,8 @@ private:
 	// --- METHODS ---
 
 public:
+
+	Solution(Instance *probInst);		// constructor of an empty feasible Solution object for a problem Instance
 
 	bool isFeasible();
 	unsigned long int evaluateObjectiveFunction();

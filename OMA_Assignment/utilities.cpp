@@ -1,5 +1,7 @@
 #include "utilities.hpp"
 
+using namespace std;
+
 
 Params parseCommandLine(int argc, char *argv[])
 {	// working parsing_CommandLine
@@ -112,6 +114,17 @@ Instance readInputFile(std::string fileName)
 //////////////////////////////////////////////
 
 
+Solution::Solution(Instance *probInst)
+	: objFunctionValue(0),
+	problemInstance(probInst)
+{
+	configsServingQueries = (short int**)malloc(problemInstance->nConfigs * sizeof(short int*));
+	for (int i = 0; i < problemInstance->nConfigs; i++)
+		configsServingQueries[i] = (short int*)calloc(problemInstance->nQueries, sizeof(short int));
+	indexesToBuild = (short int*)calloc(problemInstance->nIndexes, sizeof(short int));
+}
+
+
 bool Solution::isFeasible()
 {
 	bool FF;
@@ -188,5 +201,24 @@ unsigned long int Solution::evaluateObjectiveFunction()
 
 void Solution::writeToFile(std::string fileName)
 {
+	// TODO: please use fprintf() to write the outputs, using stdout for standard output, stderr for errors
+	// and the declared file pointer to write on the output file
+	// Also, add a console log message that says "Found a new solution with objective function value = X"
 
+	ofstream myfile;
+	myfile.open(fileName.c_str());
+	if (myfile.is_open())
+	{
+		for (int i = 0; i < problemInstance->nConfigs; i++) {
+			for (int j = 0; j < problemInstance->nQueries; j++) {
+
+				myfile << configsServingQueries[i][j] << " ";
+				cout << configsServingQueries[i][j] << " ";
+			}
+			myfile << "\n";
+			cout << "\n";
+		}
+		myfile.close();
+	}
+	else cout << "Error: unable to open file";
 }
