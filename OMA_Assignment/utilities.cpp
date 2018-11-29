@@ -1,5 +1,7 @@
 #include "utilities.hpp"
 
+using namespace std;
+
 
 Params parseCommandLine(int argc, char *argv[])
 {	// working parsing_CommandLine
@@ -112,6 +114,17 @@ Instance readInputFile(std::string fileName)
 //////////////////////////////////////////////
 
 
+Solution::Solution(Instance *probInst)
+	: objFunctionValue(0),
+	problemInstance(probInst)
+{
+	configsServingQueries = (short int**)malloc(problemInstance->nConfigs * sizeof(short int*));
+	for (int i = 0; i < problemInstance->nConfigs; i++)
+		configsServingQueries[i] = (short int*)calloc(problemInstance->nQueries, sizeof(short int));
+	indexesToBuild = (short int*)calloc(problemInstance->nIndexes, sizeof(short int));
+}
+
+
 bool Solution::isFeasible()
 {
 	bool FF;	// posso risparmiarmela
@@ -181,21 +194,24 @@ unsigned long int Solution::evaluateObjectiveFunction()
 
 void Solution::writeToFile(std::string fileName)
 {
+	// TODO: please use fprintf() to write the outputs, using stdout for standard output, stderr for errors
+	// and the declared file pointer to write on the output file
+	// Also, add a console log message that says "Found a new solution with objective function value = X"
 
-		using namespace std;
-		ofstream myfile(fileName);
-		if (myfile.is_open())
-		{
-			for ()
-			{
-				myfile << Solution.C + " ";  //need solution to understand how to print, which variables, data and functions it is possible to use
-					cout << Solution.C;
-				myfile << Solution.Q;
-					cout << Solution.Q;
-				myfile << Solution.ecq;
-					cout << Solution.ecq;
+	ofstream myfile;
+	myfile.open(fileName.c_str());
+	if (myfile.is_open())
+	{
+		for (int i = 0; i < problemInstance->nConfigs; i++) {
+			for (int j = 0; j < problemInstance->nQueries; j++) {
+
+				myfile << configsServingQueries[i][j] << " ";
+				cout << configsServingQueries[i][j] << " ";
 			}
-			myfile.close();
+			myfile << "\n";
+			cout << "\n";
 		}
-		else cout << "Error: unable to open file";
+		myfile.close();
+	}
+	else cout << "Error: unable to open file";
 }
