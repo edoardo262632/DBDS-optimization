@@ -114,46 +114,46 @@ Instance readInputFile(std::string fileName)
 
 bool Solution::isFeasible()
 {
-	bool FF;
+	bool FF;	// posso risparmiarmela
 
-	Instance i;
+	// Instace = problemInstance
+
 	//	 allocate vector for check 2nd constraint
-	unsigned int *check4Query = calloc(e.nQueries, sizeof(unsigned int)); 
-
-	unsigned int *b;					
+	unsigned int *check4Query =(unsigned int*) calloc(problemInstance->nQueries,sizeof(unsigned int)); 
+					
 	unsigned int i, j, k, mem;
 	
 	// allocate b vector
 	// b vector is for all x matrix not for each row
-	b = calloc(e.nIndexes,sizeof(unsigned int));
+	//this->indexesToBuild = (short int*)calloc(problemInstance->nIndexes,sizeof(short int));
 	
 	//	iterate x matrix 
 
-	for (i = 0; i < s.nC; i++) {
-		for (j = 0; j < s.nQ; j++) {
+	for (i = 0; i < problemInstance->nConfigs; i++) {
+		for (j = 0; j < problemInstance->nQueries; j++) {
 
 			if (this->configsServingQueries[i][j] == 1) {			// configuration i serve query j
 
 						///		CHECK 2ND CONSTRAINT
+				// fare un check scorrendo le colonne
 				if (check4Query[j] = 1) {
-					fprintf(stderr, "Too many configuration for query %u", j);
+					//fprintf(stderr, "Too many configuration for query %u", j);
 					return FF = false;
 				}					
-				else check4Query[j] += 1;
+				else check4Query[j] = 1;
 						///		MEMORY CHECK
-				for (k = 0; k < e.nIndexes; k++) {
-					if (i.configIndexesMatrix[i][k] == 1) {
+				for (k = 0; k < problemInstance->nIndexes; k++) {
+					if (problemInstance->configIndexesMatrix[i][k] == 1) {
 						// index k is served by configuration i so it has to be builded
-						b[k] = 1;
+						indexesToBuild[k] = 1;
 						// search for memory usage
-						mem += i.indexesMemoryOccupation[k];
-						if (mem > M) {
-							fprintf(stderr, "Configuration %u that uses index %u for quey %u exceeds memory limit \n", i, k, j);
+						mem += problemInstance->indexesMemoryOccupation[k]; // mettere furoi dal ciclo
+						if (mem > problemInstance->M) {
+							//fprintf(stderr, "Configuration %u that uses index %u for quey %u exceeds memory limit \n", i, k, j);
 							return FF = false;
 						}
 
 					}
-					//	else b[k] = 0;
 				}
 
 			}
