@@ -1,6 +1,8 @@
 #ifndef ALGORITHM_HPP
 #define ALGORITHM_HPP
 
+#include "utilities.hpp"
+
 /*
 ** Algorithm provides a generic interface for an algorithm's implementation,
 ** in order to achieve modularity and freedom of exchanging the algorithm in use for testing and tweaking purposes
@@ -12,15 +14,17 @@ class Algorithm
 
 public:
 
-private:
+protected:
 
 	Solution bestSolution;
+
+private:
 
 	// ====== METHODS ======
 
 public:
 
-	virtual void run(Instance problemInstance, unsigned int time) = 0;
+	virtual void run(const Instance& problemInstance, unsigned int time) = 0;
 
 private:
 
