@@ -7,6 +7,7 @@ using namespace std;
 
 #include "utilities.hpp"
 #include "algorithm.hpp"
+#include "greedy.hpp"
 
 
 int main(int argc, char **argv) 
