@@ -1,5 +1,7 @@
 #include "utilities.hpp"
 
+using namespace std;
+
 
 Params parseCommandLine(int argc, char *argv[])
 {	// working parsing_CommandLine
@@ -112,6 +114,17 @@ Instance readInputFile(std::string fileName)
 //////////////////////////////////////////////
 
 
+Solution::Solution(Instance *probInst)
+	: objFunctionValue(0),
+	problemInstance(probInst)
+{
+	configsServingQueries = (short int**)malloc(problemInstance->nConfigs * sizeof(short int*));
+	for (int i = 0; i < problemInstance->nConfigs; i++)
+		configsServingQueries[i] = (short int*)calloc(problemInstance->nQueries, sizeof(short int));
+	indexesToBuild = (short int*)calloc(problemInstance->nIndexes, sizeof(short int));
+}
+
+
 bool Solution::isFeasible()
 {
 	bool FF;
@@ -181,23 +194,21 @@ bool Solution::isFeasible()
 
 unsigned long int Solution::evaluateObjectiveFunction()
 {
-	Instance e = readInputFile(filename);
-	unsigned int **vectF_p = &e.indexesFixedCost;			//	|I|		integer
-	unsigned int ***matrG_p = &e.configQueriesGain;			//	|C|x|Q| integer
+	Instance problemInstance;
 
 	unsigned int all_gains = 0;
 	unsigned int time_spent = 0;	
 
 	// gets gain given a solution
-	for (int i = 0; i < e.nConfigs; i++) {
-		for (int j = 0; j < e.nQueries; j++) {
-			all_gains += (configsServingQueries[i][j])*(*matrG_p[i][j]);
+	for (int i = 0; i < problemInstance.nConfigs; i++) {
+		for (int j = 0; j < problemInstance.nQueries; j++) {
+			all_gains += (configsServingQueries[i][j])*(problemInstance.configQueriesGain[i][j]);
 		}
 	}
 
 	// gets time spent given a solution
-	for (int i = 0; i < e.nIndexes; i++){
-		time_spent += indexesToBuild[i]*(*vectF_p[i]);
+	for (int i = 0; i < problemInstance.nIndexes; i++){
+		time_spent += indexesToBuild[i]*(problemInstance.indexesFixedCost[i]);
 	}
 
 	// updates objective function value
@@ -212,21 +223,24 @@ unsigned long int Solution::evaluateObjectiveFunction()
 
 void Solution::writeToFile(std::string fileName)
 {
+	// TODO: please use fprintf() to write the outputs, using stdout for standard output, stderr for errors
+	// and the declared file pointer to write on the output file
+	// Also, add a console log message that says "Found a new solution with objective function value = X"
 
-		using namespace std;
-		ofstream myfile(fileName);
-		if (myfile.is_open())
-		{
-			for ()
-			{
-				myfile << Solution.C + " ";  //need solution to understand how to print, which variables, data and functions it is possible to use
-					cout << Solution.C;
-				myfile << Solution.Q;
-					cout << Solution.Q;
-				myfile << Solution.ecq;
-					cout << Solution.ecq;
+	ofstream myfile;
+	myfile.open(fileName.c_str());
+	if (myfile.is_open())
+	{
+		for (int i = 0; i < problemInstance->nConfigs; i++) {
+			for (int j = 0; j < problemInstance->nQueries; j++) {
+
+				myfile << configsServingQueries[i][j] << " ";
+				cout << configsServingQueries[i][j] << " ";
 			}
-			myfile.close();
+			myfile << "\n";
+			cout << "\n";
 		}
-		else cout << "Error: unable to open file";
+		myfile.close();
+	}
+	else cout << "Error: unable to open file";
 }
