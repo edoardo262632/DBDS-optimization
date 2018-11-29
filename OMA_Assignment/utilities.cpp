@@ -194,21 +194,19 @@ bool Solution::isFeasible()
 
 unsigned long int Solution::evaluateObjectiveFunction()
 {
-	Instance problemInstance;
-
 	unsigned int all_gains = 0;
 	unsigned int time_spent = 0;	
 
 	// gets gain given a solution
-	for (int i = 0; i < problemInstance.nConfigs; i++) {
-		for (int j = 0; j < problemInstance.nQueries; j++) {
-			all_gains += (configsServingQueries[i][j])*(problemInstance.configQueriesGain[i][j]);
+	for (int i = 0; i < problemInstance->nConfigs; i++) {
+		for (int j = 0; j < problemInstance->nQueries; j++) {
+			all_gains += (configsServingQueries[i][j])*(problemInstance->configQueriesGain[i][j]);
 		}
 	}
 
 	// gets time spent given a solution
-	for (int i = 0; i < problemInstance.nIndexes; i++){
-		time_spent += indexesToBuild[i]*(problemInstance.indexesFixedCost[i]);
+	for (int i = 0; i < problemInstance->nIndexes; i++){
+		time_spent += indexesToBuild[i]*(problemInstance->indexesFixedCost[i]);
 	}
 
 	// updates objective function value
