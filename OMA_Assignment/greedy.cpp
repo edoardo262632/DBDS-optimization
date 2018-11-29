@@ -6,11 +6,11 @@ void Greedy::run(const Instance& problemInstance, unsigned int time) {
 	for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
 
 		int A = rand() % problemInstance.nConfigs;		// generate a random value for the configuration to take for each query
-		bestSolution.configsServingQueries[i][A] = 1;
+		bestSolution.configsServingQueries[A][i] = 1;
 		if (memoryCost(problemInstance, bestSolution) <= problemInstance.M)
-			bestSolution.configsServingQueries[i][A] = 0;							// "backtrack" -> do not activate this configuration
+			bestSolution.configsServingQueries[A][i] = 0;							// "backtrack" -> do not activate this configuration
 		else
-			fprintf(stdout, "Activated configuration (%u) for query (%u)\n", i, A);
+			fprintf(stdout, "Activated configuration (%u) for query (%u)\n", A, i);
 	}
 
 	if (bestSolution.isFeasible())
