@@ -189,20 +189,4 @@ unsigned long int Solution::evaluateObjectiveFunction()
 void Solution::writeToFile(std::string fileName)
 {
 
-		using namespace std;
-		ofstream myfile(fileName);
-		if (myfile.is_open())
-		{
-			for ()
-			{
-				myfile << Solution.C + " ";  //need solution to understand how to print, which variables, data and functions it is possible to use
-					cout << Solution.C;
-				myfile << Solution.Q;
-					cout << Solution.Q;
-				myfile << Solution.ecq;
-					cout << Solution.ecq;
-			}
-			myfile.close();
-		}
-		else cout << "Error: unable to open file";
 }
