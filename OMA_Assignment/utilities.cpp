@@ -126,63 +126,55 @@ Solution::Solution(Instance *probInst)
 
 
 bool Solution::isFeasible()
-{
-	bool FF;	// posso risparmiarmela
+{				
+	unsigned int i, j, k, h, w, mem;
+	short int *check = (short int*)calloc(problemInstance->nConfigs,sizeof(short int));
+	short int *check2 = (short int*)calloc(problemInstance->nQueries,sizeof(short int));
 
-	// Instace = problemInstance
-
-	//	 allocate vector for check 2nd constraint
-	unsigned int *check4Query =(unsigned int*) calloc(problemInstance->nQueries,sizeof(unsigned int)); 
-					
-	unsigned int i, j, k, mem;
-	
-	// allocate b vector
-	// b vector is for all x matrix not for each row
-	//this->indexesToBuild = (short int*)calloc(problemInstance->nIndexes,sizeof(short int));
-	
-	//	iterate x matrix 
-
-	for (i = 0; i < problemInstance->nConfigs; i++) {
+	mem = 0;
+	for (i = 0; i < problemInstance->nConfigs; i++) {		//	iterate x matrix 
 		for (j = 0; j < problemInstance->nQueries; j++) {
+			
 
-			if (this->configsServingQueries[i][j] == 1) {			// configuration i serve query j
+			if (configsServingQueries[i][j]) {	// configuration i serve query j
 
-						///		CHECK 2ND CONSTRAINT
-				// fare un check scorrendo le colonne
-				if (check4Query[j] = 1) {
-					//fprintf(stderr, "Too many configuration for query %u", j);
-					return FF = false;
-				}					
-				else check4Query[j] = 1;
-						///		MEMORY CHECK
-				for (k = 0; k < problemInstance->nIndexes; k++) {
-					if (problemInstance->configIndexesMatrix[i][k] == 1) {
-						// index k is served by configuration i so it has to be builded
-						indexesToBuild[k] = 1;
-						// search for memory usage
-						mem += problemInstance->indexesMemoryOccupation[k]; // mettere furoi dal ciclo
-						if (mem > problemInstance->M) {
-							//fprintf(stderr, "Configuration %u that uses index %u for quey %u exceeds memory limit \n", i, k, j);
-							return FF = false;
+				//		CHECK FIRST CONSTRAINT
+				if (check[i] == 0) {		//	first time for config i 
+
+					for (k = 0; k < problemInstance->nIndexes; k++) {
+						if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[i][k] == 1) {
+							// index k is served by configuration i so it has to be builded
+							// index k is not yet builded
+							indexesToBuild[k] = 1;
+							// search for memory usage
+							mem += problemInstance->indexesMemoryOccupation[k];
 						}
-
 					}
+					check[i] = 1;
 				}
 
+				//		CHECK SECOND CONSTRAINT
+				else if(check2[j]==0){		// check culumn query j
+					h = 0;
+					w = 0;
+					while (h < problemInstance->nConfigs) {
+						w += configsServingQueries[h][j];
+						if (w > 1) return false;
+					}
+					check2[j] = 1;
+
+				}
+				
 			}
+
 
 		}
 	}
 	
+	if (mem > problemInstance->M) return false;
+	else return true;
+
 	 
-
-
-
-	// PLEASE NOTE: the third constraint in our model is actually a way to build the 'b' vector
-	// which is then used in the objective function evaluation. Therefore, it's not something to check
-	// in order to determine the feasibility of the solution but you need to set the proper 0/1 values
-	// inside this function
-	return false;
 }
 
 unsigned long int Solution::evaluateObjectiveFunction()
