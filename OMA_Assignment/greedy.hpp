@@ -16,6 +16,8 @@ private:
 	
 public:
 
+	Greedy(Instance& inst) : Algorithm(inst) {}
+
 	void run(const Instance& problemInstance, unsigned int time);
 
 private:

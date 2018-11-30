@@ -26,7 +26,10 @@ int main(int argc, char **argv)
 		exit (EXIT_FAILURE);
 	} 
 	
-	// TODO: Instantiate the proper class and run the algorithm
+	// Instantiate the proper class and run the algorithm
+	Greedy greedySolver = Greedy(problemInstance);
+	greedySolver.run(problemInstance, executionParameters.timeLimit);
+	
 
 	return 0;
 }

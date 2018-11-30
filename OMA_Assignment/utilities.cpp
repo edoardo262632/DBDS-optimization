@@ -127,57 +127,43 @@ Solution::Solution(Instance *probInst)
 
 bool Solution::isFeasible()
 {				
-	unsigned int i, j, k, h, w, mem;
+	unsigned int i, j, k, mem=0;
 	short int *check = (short int*)calloc(problemInstance->nConfigs,sizeof(short int));
 	short int *check2 = (short int*)calloc(problemInstance->nQueries,sizeof(short int));
 
-	mem = 0;
-	for (i = 0; i < problemInstance->nConfigs; i++) {		//	iterate x matrix 
+	for (i = 0; i < problemInstance->nConfigs; i++) {		//	iterate solution matrix 
 		for (j = 0; j < problemInstance->nQueries; j++) {
 			
-
 			if (configsServingQueries[i][j]) {	// configuration i serve query j
+				
+				//	CHECK SECOND CONSTRAINT
+				if (check2[j] > 0)
+					return false;
+				check2[j]++;
 
-				//		CHECK FIRST CONSTRAINT
-				if (check[i] == 0) {		//	first time for config i 
-
-					for (k = 0; k < problemInstance->nIndexes; k++) {
+				//	CHECK FIRST CONSTRAINT
+				if (check[i] == 0) {	//	first time for config i 
+					check[i] = 1;
+					for (k = 0; k < problemInstance->nIndexes; k++) {  // slide the Indexes vector
 						if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[i][k] == 1) {
 							// index k is served by configuration i so it has to be builded
 							// index k is not yet builded
 							indexesToBuild[k] = 1;
 							// search for memory usage
 							mem += problemInstance->indexesMemoryOccupation[k];
+							if (mem > problemInstance->M) 
+								return false;
 						}
 					}
-					check[i] = 1;
-				}
 
-				//		CHECK SECOND CONSTRAINT
-				else if(check2[j]==0){		// check culumn query j
-					h = 0;
-					w = 0;
-					while (h < problemInstance->nConfigs) {
-						w += configsServingQueries[h][j];
-						if (w > 1) return false;
-					}
-					check2[j] = 1;
-
-				}
-				
+				} 
 			}
-
-
 		}
 	}
-	
-	if (mem > problemInstance->M) return false;
-	else return true;
-
-	 
+	return true;	 
 }
 
-unsigned long int Solution::evaluateObjectiveFunction()
+long int Solution::evaluateObjectiveFunction()
 {
 	unsigned int all_gains = 0;
 	unsigned int time_spent = 0;	
@@ -185,7 +171,8 @@ unsigned long int Solution::evaluateObjectiveFunction()
 	// gets gain given a solution
 	for (int i = 0; i < problemInstance->nConfigs; i++) {
 		for (int j = 0; j < problemInstance->nQueries; j++) {
-			all_gains += (configsServingQueries[i][j])*(problemInstance->configQueriesGain[i][j]);
+			if(configsServingQueries[i][j])
+				all_gains += (configsServingQueries[i][j])*(problemInstance->configQueriesGain[i][j]);
 		}
 	}
 
@@ -198,10 +185,6 @@ unsigned long int Solution::evaluateObjectiveFunction()
 	objFunctionValue = all_gains - time_spent;
 
 	return objFunctionValue;
-
-	// PLEASE NOTE: after finishing the evaluation, remember to save
-	// the result inside objFunctionValue (in the solution class) before returning it
-
 }
 
 void Solution::writeToFile(std::string fileName)

@@ -24,6 +24,8 @@ private:
 
 public:
 
+	Algorithm(Instance& inst) : bestSolution(&inst) {}
+
 	virtual void run(const Instance& problemInstance, unsigned int time) = 0;
 
 private:

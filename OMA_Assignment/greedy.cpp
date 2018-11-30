@@ -2,20 +2,21 @@
 #include <time.h>
 
 void Greedy::run(const Instance& problemInstance, unsigned int time) {
-	
+	unsigned int m;
 	for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
 
 		int A = rand() % problemInstance.nConfigs;		// generate a random value for the configuration to take for each query
 		bestSolution.configsServingQueries[A][i] = 1;
-		if (memoryCost(problemInstance, bestSolution) <= problemInstance.M)
+		if ((m = memoryCost(problemInstance, bestSolution)) > problemInstance.M)
 			bestSolution.configsServingQueries[A][i] = 0;							// "backtrack" -> do not activate this configuration
 		else
-			fprintf(stdout, "Activated configuration (%u) for query (%u)\n", A, i);
+			fprintf(stdout, "Activated configuration (%u) for query (%u) %u\n", A, i,m);
 	}
 
 	if (bestSolution.isFeasible())
 	{
-		fprintf(stdout, "\nGreedy solution generation terminated succesfully!\nObjective function value = %lu\nMemory cost = %u\n",
+		
+		fprintf(stdout, "\nGreedy solution generation terminated succesfully!\nObjective function value = %ld\nMemory cost = %u\n",
 			bestSolution.evaluateObjectiveFunction(), memoryCost(problemInstance, bestSolution));
 	}
 	else
@@ -45,7 +46,7 @@ unsigned int Greedy::memoryCost(const Instance& problemInstance, const Solution&
 
 	for (unsigned int i = 0; i < problemInstance.nIndexes; i++) {
 		if (b[i])
-			mem += problemInstance.indexesFixedCost[i];					// calculate memory cost of the given solution
+			mem += problemInstance.indexesMemoryOccupation[i];					// calculate memory cost of the given solution
 	}
 
 	return mem;
