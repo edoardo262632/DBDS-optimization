@@ -24,9 +24,12 @@ private:
 
 public:
 
-	Algorithm(Instance& inst) : bestSolution(&inst) {}
+	Algorithm(Instance& inst) 
+		: bestSolution(&inst) 
+	{
+	}
 
-	virtual void run(const Instance& problemInstance, unsigned int time) = 0;
+	virtual void run(const Instance& problemInstance, const Params& parameters) = 0;
 
 private:
 

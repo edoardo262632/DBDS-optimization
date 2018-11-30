@@ -28,8 +28,7 @@ int main(int argc, char **argv)
 	
 	// Instantiate the proper class and run the algorithm
 	Greedy greedySolver = Greedy(problemInstance);
-	greedySolver.run(problemInstance, executionParameters.timeLimit);
+	greedySolver.run(problemInstance, executionParameters);
 	
-
 	return 0;
 }

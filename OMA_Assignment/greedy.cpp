@@ -1,7 +1,6 @@
 #include "greedy.hpp"
-#include <time.h>
 
-void Greedy::run(const Instance& problemInstance, unsigned int time) {
+void Greedy::run(const Instance& problemInstance, const Params& parameters) {
 	unsigned int m;
 	for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
 
@@ -15,9 +14,9 @@ void Greedy::run(const Instance& problemInstance, unsigned int time) {
 
 	if (bestSolution.isFeasible())
 	{
-		
 		fprintf(stdout, "\nGreedy solution generation terminated succesfully!\nObjective function value = %ld\nMemory cost = %u\n",
 			bestSolution.evaluateObjectiveFunction(), memoryCost(problemInstance, bestSolution));
+		bestSolution.writeToFile(parameters.outputFileName);
 	}
 	else
 	{

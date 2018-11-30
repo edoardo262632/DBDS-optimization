@@ -4,8 +4,7 @@ using namespace std;
 
 
 Params parseCommandLine(int argc, char *argv[])
-{	// working parsing_CommandLine
-
+{	
 	Params execParams = Params();
 
 	if (argc != 2 && argc != 4)
@@ -44,8 +43,7 @@ Params parseCommandLine(int argc, char *argv[])
 
 
 Instance readInputFile(std::string fileName)
-{	// working reading_file
-
+{	
 	Instance instance = Instance();
 	FILE *fl;
 
@@ -127,29 +125,30 @@ Solution::Solution(Instance *probInst)
 
 bool Solution::isFeasible()
 {				
-	unsigned int i, j, k, mem=0;
+	unsigned int i, j, k, mem = 0;
 	short int *check = (short int*)calloc(problemInstance->nConfigs,sizeof(short int));
 	short int *check2 = (short int*)calloc(problemInstance->nQueries,sizeof(short int));
 
-	for (i = 0; i < problemInstance->nConfigs; i++) {		//	iterate solution matrix 
+	for (i = 0; i < problemInstance->nConfigs; i++) {		//	iterate over solution matrix 
 		for (j = 0; j < problemInstance->nQueries; j++) {
 			
-			if (configsServingQueries[i][j]) {	// configuration i serve query j
+			if (configsServingQueries[i][j]) {		// configuration i serves query j
 				
-				//	CHECK SECOND CONSTRAINT
+				//	CHECK UNIQUENESS CONSTRAINT
 				if (check2[j] > 0)
 					return false;
 				check2[j]++;
 
-				//	CHECK FIRST CONSTRAINT
-				if (check[i] == 0) {	//	first time for config i 
+				//	CHECK MEMORY CONSTRAINT
+				if (check[i] == 0) {			// if it's the first time for configuration i 
 					check[i] = 1;
-					for (k = 0; k < problemInstance->nIndexes; k++) {  // slide the Indexes vector
+
+					// iterate on the Indexes vector
+					for (k = 0; k < problemInstance->nIndexes; k++) {  
 						if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[i][k] == 1) {
-							// index k is served by configuration i so it has to be builded
-							// index k is not yet builded
+							// index k is part of configuration i and has not yet been built, so we need to build it
 							indexesToBuild[k] = 1;
-							// search for memory usage
+							// update memory usage and verify constraint
 							mem += problemInstance->indexesMemoryOccupation[k];
 							if (mem > problemInstance->M) 
 								return false;
@@ -162,6 +161,7 @@ bool Solution::isFeasible()
 	}
 	return true;	 
 }
+
 
 long int Solution::evaluateObjectiveFunction()
 {
@@ -187,6 +187,7 @@ long int Solution::evaluateObjectiveFunction()
 	return objFunctionValue;
 }
 
+
 void Solution::writeToFile(std::string fileName)
 {
 	FILE *fl;
@@ -198,11 +199,8 @@ void Solution::writeToFile(std::string fileName)
 		fprintf(stdout, "Found a new solution with objective function value = %d", objFunctionValue);
 		for (int i = 0; i < problemInstance->nConfigs; i++) {					
 			for (int j = 0; j < problemInstance->nQueries; j++) {				
-
 				fprintf(fl, "%d ", configsServingQueries[i][j]);		
-				fprintf(stdout, "%d ", configsServingQueries[i][j]);	
-			}
-			fprintf(stdout, "\n");										
+			}								
 			fprintf(fl, "\n");											
 		}
 		fclose(fl);

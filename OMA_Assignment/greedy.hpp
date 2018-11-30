@@ -16,9 +16,12 @@ private:
 	
 public:
 
-	Greedy(Instance& inst) : Algorithm(inst) {}
+	Greedy(Instance& inst)
+		: Algorithm(inst)		// base class (Algorithm) constructor
+	{
+	}
 
-	void run(const Instance& problemInstance, unsigned int time);
+	void run(const Instance& problemInstance, const Params& parameters);
 
 private:
 
