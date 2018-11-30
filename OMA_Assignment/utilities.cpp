@@ -179,9 +179,29 @@ bool Solution::isFeasible()
 
 unsigned long int Solution::evaluateObjectiveFunction()
 {
+	unsigned int all_gains = 0;
+	unsigned int time_spent = 0;	
+
+	// gets gain given a solution
+	for (int i = 0; i < problemInstance->nConfigs; i++) {
+		for (int j = 0; j < problemInstance->nQueries; j++) {
+			all_gains += (configsServingQueries[i][j])*(problemInstance->configQueriesGain[i][j]);
+		}
+	}
+
+	// gets time spent given a solution
+	for (int i = 0; i < problemInstance->nIndexes; i++){
+		time_spent += indexesToBuild[i]*(problemInstance->indexesFixedCost[i]);
+	}
+
+	// updates objective function value
+	objFunctionValue = all_gains - time_spent;
+
+	return objFunctionValue;
+
 	// PLEASE NOTE: after finishing the evaluation, remember to save
 	// the result inside objFunctionValue (in the solution class) before returning it
-	return 0;
+
 }
 
 void Solution::writeToFile(std::string fileName)
