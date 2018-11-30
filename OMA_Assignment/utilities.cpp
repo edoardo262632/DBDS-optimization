@@ -189,24 +189,22 @@ long int Solution::evaluateObjectiveFunction()
 
 void Solution::writeToFile(std::string fileName)
 {
-	// TODO: please use fprintf() to write the outputs, using stdout for standard output, stderr for errors
-	// and the declared file pointer to write on the output file
-	// Also, add a console log message that says "Found a new solution with objective function value = X"
-
-	ofstream myfile;
-	myfile.open(fileName.c_str());
-	if (myfile.is_open())
+	FILE *fl;
+	fl = fopen(fileName.c_str(), "w");
+	if (fl == NULL)
+		fprintf(stderr, "Error: unable to open file %s", fileName.c_str());		
+	else
 	{
-		for (int i = 0; i < problemInstance->nConfigs; i++) {
-			for (int j = 0; j < problemInstance->nQueries; j++) {
+		fprintf(stdout, "Found a new solution with objective function value = %d", objFunctionValue);
+		for (int i = 0; i < problemInstance->nConfigs; i++) {					
+			for (int j = 0; j < problemInstance->nQueries; j++) {				
 
-				myfile << configsServingQueries[i][j] << " ";
-				cout << configsServingQueries[i][j] << " ";
+				fprintf(fl, "%d ", configsServingQueries[i][j]);		
+				fprintf(stdout, "%d ", configsServingQueries[i][j]);	
 			}
-			myfile << "\n";
-			cout << "\n";
+			fprintf(stdout, "\n");										
+			fprintf(fl, "\n");											
 		}
-		myfile.close();
+		fclose(fl);
 	}
-	else cout << "Error: unable to open file";
 }
