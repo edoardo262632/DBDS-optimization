@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 
-#define DEFAULT_TIMELIMIT 300
+#define DEFAULT_TIMELIMIT 300*1000
 
 
 /* ============ DATA TYPES ============ */
@@ -76,6 +76,6 @@ private:
 
 Params parseCommandLine (int argc, char* argv[]);
 Instance readInputFile (std::string fileName);
-
+unsigned int memoryCost(const Instance& problemInstance, const Solution& solution);
 
 #endif // UTILITIES_HPP

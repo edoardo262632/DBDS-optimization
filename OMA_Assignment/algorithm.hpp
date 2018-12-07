@@ -16,6 +16,7 @@ public:
 
 protected:
 
+	Instance problemInstance;
 	Solution bestSolution;
 
 private:
@@ -24,8 +25,9 @@ private:
 
 public:
 
-	Algorithm(Instance& inst) 
-		: bestSolution(&inst) 
+	Algorithm(Instance& inst)
+		: bestSolution(&inst),
+		problemInstance(inst)
 	{
 	}
 

@@ -24,6 +24,9 @@
     <ClCompile Include="greedy.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="genetic.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="algorithm.hpp">
@@ -33,6 +36,9 @@
       <Filter>File di origine</Filter>
     </ClInclude>
     <ClInclude Include="greedy.hpp">
+      <Filter>File di origine</Filter>
+    </ClInclude>
+    <ClInclude Include="genetic.hpp">
       <Filter>File di origine</Filter>
     </ClInclude>
   </ItemGroup>

@@ -25,7 +25,6 @@ public:
 
 private:
 
-	unsigned int memoryCost(const Instance& problemInstance, const Solution& solution);
 };
 	
 #endif	// GREEDY_HPP
