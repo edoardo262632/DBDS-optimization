@@ -93,11 +93,19 @@ Instance readInputFile(std::string fileName)
 
 	// alloc and read the CONFIGURATION_QUERIES_GAIN
 	instance.configQueriesGain = (unsigned int **)malloc(instance.nConfigs * sizeof(unsigned int*));
+	
 	for (unsigned int i = 0; i < instance.nConfigs; i++) {
 		instance.configQueriesGain[i] = (unsigned int*)malloc(instance.nQueries * sizeof(unsigned int));
 		for (unsigned int j = 0; j < instance.nQueries; j++)
 			fscanf(fl, "%u", &instance.configQueriesGain[i][j]);
+			/*if(instance.configQueriesGain[i][j]>0)
+				nConf[j] += 1;
+				
+				*/
 	}
+
+	/*
+	*/
 
 	fclose(fl);
 
@@ -115,11 +123,48 @@ Instance readInputFile(std::string fileName)
 Solution::Solution(Instance *probInst)
 	: objFunctionValue(0),
 	problemInstance(probInst)
-{
-	configsServingQueries = (short int**)malloc(problemInstance->nConfigs * sizeof(short int*));
-	for (int i = 0; i < problemInstance->nConfigs; i++)
-		configsServingQueries[i] = (short int*)calloc(problemInstance->nQueries, sizeof(short int));
+{	
+	selectedConfiguration = (short int*)malloc(problemInstance->nQueries*sizeof(short int));
+	configsServingQueries = (short int**)malloc(problemInstance->nQueries * sizeof(short int*));
+	for (int i = 0; i < problemInstance->nQueries; i++) {
+		configsServingQueries[i] = (short int*)calloc(problemInstance->nConfigs, sizeof(short int));
+		selectedConfiguration[i] = -1;
+	}
 	indexesToBuild = (short int*)calloc(problemInstance->nIndexes, sizeof(short int));
+}
+
+
+long int Solution::evaluateObjectiveFunction_isFeasible() {
+	
+	unsigned int all_gains = 0;
+	unsigned int time_spent = 0;
+	unsigned int mem = 0;
+	short int *check = (short int*)calloc(problemInstance->nConfigs, sizeof(short int));
+
+	for (int i = 0; i < problemInstance->nQueries; i++) {
+		short int x = selectedConfiguration[i]; // already setted the value to a negative one in the greedy function and swapping fase
+		if (x >= 0) {
+			if (check[x] == 0) {			// if it's the first time for configuration i 
+				check[x] = 1;
+
+				// iterate on the Indexes vector
+				for (int k = 0; k < problemInstance->nIndexes; k++) {
+					if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[x][k] == 1) {
+						// index k is part of configuration i and has not yet been built, so we need to build it
+						indexesToBuild[k] = 1;
+
+						// update memory usage and verify constraint
+						mem += problemInstance->indexesMemoryOccupation[k];
+						if (mem > problemInstance->M)
+							return false;
+						time_spent += problemInstance->indexesFixedCost[k];
+					}
+				}
+			}
+			all_gains += problemInstance->configQueriesGain[x][i]; //  add the contribute of the configuration with the i query
+		}
+	}
+	return all_gains - time_spent;
 }
 
 
