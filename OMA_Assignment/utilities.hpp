@@ -49,6 +49,7 @@ public:
 	short int **configsServingQueries;			// x matrix
 	short int *indexesToBuild;					// b vector
 	long int objFunctionValue;
+	short int *selectedConfiguration;
 	
 
 private:
@@ -62,6 +63,7 @@ public:
 	Solution(Instance *probInst);		// constructor of an empty feasible Solution object for a problem Instance
 
 	bool isFeasible();
+	long int evaluateObjectiveFunction_isFeasible();
 	long int evaluateObjectiveFunction();
 	void writeToFile(std::string fileName);
 
