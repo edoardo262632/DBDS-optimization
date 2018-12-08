@@ -15,16 +15,25 @@ public:
 
 private:
 
+	// Comparator for Solution objects, to use in the population sorted set
+	struct solution_comparator {
+		bool operator() (Solution& lhs, Solution& rhs) const
+		{
+			return lhs.evaluate() < rhs.evaluate();
+		}
+	};
+
 	Solution* parents;
 	Solution* offsprings;
-	std::set<Solution> population;
+	std::set<Solution, solution_comparator> population;
 
 	// ====== METHODS ======
 
 public:
 
 	Genetic(Instance& inst)
-		: Algorithm(inst)		// base class (Algorithm) constructor
+		: Algorithm(inst),		// base class constructor
+		population(std::set<Solution, solution_comparator>())
 	{
 		parents = (Solution*)malloc(POPULATION_SIZE * sizeof(Solution));
 		offsprings = (Solution*)malloc((2 * POPULATION_SIZE - 1) * sizeof(Solution));

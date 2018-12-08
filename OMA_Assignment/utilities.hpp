@@ -2,7 +2,7 @@
 #define UTILITIES_HPP
 #include <string>
 #include <iostream>
-#include <fstream>
+#include <limits>
 
 #define DEFAULT_TIMELIMIT 300*1000
 
@@ -48,12 +48,12 @@ public:
 
 	short int **configsServingQueries;			// x matrix
 	short int *indexesToBuild;					// b vector
-	long int objFunctionValue;
-	short int *selectedConfiguration;
+	short int *selectedConfiguration;			// compact integer representation of the solution matrix
 	
 
 private:
 
+	long int objFunctionValue;
 	Instance *problemInstance;	// TODO: initialize these values inside the Solution class constructor
 	
 	// --- METHODS ---
@@ -61,12 +61,14 @@ private:
 public:
 
 	Solution(Instance *probInst);		// constructor of an empty feasible Solution object for a problem Instance
+	Solution(const Solution& other);	// copy constructor
+
+	long int evaluate();
+	void writeToFile(const std::string fileName) const;
 
 	bool isFeasible();
-	long int evaluateObjectiveFunction_isFeasible();
 	long int evaluateObjectiveFunction();
-	void writeToFile(std::string fileName);
-
+	
 private:
 
 

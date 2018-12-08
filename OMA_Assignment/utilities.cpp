@@ -98,13 +98,10 @@ Instance readInputFile(std::string fileName)
 		instance.configQueriesGain[i] = (unsigned int*)malloc(instance.nQueries * sizeof(unsigned int));
 		for (unsigned int j = 0; j < instance.nQueries; j++)
 			fscanf(fl, "%u", &instance.configQueriesGain[i][j]);
-			/*if(instance.configQueriesGain[i][j]>0)
-				nConf[j] += 1;
-				
-				*/
 	}
 
 	/*
+	TODO: creation of additional support data structure
 	*/
 
 	fclose(fl);
@@ -147,28 +144,47 @@ unsigned int memoryCost(const Instance& problemInstance, const Solution& solutio
 
 
 Solution::Solution(Instance *probInst)
-	: objFunctionValue(0),
+	: objFunctionValue(LONG_MIN),
 	problemInstance(probInst)
 {	
-	selectedConfiguration = (short int*)malloc(problemInstance->nQueries*sizeof(short int));
-	configsServingQueries = (short int**)malloc(problemInstance->nQueries * sizeof(short int*));
+	selectedConfiguration = (short int*) malloc(problemInstance->nQueries*sizeof(short int));
+	configsServingQueries = (short int**) malloc(problemInstance->nQueries * sizeof(short int*));
 	for (int i = 0; i < problemInstance->nQueries; i++) {
-		configsServingQueries[i] = (short int*)calloc(problemInstance->nConfigs, sizeof(short int));
+		configsServingQueries[i] = (short int*) calloc(problemInstance->nConfigs, sizeof(short int));
 		selectedConfiguration[i] = -1;
 	}
 	indexesToBuild = (short int*)calloc(problemInstance->nIndexes, sizeof(short int));
 }
 
+Solution::Solution(const Solution & other)
+	: Solution(other.problemInstance)
+{
+	for (int i = 0; i < problemInstance->nQueries; i++) {
+		// copy of the x matrix
+		for (int j = 0; j < problemInstance->nConfigs; j++)
+			configsServingQueries[i][j] = other.configsServingQueries[i][j];
+		// copy of the support integer array
+		selectedConfiguration[i] = other.selectedConfiguration[i];
+	}
 
-long int Solution::evaluateObjectiveFunction_isFeasible() {
+	// copy of the index array
+	for (int i = 0; i < problemInstance->nIndexes; i++)
+		indexesToBuild[i] = other.indexesToBuild[i];
+}
+
+
+long int Solution::evaluate() {
 	
+	if (objFunctionValue != LONG_MIN)
+		return objFunctionValue;
+
 	unsigned int all_gains = 0;
 	unsigned int time_spent = 0;
 	unsigned int mem = 0;
 	short int *check = (short int*)calloc(problemInstance->nConfigs, sizeof(short int));
 
 	for (int i = 0; i < problemInstance->nQueries; i++) {
-		short int x = selectedConfiguration[i]; // already setted the value to a negative one in the greedy function and swapping fase
+		short int x = selectedConfiguration[i];		// already setted the value to a negative one in the greedy function and swapping fase
 		if (x >= 0) {
 			if (check[x] == 0) {			// if it's the first time for configuration i 
 				check[x] = 1;
@@ -182,7 +198,7 @@ long int Solution::evaluateObjectiveFunction_isFeasible() {
 						// update memory usage and verify constraint
 						mem += problemInstance->indexesMemoryOccupation[k];
 						if (mem > problemInstance->M)
-							return -1;
+							return LONG_MIN;
 						time_spent += problemInstance->indexesFixedCost[k];
 					}
 				}
@@ -259,7 +275,7 @@ long int Solution::evaluateObjectiveFunction()
 }
 
 
-void Solution::writeToFile(std::string fileName)
+void Solution::writeToFile(const std::string fileName) const
 {
 	FILE *fl;
 	fl = fopen(fileName.c_str(), "w");
