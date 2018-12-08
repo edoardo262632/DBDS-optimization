@@ -156,7 +156,7 @@ long int Solution::evaluateObjectiveFunction_isFeasible() {
 						// update memory usage and verify constraint
 						mem += problemInstance->indexesMemoryOccupation[k];
 						if (mem > problemInstance->M)
-							return false;
+							return -1;
 						time_spent += problemInstance->indexesFixedCost[k];
 					}
 				}
