@@ -216,8 +216,8 @@ bool Solution::isFeasible()
 	short int *check = (short int*)calloc(problemInstance->nConfigs,sizeof(short int));
 	short int *check2 = (short int*)calloc(problemInstance->nQueries,sizeof(short int));
 
-	for (i = 0; i < problemInstance->nConfigs; i++) {		//	iterate over solution matrix 
-		for (j = 0; j < problemInstance->nQueries; j++) {
+	for (i = 0; i < problemInstance->nQueries; i++) {		//	iterate over solution matrix 
+		for (j = 0; j < problemInstance->nConfigs; j++) {
 			
 			if (configsServingQueries[i][j]) {		// configuration i serves query j
 				
