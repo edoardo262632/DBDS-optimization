@@ -35,9 +35,9 @@ void Genetic::initializePopulation(int size)
 		for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
 
 			int A = rand() % problemInstance.nConfigs;		// generate a random value for the configuration to take for each query
-			parents[n].configsServingQueries[A][i] = 1;
+			parents[n].configsServingQueries[i][A] = 1;
 			if (memoryCost(problemInstance, parents[n]) > problemInstance.M)
-				parents[n].configsServingQueries[A][i] = 0;						// "backtrack" -> do not activate this configuration
+				parents[n].configsServingQueries[i][A] = 0;						// "backtrack" -> do not activate this configuration
 		}
 	}
 }
