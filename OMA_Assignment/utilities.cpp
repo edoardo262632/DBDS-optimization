@@ -115,13 +115,14 @@ unsigned int memoryCost(const Instance& problemInstance, const Solution& solutio
 	bool *b = (bool *)calloc(problemInstance.nIndexes, sizeof(bool *));
 	unsigned int mem = 0;
 
-	for (unsigned int i = 0; i < problemInstance.nConfigs; i++) {		// iterate over rows(|C|) of confsServingQueries matrix
-		for (unsigned int j = 0; j < problemInstance.nQueries; j++) {	// iterate over columns (|Q|) confsServingQueries matrix
-			if (solution.configsServingQueries[i][j])
-			{
-				for (unsigned int k = 0; k < problemInstance.nIndexes; k++) {	// iterate over column (|I|) of configIndexesMatrix matrix with direct access to the row
-					if (problemInstance.configIndexesMatrix[i][k])
-						b[k] = true;											// build b[] array for the given solution
+	for (int i = 0; i < problemInstance.nQueries; i++) {
+		short int x = solution.selectedConfiguration[i];
+		if (x >= 0) {
+			// iterate on the Indexes vector
+			for (int k = 0; k < problemInstance.nIndexes; k++) {
+				if (b[k] == 0 && problemInstance.configIndexesMatrix[x][k] == 1) {
+					// index k is part of configuration i and has not yet been built, so we need to build it
+					b[k] = 1;
 				}
 			}
 		}
