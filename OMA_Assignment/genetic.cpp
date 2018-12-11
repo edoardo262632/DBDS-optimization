@@ -60,6 +60,17 @@ void Genetic::breedPopulation(int size)
 	// but use the copy constructor Solution(Solution& other) instead)
 
 	// ITERATE OVER THE OFFSPRINGS ARRAY AND CALL THE mutate() FUNCTION ON ALL OF THEM
+	copy_n(population.begin(), size, parents); //this is broken because population is empty
+	Solution * parentsCopy = parents;
+	for (int i = 0; i < size / 2; i++) {
+		crossover(parentsCopy[i], parentsCopy[size-i]);
+	}
+	for (int i = 0; i < size; i++) {
+		offsprings[i] = parentsCopy[i];
+	}
+	for (int i = 0; i < size; i++) {
+		mutate(offsprings[i]);
+	}
 }
 
 
