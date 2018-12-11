@@ -23,6 +23,7 @@ private:
 		}
 	};
 
+	Solution* parentsCopy;
 	Solution* parents;
 	Solution* offsprings;
 	std::set<Solution, solution_comparator> population;
