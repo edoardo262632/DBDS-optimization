@@ -93,16 +93,27 @@ Instance readInputFile(std::string fileName)
 
 	// alloc and read the CONFIGURATION_QUERIES_GAIN
 	instance.configQueriesGain = (unsigned int **)malloc(instance.nConfigs * sizeof(unsigned int*));
-	
+	// alloc a cnt vector to count number of non null element 
+	unsigned int *cnt = (unsigned int*)calloc(instance.nQueries,sizeof(unsigned int));
 	for (unsigned int i = 0; i < instance.nConfigs; i++) {
 		instance.configQueriesGain[i] = (unsigned int*)malloc(instance.nQueries * sizeof(unsigned int));
-		for (unsigned int j = 0; j < instance.nQueries; j++)
+		for (unsigned int j = 0; j < instance.nQueries; j++) {
 			fscanf(fl, "%u", &instance.configQueriesGain[i][j]);
+			if (instance.configQueriesGain[i][j] > 0) cnt[j]++;
+		}
+			
 	}
-
-	/*
-	TODO: creation of additional support data structure
-	*/
+	// creation of additional support data structure
+	instance.configServingQueries = (unsigned int**)malloc(instance.nQueries * sizeof(unsigned int*));
+	for (unsigned int i = 0; i < instance.nQueries; i++) {
+		unsigned int k = 0;
+		instance.configServingQueries[i] = (unsigned int*)malloc(cnt[i] * sizeof(unsigned int));
+		for (unsigned int j = 0; j < instance.nConfigs; j++) {
+			if (instance.configQueriesGain[j][i] > 0) {
+				instance.configServingQueries[k++][i] = j;
+			}
+		}
+	}
 
 	fclose(fl);
 
@@ -115,11 +126,11 @@ unsigned int memoryCost(const Instance& problemInstance, const Solution& solutio
 	bool *b = (bool *)calloc(problemInstance.nIndexes, sizeof(bool *));
 	unsigned int mem = 0;
 
-	for (int i = 0; i < problemInstance.nQueries; i++) {
+	for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
 		short int x = solution.selectedConfiguration[i];
 		if (x >= 0) {
 			// iterate on the Indexes vector
-			for (int k = 0; k < problemInstance.nIndexes; k++) {
+			for (unsigned int k = 0; k < problemInstance.nIndexes; k++) {
 				if (b[k] == 0 && problemInstance.configIndexesMatrix[x][k] == 1) {
 					// index k is part of configuration i and has not yet been built, so we need to build it
 					b[k] = 1;
