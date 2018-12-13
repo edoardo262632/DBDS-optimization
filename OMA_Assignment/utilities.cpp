@@ -111,6 +111,7 @@ Instance readInputFile(std::string fileName)
 		for (unsigned int j = 0; j < instance.nConfigs; j++) {
 			if (instance.configQueriesGain[j][i] > 0) {
 				instance.configServingQueries[i].config[k++] = j;
+
 			}
 		}
 	}
