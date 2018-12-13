@@ -19,7 +19,12 @@ typedef struct
 	bool parsingError = false;
 } Params;
 
-
+// Data structure that holds for each query the used configuration
+typedef struct
+{
+	unsigned int* config;
+	unsigned int lenght;
+} UsefulConfig;
 
 // Data structure used to hold the input dataset of the problem instance
 typedef struct
@@ -32,7 +37,7 @@ typedef struct
 	unsigned int *indexesFixedCost;			// f vector
 	unsigned int *indexesMemoryOccupation;	// m vector
 	unsigned int **configQueriesGain;		// g matrix
-	unsigned int **configServingQueries;
+	UsefulConfig *configServingQueries;
 } Instance;
 
 

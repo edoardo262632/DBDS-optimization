@@ -93,24 +93,24 @@ Instance readInputFile(std::string fileName)
 
 	// alloc and read the CONFIGURATION_QUERIES_GAIN
 	instance.configQueriesGain = (unsigned int **)malloc(instance.nConfigs * sizeof(unsigned int*));
-	// alloc a cnt vector to count number of non null element 
-	unsigned int *cnt = (unsigned int*)calloc(instance.nQueries,sizeof(unsigned int));
+	// alloc additional support data structure
+	instance.configServingQueries = (UsefulConfig*)malloc(instance.nQueries * sizeof(UsefulConfig));
 	for (unsigned int i = 0; i < instance.nConfigs; i++) {
 		instance.configQueriesGain[i] = (unsigned int*)malloc(instance.nQueries * sizeof(unsigned int));
 		for (unsigned int j = 0; j < instance.nQueries; j++) {
 			fscanf(fl, "%u", &instance.configQueriesGain[i][j]);
-			if (instance.configQueriesGain[i][j] > 0) cnt[j]++;
+			// count number of not null elements
+			if (instance.configQueriesGain[i][j] > 0) instance.configServingQueries[j].lenght++;
 		}
 			
 	}
-	// creation of additional support data structure
-	instance.configServingQueries = (unsigned int**)malloc(instance.nQueries * sizeof(unsigned int*));
+	// population of the additional support data structure
 	for (unsigned int i = 0; i < instance.nQueries; i++) {
 		unsigned int k = 0;
-		instance.configServingQueries[i] = (unsigned int*)malloc(cnt[i] * sizeof(unsigned int));
+		instance.configServingQueries[i].config = (unsigned int*)calloc(instance.configServingQueries[i].lenght,sizeof(unsigned int));
 		for (unsigned int j = 0; j < instance.nConfigs; j++) {
 			if (instance.configQueriesGain[j][i] > 0) {
-				instance.configServingQueries[k++][i] = j;
+				instance.configServingQueries[i].config[k++] = j;
 			}
 		}
 	}
