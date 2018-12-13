@@ -22,7 +22,7 @@ typedef struct
 // Data structure that holds for each query the configurations with a non-zero gain
 typedef struct
 {
-	unsigned int* config;
+	unsigned int* configs;
 	unsigned int length;
 } UsefulConfigs;
 
