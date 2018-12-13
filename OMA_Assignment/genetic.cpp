@@ -135,6 +135,7 @@ void Genetic::crossover(Solution& itemA, Solution& itemB)
 
 void Genetic::mutate(Solution & sol)
 {
+	short int randomConfigIndex;
 #if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
 	srand (time(NULL));		// initialize random seed for rand()
 #endif
@@ -145,26 +146,15 @@ void Genetic::mutate(Solution & sol)
 		if (rand() % problemInstance.nQueries == 0)
 		{
 			// 50 percent chance of a config for a query mutating to "no configurations"
-			if (rand() % 2 == 0)
+			if (rand() % 2 == 0) {
 				sol.selectedConfiguration[i] = -1;
+			}
 			// 50 percent chance of a config for a query mutating to any other config that serves this query
-			else
-				sol.selectedConfiguration[i] = randConfiguration(i, sol);
+			else{
+				randomConfigIndex = rand() % problemInstance.configServingQueries[i].length; 
+				sol.selectedConfiguration[i] = problemInstance.configServingQueries[i].configs[randomConfigIndex];
+			}
 		}
 	}
-}
-
-
-// Auxiliary function to randomly get another configuration serving a query
-short int Genetic::randConfiguration(int queryIndex, Solution& sol)
-{
-#if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
-	srand (time(NULL));		// initialize random seed
-#endif
-
-	// selects a random configuration index that serves the query
-	short int randomConfigIndex = rand() % problemInstance.configServingQueries[queryIndex].length; 
-
-	return problemInstance.configServingQueries[queryIndex].configs[randomConfigIndex];
 }
 
