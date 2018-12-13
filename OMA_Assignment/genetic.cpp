@@ -110,8 +110,35 @@ void Genetic::crossover(Solution& itemA, Solution& itemB)
 
 void Genetic::mutate(Solution & sol)
 {
+	srand (time(NULL)); //random seed for rand()
+
+	// iterates through the gene
+	for (int i = 0; i < problemInstance.nQueries; i++){
+		// checks if a random generated number (>= 0) is equal to 0. In this case, the mutation occurs
+		if (rand()%problemInstance.nQueries == 0)
+			// 50 percent chance of a config for a query mutating to 0
+			if (rand()%2 == 0)
+				sol.selectedConfiguration[i] = 0;
+			// 50 percent chance of a config for a query mutating to any other config that serves this query
+			else
+				sol.selectedConfiguration[i] = randConfiguration(i, sol);
+	}
 	// FOR EACH ITEM IN THE INTEGER ARRAY (index of the configuration serving a query) DO:
 		// EXTRACT A RANDOM NUMBER, IF IT SATISFIES A CONDITION WHICH HAS A 1/nQueries PROBABILITY THE GENE IS MUTATED, WHICH MEANS
 		// EXTRACTING A RANDOM NUMBER WITH A 50% CHANCE OF SETTING THE GENE TO 0 AND A 50% CHANCE OF SETTING ITS VALUE TO THE INDEX
 		// OF ANOTHER CONFIGURATION SERVING THAT QUERY (an appropriate data structure for this will be added to the problemInstance struct)
 }
+
+
+// Auxiliary function to randomly get another configuration serving a query
+short int Genetic::randConfiguration(int queryIndex, Solution & sol)
+{
+	srand (time(NULL)); //random seed
+
+	// selects random configuration index that serves a query
+	short int randomConfigIndex = rand() % problemInstance.configServingQueries[queryIndex].length; 
+
+	// returns this random config
+	return problemInstance.configServingQueries[queryIndex].configs[randomConfigIndex];
+}
+

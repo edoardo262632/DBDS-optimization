@@ -52,6 +52,9 @@ private:
 	void crossover(Solution& itemA, Solution& itemB);
 	void mutate(Solution& sol);
 
+	// Aux function
+	short int randConfiguration(int queryIndex, Solution & sol);
+
 };
 
 #endif	// GENETIC_HPP
