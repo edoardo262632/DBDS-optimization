@@ -114,7 +114,8 @@ void Genetic::mutate(Solution & sol)
 
 	// iterates through the gene
 	for (int i = 0; i < problemInstance.nQueries; i++){
-		// checks if a random generated number (>= 0) is equal to 0. In this case, the mutation occurs
+		// checks if a random generated number (between 0 and nQueries) is equal to 0. 
+		// in this case, the mutation occurs
 		if (rand()%problemInstance.nQueries == 0)
 			// 50 percent chance of a config for a query mutating to 0
 			if (rand()%2 == 0)
@@ -139,6 +140,6 @@ short int Genetic::randConfiguration(int queryIndex, Solution & sol)
 	short int randomConfigIndex = rand() % problemInstance.configServingQueries[queryIndex].length; 
 
 	// returns this random config
-	return problemInstance.configServingQueries[queryIndex].configs[randomConfigIndex];
+	return problemInstance.configServingQueries[queryIndex].configs[randomConfigIndex] + 1;
 }
 
