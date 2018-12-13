@@ -107,6 +107,7 @@ void Genetic::evaluateFitness(int size)
 			better_tmp = offsprings[i];
 			find_one = true;
 		}
+		if (find_one)
 		{
 			newBestSolution = better_tmp;
 			printf(stdout, "Found a new best solution with value = %d", newBestSolution);
