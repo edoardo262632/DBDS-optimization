@@ -6,6 +6,7 @@
 #include <set>
 
 #define POPULATION_SIZE 10
+#define DETERMINISTIC_RANDOM_NUMBER_GENERATION false
 
 class Genetic : Algorithm
 {
@@ -52,7 +53,7 @@ private:
 	void crossover(Solution& itemA, Solution& itemB);
 	void mutate(Solution& sol);
 
-	// Aux function
+	// Auxiliary function for mutation
 	short int randConfiguration(int queryIndex, Solution & sol);
 
 };
