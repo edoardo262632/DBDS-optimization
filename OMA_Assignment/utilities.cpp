@@ -254,8 +254,7 @@ void Solution::writeToFile(const std::string fileName) const
 		configsServingQueries[i][selectedConfiguration[i]] = 1;
 	}
 
-	FILE *fl;
-	fl = fopen(fileName.c_str(), "w");
+	FILE *fl = fopen(fileName.c_str(), "w");
 	if (fl == NULL)
 		fprintf(stderr, "Error: unable to open file %s", fileName.c_str());		
 	else

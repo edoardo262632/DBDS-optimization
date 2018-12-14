@@ -37,7 +37,7 @@ void Genetic::initializePopulation(int size)
 	srand((unsigned int)time(NULL));
 #endif
 
-	parents[0] = Solution(&problemInstance);		// one solution is kept with the default configuration
+	parents[0] = bestSolution;		// one solution is kept with the default configuration
 
 	for (int n = 1; n < size; n++)					// P-1 solutions are initialized with the greedy algorithm
 	{
@@ -63,8 +63,6 @@ void Genetic::initializePopulation(int size)
 
 void Genetic::breedPopulation(int size)
 {
-	//copy_n(population.begin(), size, parents);		
-	
 	int i;
 	std::set<Solution, solution_comparator>::iterator it;
 
@@ -132,7 +130,7 @@ void Genetic::replacePopulation(int size)
 void Genetic::crossover(Solution& itemA, Solution& itemB, unsigned int N)
 {
 	unsigned int M = problemInstance.nQueries / N;
-	int temp;
+	int temp = 0;
 
 	for (unsigned int i = 0; i < problemInstance.nQueries ; i += 2*M) {
 		for (unsigned int j = 0; j < M; j++) {
