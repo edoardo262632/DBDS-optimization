@@ -87,11 +87,33 @@ void Genetic::breedPopulation(int size)
 
 void Genetic::evaluateFitness(int size)
 {
+	bool better = false;
+	int better_tmp;
+	bool find_one=false;
+	int newBestSolution;
 	// ITERATE OVER THE OFFSPRINGS ARRAY AND CALL THE EVALUATE FUNCTION ON ALL OF THEM
 	// IF A SOLUTION HAS A BETTER OBJ.FUNCTION VALUE THAN THE CURRENT bestSolution, REPLACE IT
 
 	// The evaluation is done through the evaluate() method in Solution class, which has yet to be implemented but
 	// it's actually a merge between the already existing isFeasible() and evaluateObjectiveFunction() methods
+	
+	//how will work new evaluation and feasibility function? will return an int value or what? a boolean?
+	
+	for (int i = 0, i < size, i++) {		//offsprings.size()				
+		
+		better = new_evaluate_feas(offsprings[i]);
+		if (better)		//true
+		{
+			better_tmp = offsprings[i];
+			find_one = true;
+		}
+		if (find_one)
+		{
+			newBestSolution = better_tmp;
+			printf(stdout, "Found a new best solution with value = %d", newBestSolution);
+		}
+
+	}
 }
 
 
@@ -127,6 +149,7 @@ void Genetic::crossover(Solution& itemA, Solution& itemB)
 
 void Genetic::mutate(Solution & sol)
 {
+	short int randomConfigIndex;
 #if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
 	srand (time(NULL));		// initialize random seed for rand()
 #endif
@@ -137,26 +160,15 @@ void Genetic::mutate(Solution & sol)
 		if (rand() % problemInstance.nQueries == 0)
 		{
 			// 50 percent chance of a config for a query mutating to "no configurations"
-			if (rand() % 2 == 0)
+			if (rand() % 2 == 0) {
 				sol.selectedConfiguration[i] = -1;
+			}
 			// 50 percent chance of a config for a query mutating to any other config that serves this query
-			else
-				sol.selectedConfiguration[i] = randConfiguration(i, sol);
+			else{
+				randomConfigIndex = rand() % problemInstance.configServingQueries[i].length; 
+				sol.selectedConfiguration[i] = problemInstance.configServingQueries[i].configs[randomConfigIndex];
+			}
 		}
 	}
-}
-
-
-// Auxiliary function to randomly get another configuration serving a query
-short int Genetic::randConfiguration(int queryIndex, Solution& sol)
-{
-#if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
-	srand (time(NULL));		// initialize random seed
-#endif
-
-	// selects a random configuration index that serves the query
-	short int randomConfigIndex = rand() % problemInstance.configServingQueries[queryIndex].length; 
-
-	return problemInstance.configServingQueries[queryIndex].configs[randomConfigIndex];
 }
 

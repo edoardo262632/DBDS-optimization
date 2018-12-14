@@ -52,10 +52,6 @@ private:
 
 	void crossover(Solution& itemA, Solution& itemB);
 	void mutate(Solution& sol);
-
-	// Auxiliary function for mutation
-	short int randConfiguration(int queryIndex, Solution & sol);
-
 };
 
 #endif	// GENETIC_HPP
