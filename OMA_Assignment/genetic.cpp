@@ -10,6 +10,7 @@ void Genetic::run(const Instance & problemInstance, const Params & parameters)
 
 	// INITIALIZATION
 	initializePopulation(POPULATION_SIZE);
+
 	long long currentTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
 	// REPEAT UNTIL THERE'S COMPUTATIONAL TIME LEFT
@@ -47,6 +48,9 @@ void Genetic::initializePopulation(int size)
 				parents[n].selectedConfiguration[i] = -1;
 			}
 		}
+	}
+	for (int i = 0; i < size; i++) {
+		population.insert(parents[i]);
 	}
 }
 
@@ -123,6 +127,14 @@ void Genetic::replacePopulation(int size)
 	// USE THE clear() METHOD ON THE POPULATION SET TO REMOVE EVERYTHING IT CONTAINS, THEN
 	// ITERATE OVER BOTH THE PARENTS AND OFFSPRINGS ARRAY AND ADD ALL OF THEM TO THE POPULATION SET BY USING THE insert() METHOD
 	// by doing this (thanks to our custom comparator) Solutions should automatically get ordered by descending fitness value
+	population.clear();
+	for (int i = 0; i < size; i++) { 
+		population.insert(parents[i]);
+	}
+	for (int i = 0; i < size; i++) {
+		population.insert(offsprings[i]);
+	}
+
 }
 
 
