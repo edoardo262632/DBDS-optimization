@@ -103,12 +103,25 @@ void Genetic::replacePopulation(int size)
 	// by doing this (thanks to our custom comparator) Solutions should automatically get ordered by descending fitness value
 }
 
+// swap function
+void intSwap(short int *a, short int *b) {
+	int temp = *a;
+	*a = *b;
+	*b = temp;
+}
 
 void Genetic::crossover(Solution& itemA, Solution& itemB)
 {
-	// DO N-POINT CROSSOVER BETWEEN THE 2 SOLUTIONS
-	// both the integer array values (index of the configuration serving a query) and the relative column
-	// in the matrix have to be moved when doing the crossover, for moving columns ONLY SWAP POINTERS
+	unsigned int N = 4; 			// N need to be passed as a parameter
+	unsigned int M = problemInstance.nQueries / N;
+
+	for (unsigned int i = 0; i < problemInstance.nQueries ; i += 2*M) {
+		for (unsigned int j = 0; j < M; j++) {
+			if ((j+i) >= problemInstance.nQueries) break;
+			intSwap(&itemA.selectedConfiguration[j], &itemB.selectedConfiguration[j]);
+		}
+	}
+
 }
 
 
