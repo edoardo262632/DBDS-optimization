@@ -52,10 +52,8 @@ class Solution
 
 public:
 
-	short int **configsServingQueries;			// x matrix (TODO: removable)
 	short int *indexesToBuild;					// b vector
 	short int *selectedConfiguration;			// compact integer representation of the solution matrix
-	
 
 private:
 
@@ -68,6 +66,7 @@ public:
 
 	Solution(Instance *probInst);		// constructor of an empty feasible Solution object for a problem Instance
 	Solution(const Solution& other);	// copy constructor
+	~Solution();						// solution class destructor
 
 	long int evaluate();
 	long int getObjFunctionValue() const;

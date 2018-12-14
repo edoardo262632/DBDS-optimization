@@ -169,12 +169,9 @@ Solution::Solution(Instance *probInst)
 	: objFunctionValue(LONG_MIN),
 	problemInstance(probInst)
 {	
-	selectedConfiguration = (short int*) malloc(problemInstance->nQueries*sizeof(short int));
-	configsServingQueries = (short int**) malloc(problemInstance->nQueries * sizeof(short int*));
-	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
-		configsServingQueries[i] = (short int*) calloc(problemInstance->nConfigs, sizeof(short int));
+	selectedConfiguration = (short int*) malloc(problemInstance->nQueries * sizeof(short int));
+	for (unsigned int i = 0; i < problemInstance->nQueries; i++)
 		selectedConfiguration[i] = -1;
-	}
 	indexesToBuild = (short int*)calloc(problemInstance->nIndexes, sizeof(short int));
 }
 
@@ -182,9 +179,6 @@ Solution::Solution(const Solution & other)
 	: Solution(other.problemInstance)
 {
 	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
-		// copy of the x matrix
-		for (unsigned int j = 0; j < problemInstance->nConfigs; j++)
-			configsServingQueries[i][j] = other.configsServingQueries[i][j];
 		// copy of the support integer array
 		selectedConfiguration[i] = other.selectedConfiguration[i];
 	}
@@ -192,6 +186,13 @@ Solution::Solution(const Solution & other)
 	// copy of the index array
 	for (unsigned int i = 0; i < problemInstance->nIndexes; i++)
 		indexesToBuild[i] = other.indexesToBuild[i];
+}
+
+Solution::~Solution()
+{
+	// free all previously allocated heap memory
+	free(selectedConfiguration);
+	free(indexesToBuild);
 }
 
 
@@ -225,9 +226,12 @@ long int Solution::evaluate() {
 					}
 				}
 			}
-			all_gains += problemInstance->configQueriesGain[x][i]; //  add the contribute of the configuration with the i query
+			all_gains += problemInstance->configQueriesGain[x][i];	// add the contribute of the configuration with the i query
 		}
 	}
+
+	free(check);
+
 	return all_gains - time_spent;
 }
 
@@ -239,14 +243,14 @@ long int Solution::getObjFunctionValue() const
 
 void Solution::writeToFile(const std::string fileName) const
 {
+	short int**	configsServingQueries = (short int**)malloc(problemInstance->nQueries * sizeof(short int*));
+
 	// Generate solution matrix on-the-fly before printing it
 	for (unsigned int i = 0; i < problemInstance->nQueries; i++)
 	{
-		// clear all values in the column
-		for (unsigned int j = 0; j < problemInstance->nConfigs; j++)
-			configsServingQueries[i][j] = 0;
+		configsServingQueries[i] = (short int*)calloc(problemInstance->nConfigs, sizeof(short int));
 
-		// set a 1 into the specific cell of the column
+		// set a 1 into the proper cell of the column
 		configsServingQueries[i][selectedConfiguration[i]] = 1;
 	}
 
@@ -265,4 +269,8 @@ void Solution::writeToFile(const std::string fileName) const
 		}
 		fclose(fl);
 	}
+
+	for (unsigned int i = 0; i < problemInstance->nQueries; i++)
+		free(configsServingQueries[i]);
+	free(configsServingQueries);
 }

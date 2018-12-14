@@ -72,7 +72,7 @@ void Genetic::breedPopulation(int size)
 	for (i = 0, it = population.begin(); 
 		it != population.end() && i < POPULATION_SIZE; ++it, ++i)
 	{
-		parents[i] = *it;
+		parents[i] = Solution(*it);
 	}
 	
 	// duplicate parents before breeding, so we do not overwrite them
@@ -82,7 +82,7 @@ void Genetic::breedPopulation(int size)
 	
 	// apply crossover operator on pairs of parents
 	for (int i = 0; i < size / 2; i++) {
-		crossover(offsprings[i], offsprings[size-i], N_CROSSOVER_POINTS);
+		crossover(offsprings[i], offsprings[size-i-1], N_CROSSOVER_POINTS);
 	}
 	
 	// apply mutation operator on all offsprings
@@ -111,7 +111,7 @@ void Genetic::evaluateFitness(int size, const std::string outputFileName)
 
 	if (found_improving)
 	{
-		bestSolution = offsprings[i_best];						// Update the best solution found so far and log it to file/console
+		bestSolution = offsprings[i_best];				// Update the best solution found so far and log it to file/console
 		bestSolution.writeToFile(outputFileName);
 	}
 }
@@ -166,7 +166,7 @@ void Genetic::mutate(Solution & sol)
 				sol.selectedConfiguration[i] = -1;
 			}
 			// 50 percent chance of a config for a query mutating to any other config that serves this query
-			else{
+			else {
 				randomConfigIndex = rand() % problemInstance.configServingQueries[i].length; 
 				sol.selectedConfiguration[i] = problemInstance.configServingQueries[i].configs[randomConfigIndex];
 			}

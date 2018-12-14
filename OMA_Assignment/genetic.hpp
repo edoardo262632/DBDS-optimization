@@ -4,7 +4,7 @@
 #include "algorithm.hpp"
 #include <set>
 
-#define POPULATION_SIZE 32
+#define POPULATION_SIZE 50
 #define N_CROSSOVER_POINTS 4
 #define DETERMINISTIC_RANDOM_NUMBER_GENERATION true
 
