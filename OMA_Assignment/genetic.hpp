@@ -50,7 +50,7 @@ private:
 	void evaluateFitness(int size);
 	void replacePopulation(int size);
 
-	void crossover(Solution& itemA, Solution& itemB);
+	void crossover(Solution& itemA, Solution& itemB, unsigned int N);
 	void mutate(Solution& sol);
 };
 
