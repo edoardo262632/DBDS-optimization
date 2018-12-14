@@ -87,10 +87,11 @@ void Genetic::breedPopulation(int size)
 
 void Genetic::evaluateFitness(int size)
 {
-	bool better = false;
-	int better_tmp;
+	long int better = 0;
+	long int better_tmp=0;
 	bool find_one=false;
-	int newBestSolution;
+	long int newBestSolution;
+	int i_best = 0;
 	// ITERATE OVER THE OFFSPRINGS ARRAY AND CALL THE EVALUATE FUNCTION ON ALL OF THEM
 	// IF A SOLUTION HAS A BETTER OBJ.FUNCTION VALUE THAN THE CURRENT bestSolution, REPLACE IT
 
@@ -99,21 +100,20 @@ void Genetic::evaluateFitness(int size)
 	
 	//how will work new evaluation and feasibility function? will return an int value or what? a boolean?
 	
-	for (int i = 0, i < size, i++) {		//offsprings.size()				
-		
-		better = new_evaluate_feas(offsprings[i]);
-		if (better)		//true
+	for (int i = 0; i < size; i++) {		//offsprings.size()				
+		better_tmp = offsprings[i].evaluate();
+		if (better_tmp > better)
 		{
-			better_tmp = offsprings[i];
+			better = better_tmp;			//offsprings[i]
+			i_best = i;
 			find_one = true;
 		}
+	}
 		if (find_one)
 		{
 			newBestSolution = better_tmp;
-			printf(stdout, "Found a new best solution with value = %d", newBestSolution);
+			offsprings[i_best].writeToFile("SolutionFile.txt");
 		}
-
-	}
 }
 
 
