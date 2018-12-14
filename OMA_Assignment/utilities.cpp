@@ -95,6 +95,9 @@ Instance readInputFile(std::string fileName)
 	instance.configQueriesGain = (unsigned int **)malloc(instance.nConfigs * sizeof(unsigned int*));
 	// alloc additional support data structure
 	instance.configServingQueries = (UsefulConfigs*)malloc(instance.nQueries * sizeof(UsefulConfigs));
+	for (unsigned int j = 0; j < instance.nQueries; j++)
+		instance.configServingQueries[j].length = 0;
+
 	for (unsigned int i = 0; i < instance.nConfigs; i++) {
 		instance.configQueriesGain[i] = (unsigned int*)malloc(instance.nQueries * sizeof(unsigned int));
 		for (unsigned int j = 0; j < instance.nQueries; j++) {
@@ -147,6 +150,14 @@ unsigned int memoryCost(const Instance& problemInstance, const Solution& solutio
 }
 
 
+long long getCurrentTime_ms()		// returns system time in milliseconds
+{
+	return std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::system_clock::now().time_since_epoch()
+		).count();
+}
+
+
 //////////////////////////////////////////////
 //
 //	Solution class implementation
@@ -160,7 +171,7 @@ Solution::Solution(Instance *probInst)
 {	
 	selectedConfiguration = (short int*) malloc(problemInstance->nQueries*sizeof(short int));
 	configsServingQueries = (short int**) malloc(problemInstance->nQueries * sizeof(short int*));
-	for (int i = 0; i < problemInstance->nQueries; i++) {
+	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
 		configsServingQueries[i] = (short int*) calloc(problemInstance->nConfigs, sizeof(short int));
 		selectedConfiguration[i] = -1;
 	}
@@ -170,16 +181,16 @@ Solution::Solution(Instance *probInst)
 Solution::Solution(const Solution & other)
 	: Solution(other.problemInstance)
 {
-	for (int i = 0; i < problemInstance->nQueries; i++) {
+	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
 		// copy of the x matrix
-		for (int j = 0; j < problemInstance->nConfigs; j++)
+		for (unsigned int j = 0; j < problemInstance->nConfigs; j++)
 			configsServingQueries[i][j] = other.configsServingQueries[i][j];
 		// copy of the support integer array
 		selectedConfiguration[i] = other.selectedConfiguration[i];
 	}
 
 	// copy of the index array
-	for (int i = 0; i < problemInstance->nIndexes; i++)
+	for (unsigned int i = 0; i < problemInstance->nIndexes; i++)
 		indexesToBuild[i] = other.indexesToBuild[i];
 }
 
@@ -194,14 +205,14 @@ long int Solution::evaluate() {
 	unsigned int mem = 0;
 	short int *check = (short int*)calloc(problemInstance->nConfigs, sizeof(short int));
 
-	for (int i = 0; i < problemInstance->nQueries; i++) {
+	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
 		short int x = selectedConfiguration[i];		// already setted the value to a negative one in the greedy function and swapping fase
 		if (x >= 0) {
 			if (check[x] == 0) {			// if it's the first time for configuration i 
 				check[x] = 1;
 
 				// iterate on the Indexes vector
-				for (int k = 0; k < problemInstance->nIndexes; k++) {
+				for (unsigned int k = 0; k < problemInstance->nIndexes; k++) {
 					if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[x][k] == 1) {
 						// index k is part of configuration i and has not yet been built, so we need to build it
 						indexesToBuild[k] = 1;
@@ -220,84 +231,35 @@ long int Solution::evaluate() {
 	return all_gains - time_spent;
 }
 
-
-bool Solution::isFeasible()
-{				
-	unsigned int i, j, k, mem = 0;
-	short int *check = (short int*)calloc(problemInstance->nConfigs,sizeof(short int));
-	short int *check2 = (short int*)calloc(problemInstance->nQueries,sizeof(short int));
-
-	for (i = 0; i < problemInstance->nQueries; i++) {		//	iterate over solution matrix 
-		for (j = 0; j < problemInstance->nConfigs; j++) {
-			
-			if (configsServingQueries[i][j]) {		// configuration i serves query j
-				
-				//	CHECK UNIQUENESS CONSTRAINT
-				if (check2[j] > 0)
-					return false;
-				check2[j]++;
-
-				//	CHECK MEMORY CONSTRAINT
-				if (check[i] == 0) {			// if it's the first time for configuration i 
-					check[i] = 1;
-
-					// iterate on the Indexes vector
-					for (k = 0; k < problemInstance->nIndexes; k++) {  
-						if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[i][k] == 1) {
-							// index k is part of configuration i and has not yet been built, so we need to build it
-							indexesToBuild[k] = 1;
-							// update memory usage and verify constraint
-							mem += problemInstance->indexesMemoryOccupation[k];
-							if (mem > problemInstance->M) 
-								return false;
-						}
-					}
-
-				} 
-			}
-		}
-	}
-	return true;	 
-}
-
-
-long int Solution::evaluateObjectiveFunction()
+long int Solution::getObjFunctionValue() const
 {
-	unsigned int all_gains = 0;
-	unsigned int time_spent = 0;	
-
-	// gets gain given a solution
-	for (int i = 0; i < problemInstance->nConfigs; i++) {
-		for (int j = 0; j < problemInstance->nQueries; j++) {
-			if(configsServingQueries[i][j])
-				all_gains += (configsServingQueries[i][j])*(problemInstance->configQueriesGain[i][j]);
-		}
-	}
-
-	// gets time spent given a solution
-	for (int i = 0; i < problemInstance->nIndexes; i++){
-		time_spent += indexesToBuild[i]*(problemInstance->indexesFixedCost[i]);
-	}
-
-	// updates objective function value
-	objFunctionValue = all_gains - time_spent;
-
 	return objFunctionValue;
 }
 
 
 void Solution::writeToFile(const std::string fileName) const
 {
+	// Generate solution matrix on-the-fly before printing it
+	for (unsigned int i = 0; i < problemInstance->nQueries; i++)
+	{
+		// clear all values in the column
+		for (unsigned int j = 0; j < problemInstance->nConfigs; j++)
+			configsServingQueries[i][j] = 0;
+
+		// set a 1 into the specific cell of the column
+		configsServingQueries[i][selectedConfiguration[i]] = 1;
+	}
+
 	FILE *fl;
 	fl = fopen(fileName.c_str(), "w");
 	if (fl == NULL)
 		fprintf(stderr, "Error: unable to open file %s", fileName.c_str());		
 	else
 	{
-		fprintf(stdout, "Found a new solution with objective function value = %d", objFunctionValue);
-		for (int i = 0; i < problemInstance->nConfigs; i++) {					
-			for (int j = 0; j < problemInstance->nQueries; j++) {				
-				fprintf(fl, "%d ", configsServingQueries[i][j]);		
+		fprintf(stdout, "Found a new best solution with objective function value = %ld", objFunctionValue);
+		for (unsigned int i = 0; i < problemInstance->nConfigs; i++) {
+			for (unsigned int j = 0; j < problemInstance->nQueries; j++) {
+				fprintf(fl, "%d ", configsServingQueries[j][i]);		
 			}								
 			fprintf(fl, "\n");											
 		}

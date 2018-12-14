@@ -1,12 +1,12 @@
-#ifndef GREEDY_HPP
-#define GREEDY_HPP
+#ifndef GENETIC_HPP
+#define GENETIC_HPP
 
 #include "algorithm.hpp"
-#include "utilities.hpp"
 #include <set>
 
-#define POPULATION_SIZE 10
-#define DETERMINISTIC_RANDOM_NUMBER_GENERATION false
+#define POPULATION_SIZE 32
+#define N_CROSSOVER_POINTS 4
+#define DETERMINISTIC_RANDOM_NUMBER_GENERATION true
 
 class Genetic : Algorithm
 {
@@ -18,13 +18,12 @@ private:
 
 	// Comparator for Solution objects, to use in the population sorted set
 	struct solution_comparator {
-		bool operator() (Solution& lhs, Solution& rhs) const
+		bool operator() (const Solution& lhs, const Solution& rhs) const
 		{
-			return lhs.evaluate() < rhs.evaluate();
+			return lhs.getObjFunctionValue() < rhs.getObjFunctionValue();
 		}
 	};
 
-	Solution* parentsCopy;
 	Solution* parents;
 	Solution* offsprings;
 	std::set<Solution, solution_comparator> population;
@@ -38,7 +37,7 @@ public:
 		population(std::set<Solution, solution_comparator>())
 	{
 		parents = (Solution*)malloc(POPULATION_SIZE * sizeof(Solution));
-		offsprings = (Solution*)malloc((2 * POPULATION_SIZE - 1) * sizeof(Solution));
+		offsprings = (Solution*)malloc(POPULATION_SIZE * sizeof(Solution));
 	}
 
 	void run(const Instance& problemInstance, const Params& parameters);
@@ -47,10 +46,10 @@ private:
 
 	void initializePopulation(int size);
 	void breedPopulation(int size);
-	void evaluateFitness(int size);
+	void evaluateFitness(int size, const std::string outputFileName);
 	void replacePopulation(int size);
 
-	void crossover(Solution& itemA, Solution& itemB, unsigned int N);
+	void crossover(Solution& itemA, Solution& itemB, unsigned int N = 2);
 	void mutate(Solution& sol);
 };
 

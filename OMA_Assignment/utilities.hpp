@@ -1,8 +1,9 @@
 #ifndef UTILITIES_HPP
 #define UTILITIES_HPP
+
 #include <string>
-#include <iostream>
 #include <limits>
+#include <chrono>
 
 #define DEFAULT_TIMELIMIT 300*1000
 
@@ -44,7 +45,6 @@ typedef struct
 
 /* ========== CLASSES ========== */
 
-// A solution is represented by a class because it holds both data and functions
 class Solution
 {
 
@@ -52,7 +52,7 @@ class Solution
 
 public:
 
-	short int **configsServingQueries;			// x matrix
+	short int **configsServingQueries;			// x matrix (TODO: removable)
 	short int *indexesToBuild;					// b vector
 	short int *selectedConfiguration;			// compact integer representation of the solution matrix
 	
@@ -60,7 +60,7 @@ public:
 private:
 
 	long int objFunctionValue;
-	Instance *problemInstance;	// TODO: initialize these values inside the Solution class constructor
+	Instance *problemInstance;
 	
 	// --- METHODS ---
 
@@ -70,10 +70,8 @@ public:
 	Solution(const Solution& other);	// copy constructor
 
 	long int evaluate();
+	long int getObjFunctionValue() const;
 	void writeToFile(const std::string fileName) const;
-
-	bool isFeasible();
-	long int evaluateObjectiveFunction();
 	
 private:
 
@@ -87,5 +85,6 @@ private:
 Params parseCommandLine (int argc, char* argv[]);
 Instance readInputFile (std::string fileName);
 unsigned int memoryCost(const Instance& problemInstance, const Solution& solution);
+long long getCurrentTime_ms();
 
 #endif // UTILITIES_HPP

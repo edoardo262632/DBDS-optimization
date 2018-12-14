@@ -2,7 +2,6 @@
 #define GREEDY_HPP
 
 #include "algorithm.hpp"
-#include "utilities.hpp"
 
 class Greedy : Algorithm
 {

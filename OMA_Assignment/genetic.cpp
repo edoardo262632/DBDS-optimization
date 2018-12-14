@@ -1,27 +1,32 @@
 #include "genetic.hpp"
-#include <chrono>
-
-using namespace std::chrono;
 
 
 void Genetic::run(const Instance & problemInstance, const Params & parameters)
 {
-	long long startingTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	unsigned int generation_counter = 0;
+	long long startingTime = getCurrentTime_ms();
 
 	// INITIALIZATION
 	initializePopulation(POPULATION_SIZE);
 
-	long long currentTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+	long long currentTime = getCurrentTime_ms();
 
 	// REPEAT UNTIL THERE'S COMPUTATIONAL TIME LEFT
 	while (currentTime - startingTime < parameters.timeLimit)
 	{
 		breedPopulation(POPULATION_SIZE);
-		evaluateFitness(POPULATION_SIZE);
+		evaluateFitness(POPULATION_SIZE, parameters.outputFileName);
 		replacePopulation(POPULATION_SIZE);
-			
-		currentTime = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();		// update timestamp
+		
+		currentTime = getCurrentTime_ms();		// update timestamp
+
+		fprintf(stdout, "Succesfully trained generation %u - Seconds elapsed: %.4f\n",
+			generation_counter, ((float)(currentTime-startingTime)/1000));
+		generation_counter++;
 	}
+
+	fprintf(stdout, "\nGenetic algorithm terminated succesfully!\nObjective function value = %ld\nMemory cost = %u\n",
+		bestSolution.evaluate(), memoryCost(problemInstance, bestSolution));
 }
 
 
@@ -29,7 +34,7 @@ void Genetic::run(const Instance & problemInstance, const Params & parameters)
 void Genetic::initializePopulation(int size)
 {
 #if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 #endif
 
 	parents[0] = Solution(&problemInstance);		// one solution is kept with the default configuration
@@ -40,16 +45,16 @@ void Genetic::initializePopulation(int size)
 		for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
 
 			int A = rand() % problemInstance.nConfigs;		// generate a random value for the configuration to take for each query
-			// TODO: possibility to randomize not over 500 but only over the useful configurations
-			parents[n].configsServingQueries[i][A] = 1;
+															// TODO: randomize not over all the configurations but only over the useful ones ??
 			parents[n].selectedConfiguration[i] = A;
-			if (memoryCost(problemInstance, parents[n]) > problemInstance.M) {
-				parents[n].configsServingQueries[i][A] = 0;						// "backtrack" -> do not activate this configuration
-				parents[n].selectedConfiguration[i] = -1;
-			}
+			if (memoryCost(problemInstance, parents[n]) > problemInstance.M)
+				parents[n].selectedConfiguration[i] = -1;						// "backtrack" -> do not activate this configuration
 		}
 	}
+
+	// Initialization and evaluation of the starting population set
 	for (int i = 0; i < size; i++) {
+		parents[i].evaluate();
 		population.insert(parents[i]);
 	}
 }
@@ -58,83 +63,69 @@ void Genetic::initializePopulation(int size)
 
 void Genetic::breedPopulation(int size)
 {
-	// ITERATE OVER THE POPULATION SORTED SET (using c++ collection iterator)
-	// AND COPY THE FIRST size SOLUTIONS (pointers) INTO THE parents ARRAY
-
-	// COMBINE (CALLING crossover() FUNCTION) THE FIRST PARENT WITH THE LAST IN THE ARRAY, THE SECOND WITH THE LAST BUT ONE, ...
-	// FILLING THE offsprings ARRAY WITH THE NEW SOLUTIONS 
-	// (you will need to create 2 new solutions by copying the parents before calling the crossover function,
-	// because we don't want to lose the parents, DO NOT copy the content of the solutions manually 
-	// but use the copy constructor Solution(Solution& other) instead)
-
-	// ITERATE OVER THE OFFSPRINGS ARRAY AND CALL THE mutate() FUNCTION ON ALL OF THEM
+	//copy_n(population.begin(), size, parents);		
 	
-	copy_n(population.begin(), size, parents); //this is broken because population is empty
-	
-	for (int i = 0; i < size; i++) {
-		parentsCopy[i] = Solution(parents[i]);
+	int i;
+	std::set<Solution, solution_comparator>::iterator it;
+
+	// select the best POPULATION_SIZE elements to use as parents
+	for (i = 0, it = population.begin(); 
+		it != population.end() && i < POPULATION_SIZE; ++it, ++i)
+	{
+		parents[i] = *it;
 	}
 	
+	// duplicate parents before breeding, so we do not overwrite them
+	for (int i = 0; i < size; i++) {
+		offsprings[i] = Solution(parents[i]);
+	}
+	
+	// apply crossover operator on pairs of parents
 	for (int i = 0; i < size / 2; i++) {
-		crossover(parentsCopy[i], parentsCopy[size-i]);
+		crossover(offsprings[i], offsprings[size-i], N_CROSSOVER_POINTS);
 	}
 	
-	for (int i = 0; i < size; i++) {
-		offsprings[i] = parentsCopy[i];
-	}
-	
+	// apply mutation operator on all offsprings
 	for (int i = 0; i < size; i++) {
 		mutate(offsprings[i]);
 	}
 }
 
 
-void Genetic::evaluateFitness(int size)
+void Genetic::evaluateFitness(int size, const std::string outputFileName)
 {
-	long int better = 0;
-	long int better_tmp=0;
-	bool find_one=false;
-	long int newBestSolution;
+	long int current_best = bestSolution.evaluate(), val;
+	bool found_improving = false;
 	int i_best = 0;
-	// ITERATE OVER THE OFFSPRINGS ARRAY AND CALL THE EVALUATE FUNCTION ON ALL OF THEM
-	// IF A SOLUTION HAS A BETTER OBJ.FUNCTION VALUE THAN THE CURRENT bestSolution, REPLACE IT
-
-	// The evaluation is done through the evaluate() method in Solution class, which has yet to be implemented but
-	// it's actually a merge between the already existing isFeasible() and evaluateObjectiveFunction() methods
 	
-	//how will work new evaluation and feasibility function? will return an int value or what? a boolean?
-	
-	for (int i = 0; i < size; i++) {		//offsprings.size()				
-		better_tmp = offsprings[i].evaluate();
-		if (better_tmp > better)
+	for (int i = 0; i < size; i++)		// offsprings.size()
+	{				
+		val = offsprings[i].evaluate();
+		if (val > current_best)
 		{
-			better = better_tmp;			//offsprings[i]
+			current_best = val;			// update current best value
 			i_best = i;
-			find_one = true;
+			found_improving = true;
 		}
 	}
-		if (find_one)
-		{
-			newBestSolution = better_tmp;
-			offsprings[i_best].writeToFile("SolutionFile.txt");
-		}
+
+	if (found_improving)
+	{
+		bestSolution = offsprings[i_best];						// Update the best solution found so far and log it to file/console
+		bestSolution.writeToFile(outputFileName);
+	}
 }
 
 
 void Genetic::replacePopulation(int size)
 {
-	// WE NEED TO REPLACE THE OLDER POPULATION WITH THE NEW ELEMENTS
-	// USE THE clear() METHOD ON THE POPULATION SET TO REMOVE EVERYTHING IT CONTAINS, THEN
-	// ITERATE OVER BOTH THE PARENTS AND OFFSPRINGS ARRAY AND ADD ALL OF THEM TO THE POPULATION SET BY USING THE insert() METHOD
-	// by doing this (thanks to our custom comparator) Solutions should automatically get ordered by descending fitness value
 	population.clear();
-	for (int i = 0; i < size; i++) { 
+
+	for (int i = 0; i < size; i++) 
+	{ 
 		population.insert(parents[i]);
-	}
-	for (int i = 0; i < size; i++) {
 		population.insert(offsprings[i]);
 	}
-
 }
 
 
@@ -162,11 +153,11 @@ void Genetic::mutate(Solution & sol)
 {
 	short int randomConfigIndex;
 #if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
-	srand (time(NULL));		// initialize random seed for rand()
+	srand ((unsigned int)time(NULL));		// initialize random seed for rand()
 #endif
 
 	// iterates over the genes
-	for (int i = 0; i < problemInstance.nQueries; i++) {
+	for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
 		// checks if a random generated number (>= 0) is equal to 0. In this case, the mutation occurs
 		if (rand() % problemInstance.nQueries == 0)
 		{

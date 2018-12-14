@@ -8,6 +8,7 @@ using namespace std;
 #include "utilities.hpp"
 #include "algorithm.hpp"
 #include "greedy.hpp"
+#include "genetic.hpp"
 
 
 int main(int argc, char **argv) 
@@ -27,8 +28,8 @@ int main(int argc, char **argv)
 	} 
 	
 	// Instantiate the proper class and run the algorithm
-	Greedy greedySolver = Greedy(problemInstance);
-	greedySolver.run(problemInstance, executionParameters);
+	Genetic solver = Genetic(problemInstance);
+	solver.run(problemInstance, executionParameters);
 	
 	return 0;
 }
