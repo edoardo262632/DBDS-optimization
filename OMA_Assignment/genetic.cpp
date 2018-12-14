@@ -91,10 +91,11 @@ void Genetic::breedPopulation(int size)
 
 void Genetic::evaluateFitness(int size)
 {
-	bool better = false;
-	int better_tmp;
+	long int better = 0;
+	long int better_tmp=0;
 	bool find_one=false;
-	int newBestSolution;
+	long int newBestSolution;
+	int i_best = 0;
 	// ITERATE OVER THE OFFSPRINGS ARRAY AND CALL THE EVALUATE FUNCTION ON ALL OF THEM
 	// IF A SOLUTION HAS A BETTER OBJ.FUNCTION VALUE THAN THE CURRENT bestSolution, REPLACE IT
 
@@ -103,21 +104,20 @@ void Genetic::evaluateFitness(int size)
 	
 	//how will work new evaluation and feasibility function? will return an int value or what? a boolean?
 	
-	for (int i = 0, i < size, i++) {		//offsprings.size()				
-		
-		better = new_evaluate_feas(offsprings[i]);
-		if (better)		//true
+	for (int i = 0; i < size; i++) {		//offsprings.size()				
+		better_tmp = offsprings[i].evaluate();
+		if (better_tmp > better)
 		{
-			better_tmp = offsprings[i];
+			better = better_tmp;			//offsprings[i]
+			i_best = i;
 			find_one = true;
 		}
+	}
 		if (find_one)
 		{
 			newBestSolution = better_tmp;
-			printf(stdout, "Found a new best solution with value = %d", newBestSolution);
+			offsprings[i_best].writeToFile("SolutionFile.txt");
 		}
-
-	}
 }
 
 
@@ -138,11 +138,23 @@ void Genetic::replacePopulation(int size)
 }
 
 
-void Genetic::crossover(Solution& itemA, Solution& itemB)
+void Genetic::crossover(Solution& itemA, Solution& itemB, unsigned int N)
 {
-	// DO N-POINT CROSSOVER BETWEEN THE 2 SOLUTIONS
-	// both the integer array values (index of the configuration serving a query) and the relative column
-	// in the matrix have to be moved when doing the crossover, for moving columns ONLY SWAP POINTERS
+	unsigned int M = problemInstance.nQueries / N;
+	int temp;
+
+	for (unsigned int i = 0; i < problemInstance.nQueries ; i += 2*M) {
+		for (unsigned int j = 0; j < M; j++) {
+			if ((j+i) >= problemInstance.nQueries)
+				break;
+
+			// swap items between the 2 solutions
+			temp = itemA.selectedConfiguration[j];
+			itemA.selectedConfiguration[j] = itemB.selectedConfiguration[j];
+			itemB.selectedConfiguration[j] = temp;
+		}
+	}
+
 }
 
 
