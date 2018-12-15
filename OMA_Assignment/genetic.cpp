@@ -26,7 +26,7 @@ void Genetic::run(const Instance & problemInstance, const Params & parameters)
 	}
 
 	fprintf(stdout, "\nGenetic algorithm terminated succesfully!\nObjective function value = %ld\nMemory cost = %u\n\n",
-		bestSolution.evaluate(), memoryCost(problemInstance, bestSolution));
+		bestSolution->evaluate(), memoryCost(problemInstance, *bestSolution));
 }
 
 
@@ -37,7 +37,7 @@ void Genetic::initializePopulation(int size)
 	srand((unsigned int)time(NULL));
 #endif
 
-	parents[0] = &bestSolution;		// one solution is kept with the default configuration
+	parents[0] = new Solution(*bestSolution);		// one solution is kept with the default configuration
 
 	for (int n = 1; n < size; n++)					// P-1 solutions are initialized with the greedy algorithm
 	{
@@ -92,7 +92,7 @@ void Genetic::breedPopulation(int size)
 
 void Genetic::evaluateFitness(int size, const std::string outputFileName)
 {
-	long int current_best = bestSolution.evaluate(), val;
+	long int current_best = bestSolution->evaluate(), val;
 	bool found_improving = false;
 	int i_best = 0;
 	
@@ -109,8 +109,8 @@ void Genetic::evaluateFitness(int size, const std::string outputFileName)
 
 	if (found_improving)
 	{
-		bestSolution = *offsprings[i_best];				// Update the best solution found so far and log it to file/console
-		bestSolution.writeToFile(outputFileName);
+		bestSolution = offsprings[i_best];				// Update the best solution found so far and log it to file/console
+		bestSolution->writeToFile(outputFileName);
 	}
 }
 

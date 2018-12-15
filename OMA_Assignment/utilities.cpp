@@ -201,37 +201,35 @@ long int Solution::evaluate() {
 	unsigned int all_gains = 0;
 	unsigned int time_spent = 0;
 	unsigned int mem = 0;
-	short int *check = (short int*)calloc(problemInstance->nConfigs, sizeof(short int));
 
 	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
-		short int x = selectedConfiguration[i];		// already setted the value to a negative one in the greedy function and swapping fase
+		short int x = selectedConfiguration[i];
 		if (x >= 0) {
-			if (check[x] == 0) {			// if it's the first time for configuration i 
-				check[x] = 1;
-
-				// iterate on the Indexes vector
-				for (unsigned int k = 0; k < problemInstance->nIndexes; k++) {
-					if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[x][k] == 1) {
-						// index k is part of configuration i and has not yet been built, so we need to build it
-						indexesToBuild[k] = 1;
-
-						// update memory usage and verify constraint
-						mem += problemInstance->indexesMemoryOccupation[k];
-						if (mem > problemInstance->M)
-						{
-							objFunctionValue = LONG_MIN;
-							return LONG_MIN;
-						}
-							
-						time_spent += problemInstance->indexesFixedCost[k];
-					}
+			// iterate on the Indexes vector
+			for (unsigned int k = 0; k < problemInstance->nIndexes; k++) {
+				if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[x][k] == 1) {
+					// index k is part of configuration i and has not yet been built, so we need to build it
+					indexesToBuild[k] = 1;
 				}
 			}
-			all_gains += problemInstance->configQueriesGain[x][i];	// add the contribute of the configuration with the i query
+			
+			all_gains += problemInstance->configQueriesGain[x][i];		// add the contribute of the configuration with the i query
 		}
 	}
 
-	free(check);
+	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) {
+		if (indexesToBuild[i])
+		{
+			mem += problemInstance->indexesMemoryOccupation[i];				// calculate memory cost of the given solution
+			time_spent += problemInstance->indexesFixedCost[i];
+
+			if (mem > problemInstance->M)
+			{
+				objFunctionValue = LONG_MIN;
+				return LONG_MIN;
+			}
+		}
+	}
 
 	objFunctionValue = all_gains - time_spent;
 	return objFunctionValue;
