@@ -31,5 +31,6 @@ int main(int argc, char **argv)
 	Genetic solver = Genetic(problemInstance);
 	solver.run(problemInstance, executionParameters);
 	
+	system("pause");
 	return 0;
 }

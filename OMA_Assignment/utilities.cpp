@@ -197,9 +197,6 @@ Solution::~Solution()
 
 
 long int Solution::evaluate() {
-	
-	if (objFunctionValue != LONG_MIN)
-		return objFunctionValue;
 
 	unsigned int all_gains = 0;
 	unsigned int time_spent = 0;
@@ -221,7 +218,11 @@ long int Solution::evaluate() {
 						// update memory usage and verify constraint
 						mem += problemInstance->indexesMemoryOccupation[k];
 						if (mem > problemInstance->M)
+						{
+							objFunctionValue = LONG_MIN;
 							return LONG_MIN;
+						}
+							
 						time_spent += problemInstance->indexesFixedCost[k];
 					}
 				}
@@ -232,7 +233,8 @@ long int Solution::evaluate() {
 
 	free(check);
 
-	return all_gains - time_spent;
+	objFunctionValue = all_gains - time_spent;
+	return objFunctionValue;
 }
 
 long int Solution::getObjFunctionValue() const
@@ -251,7 +253,8 @@ void Solution::writeToFile(const std::string fileName) const
 		configsServingQueries[i] = (short int*)calloc(problemInstance->nConfigs, sizeof(short int));
 
 		// set a 1 into the proper cell of the column
-		configsServingQueries[i][selectedConfiguration[i]] = 1;
+		if (selectedConfiguration[i] >= 0)
+			configsServingQueries[i][selectedConfiguration[i]] = 1;
 	}
 
 	FILE *fl = fopen(fileName.c_str(), "w");
@@ -259,7 +262,7 @@ void Solution::writeToFile(const std::string fileName) const
 		fprintf(stderr, "Error: unable to open file %s", fileName.c_str());		
 	else
 	{
-		fprintf(stdout, "Found a new best solution with objective function value = %ld", objFunctionValue);
+		fprintf(stdout, "Found a new best solution with objective function value = %ld\n", objFunctionValue);
 		for (unsigned int i = 0; i < problemInstance->nConfigs; i++) {
 			for (unsigned int j = 0; j < problemInstance->nQueries; j++) {
 				fprintf(fl, "%d ", configsServingQueries[j][i]);		
