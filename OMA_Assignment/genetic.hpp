@@ -58,8 +58,8 @@ private:
 	void initializePopulation3(int size);
 
 	// auxiliary functions to set configurations for queries during initialization
-	int Genetic::getRandomConfiguration(std::vector<int> usedConfigs, int queryIndex);
-	int Genetic::getHighestGainConfiguration(std::vector<int> usedConfigs, int queryIndex);
+	int getRandomConfiguration(std::vector<int> usedConfigs, int queryIndex);
+	int getHighestGainConfiguration(std::vector<int> usedConfigs, int queryIndex);
 
 };
 
