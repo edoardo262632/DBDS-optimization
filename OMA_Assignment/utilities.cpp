@@ -260,7 +260,6 @@ void Solution::writeToFile(const std::string fileName) const
 		fprintf(stderr, "Error: unable to open file %s", fileName.c_str());		
 	else
 	{
-		fprintf(stdout, "Found a new best solution with objective function value = %ld\n", objFunctionValue);
 		for (unsigned int i = 0; i < problemInstance->nConfigs; i++) {
 			for (unsigned int j = 0; j < problemInstance->nQueries; j++) {
 				fprintf(fl, "%d ", configsServingQueries[j][i]);		

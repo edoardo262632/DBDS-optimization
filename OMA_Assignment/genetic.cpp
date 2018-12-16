@@ -7,7 +7,7 @@ void Genetic::run(const Instance & problemInstance, const Params & parameters)
 	long long startingTime = getCurrentTime_ms();
 
 	// INITIALIZATION
-	initializePopulation(POPULATION_SIZE);
+	initializePopulationGreedy(POPULATION_SIZE);
 
 	long long currentTime = getCurrentTime_ms();
 
@@ -15,7 +15,7 @@ void Genetic::run(const Instance & problemInstance, const Params & parameters)
 	while (currentTime - startingTime < parameters.timeLimit)
 	{
 		breedPopulation(POPULATION_SIZE);
-		evaluateFitness(POPULATION_SIZE, parameters.outputFileName);
+		evaluateFitness(POPULATION_SIZE, parameters.outputFileName, generation_counter);
 		replacePopulation(POPULATION_SIZE);
 		
 		currentTime = getCurrentTime_ms();		// update timestamp
@@ -37,7 +37,7 @@ void Genetic::initializePopulation(int size)
 	srand((unsigned int)time(NULL));
 #endif
 
-	parents[0] = new Solution(*bestSolution);		// one solution is kept with the default configuration
+	parents[0] = bestSolution;		// one solution is kept with the default configuration
 
 	for (int n = 1; n < size; n++)					// P-1 solutions are initialized with the greedy algorithm
 	{
@@ -45,7 +45,6 @@ void Genetic::initializePopulation(int size)
 		for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
 
 			int A = rand() % problemInstance.nConfigs;		// generate a random value for the configuration to take for each query
-															// TODO: randomize not over all the configurations but only over the useful ones ??
 			parents[n]->selectedConfiguration[i] = A;
 			if (memoryCost(problemInstance, *parents[n]) > problemInstance.M)
 				parents[n]->selectedConfiguration[i] = -1;						// "backtrack" -> do not activate this configuration
@@ -64,13 +63,15 @@ void Genetic::initializePopulation(int size)
 void Genetic::breedPopulation(int size)
 {
 	int i;
-	std::set<Solution*, solution_comparator>::iterator it;
+	std::multiset<Solution*, solution_comparator>::iterator it;
 
 	// select the best POPULATION_SIZE elements to use as parents
 	for (i = 0, it = population.begin(); 
-		it != population.end() && i < POPULATION_SIZE; ++it, ++i)
+		it != population.end(); ++it, ++i)
 	{
-		parents[i] = new Solution(**it);
+		if (i < POPULATION_SIZE)
+			parents[i] = *it;
+		else delete *it;
 	}
 	
 	// duplicate parents before breeding, so we do not overwrite them
@@ -90,14 +91,14 @@ void Genetic::breedPopulation(int size)
 }
 
 
-void Genetic::evaluateFitness(int size, const std::string outputFileName)
+void Genetic::evaluateFitness(int size, const std::string outputFileName, unsigned int gen)
 {
 	long int current_best = bestSolution->evaluate(), val;
 	bool found_improving = false;
 	int i_best = 0;
 	
 	for (int i = 0; i < size; i++)		// offsprings.size()
-	{				
+	{
 		val = offsprings[i]->evaluate();
 		if (val > current_best)
 		{
@@ -111,6 +112,7 @@ void Genetic::evaluateFitness(int size, const std::string outputFileName)
 	{
 		bestSolution = offsprings[i_best];				// Update the best solution found so far and log it to file/console
 		bestSolution->writeToFile(outputFileName);
+		fprintf(stdout, "Found a new best solution with objective function value = %ld (Generation #%u)\n", current_best, gen);
 	}
 }
 
@@ -171,6 +173,11 @@ void Genetic::mutate(Solution* sol)
 		}
 	}
 }
+
+
+/* ============================================================================== */
+/* ============================================================================== */
+
 
 // "smarter" version of initialize population, selecting only the usefull
 // configurations for a query instead of completely random ones
@@ -300,11 +307,7 @@ void Genetic::initializePopulationGreedy(int size)
 	long int eval_parent;
 	for (int i = 0; i < size; i++) {
 		eval_parent = parents[i]->evaluate();
-		printf("2 The evaluation of parent is %ld for query %d\n", eval_parent, i);
-		for (int j = 0; j < problemInstance.nQueries; j++){
-			printf("%d", parents[i]->selectedConfiguration[j]);
-		}
-		printf("\n");
+		printf("The evaluation of parent is %ld for query %d\n", eval_parent, i);
 		population.insert(parents[i]);
 	}
 }
