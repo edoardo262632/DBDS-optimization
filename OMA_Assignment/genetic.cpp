@@ -228,8 +228,8 @@ void Genetic::initializePopulation3(int size)
 
 			if (memoryCost(problemInstance, *parents[n]) > problemInstance.M){
 				usedConfigs.pop_back();                     // remove the configuration if the memory cost with it is > M
-				if (i % 3 == 1) parents[n]->selectedConfiguration[i] = getHighestGainConfiguration(usedConfigs, i);
-				if (i % 3 == 2) parents[n]->selectedConfiguration[i] = getRandomConfiguration(usedConfigs, i);
+				if (i % 3 == 2) parents[n]->selectedConfiguration[i] = getHighestGainConfiguration(usedConfigs, i);
+				if (i % 3 == 1) parents[n]->selectedConfiguration[i] = getRandomConfiguration(usedConfigs, i);
 				else parents[n]->selectedConfiguration[i] = -1; // "backtrack" -> do not activate this configuration
 			}
 		}
