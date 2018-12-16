@@ -56,10 +56,12 @@ private:
 	// extra functions to initialize
 	void initializePopulation2(int size);
 	void initializePopulation3(int size);
+	void initializePopulationGreedy(int size);
 
 	// auxiliary functions to set configurations for queries during initialization
 	int getRandomConfiguration(std::vector<int> usedConfigs, int queryIndex);
 	int getHighestGainConfiguration(std::vector<int> usedConfigs, int queryIndex);
+	int maxGainGivenQuery(int queryIndex);
 
 };
 

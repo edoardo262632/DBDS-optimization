@@ -248,6 +248,67 @@ void Genetic::initializePopulation3(int size)
 	}
 }
 
+// greedily selects the configuration with highest gain given a random query
+void Genetic::initializePopulationGreedy(int size)
+{
+#if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
+	srand((unsigned int)time(NULL));
+#endif
+	srand(1);
+	parents[0] = new Solution(*bestSolution);		// one solution is kept with the default configuration
+	int randomConfigIndex;
+    std::vector<int> usedConfigs;                  // vector with already used configurations for a parent
+
+
+	for (int n = 1; n < size; n++)					// P-1 solutions are initialized with the greedy algorithm
+	{
+		parents[n] = new Solution(&problemInstance);
+	    usedConfigs.clear();
+
+		for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
+			int j = rand() % problemInstance.nQueries;		// generate a random value for the configuration to take for each query
+
+			parents[n]->selectedConfiguration[j] = maxGainGivenQuery(j);
+			usedConfigs.push_back(parents[n]->selectedConfiguration[j]);  // insert random configuration in the vector
+
+			if (memoryCost(problemInstance, *parents[n]) > problemInstance.M){
+				usedConfigs.pop_back();                     // remove the configuration if the memory cost with it is > M
+				if (i % 3 == 2) parents[n]->selectedConfiguration[j] = getHighestGainConfiguration(usedConfigs, j);
+				if (i % 2 == 1) parents[n]->selectedConfiguration[j] = getRandomConfiguration(usedConfigs, j);
+				else parents[n]->selectedConfiguration[j] = -1; // "backtrack" -> do not activate this configuration
+			}
+		}
+
+/* fills the rest of the configurations
+		for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
+			if (parents[n]->selectedConfiguration[i] < 0)
+
+			parents[n]->selectedConfiguration[i] = maxGainGivenQuery(i);
+			usedConfigs.push_back(parents[n]->selectedConfiguration[i]);  // insert random configuration in the vector
+
+			if (memoryCost(problemInstance, *parents[n]) > problemInstance.M){
+				usedConfigs.pop_back();                     // remove the configuration if the memory cost with it is > M
+				if (i % 3 == 2) parents[n]->selectedConfiguration[i] = getHighestGainConfiguration(usedConfigs, i);
+				if (i % 2 == 1) parents[n]->selectedConfiguration[i] = getRandomConfiguration(usedConfigs, i);
+				else parents[n]->selectedConfiguration[i] = -1; // "backtrack" -> do not activate this configuration
+			}
+		}
+*/
+	}
+
+	// Initialization and evaluation of the starting population set
+	long int eval_parent;
+	for (int i = 0; i < size; i++) {
+		eval_parent = parents[i]->evaluate();
+		printf("2 The evaluation of parent is %ld for query %d\n", eval_parent, i);
+		for (int j = 0; j < problemInstance.nQueries; j++){
+			printf("%d", parents[i]->selectedConfiguration[j]);
+		}
+		printf("\n");
+		population.insert(parents[i]);
+	}
+}
+
 // given the configurations already used by a parent, pick one that gives the 
 // highest gain to a query
 int Genetic::getHighestGainConfiguration(std::vector<int> usedConfigs, int queryIndex)
@@ -274,4 +335,17 @@ int Genetic::getRandomConfiguration(std::vector<int> usedConfigs, int queryIndex
 		}
 	}
 	return -1; // if none, backtrack
+}
+
+int Genetic::maxGainGivenQuery(int queryIndex)
+{
+	unsigned int maxGain = 0;
+	int maxConfig = -1;
+	for (int i = 0; i < problemInstance.configServingQueries[queryIndex].length; i++){
+		if (problemInstance.configQueriesGain[problemInstance.configServingQueries[queryIndex].configs[i]][queryIndex] > maxGain){
+			maxGain = problemInstance.configQueriesGain[problemInstance.configServingQueries[queryIndex].configs[i]][queryIndex];
+			maxConfig = problemInstance.configServingQueries[queryIndex].configs[i];
+		}
+	}
+	return maxConfig;
 }
