@@ -3,6 +3,7 @@
 
 #include "algorithm.hpp"
 #include <set>
+#include <vector> 
 
 #define POPULATION_SIZE 50
 #define N_CROSSOVER_POINTS 4
@@ -51,6 +52,15 @@ private:
 
 	void crossover(Solution* itemA, Solution* itemB, unsigned int N = 2);
 	void mutate(Solution* sol);
+
+	// extra functions to initialize
+	void initializePopulation2(int size);
+	void initializePopulation3(int size);
+
+	// auxiliary functions to set configurations for queries during initialization
+	int Genetic::getRandomConfiguration(std::vector<int> usedConfigs, int queryIndex);
+	int Genetic::getHighestGainConfiguration(std::vector<int> usedConfigs, int queryIndex);
+
 };
 
 #endif	// GENETIC_HPP

@@ -172,3 +172,106 @@ void Genetic::mutate(Solution* sol)
 	}
 }
 
+// "smarter" version of initialize population, selecting only the usefull
+// configurations for a query instead of completely random ones
+void Genetic::initializePopulation2(int size)
+{
+#if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
+	srand((unsigned int)time(NULL));
+#endif
+
+	parents[0] = new Solution(*bestSolution);		// one solution is kept with the default configuration
+
+	for (int n = 1; n < size; n++)					// P-1 solutions are initialized with the greedy algorithm
+	{
+		parents[n] = new Solution(&problemInstance);
+
+		for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
+
+			int A = rand() % problemInstance.configServingQueries[i].length; // given the configurations that serves a query, selects one randomly
+			parents[n]->selectedConfiguration[i] = problemInstance.configServingQueries[i].configs[A];
+
+			if (memoryCost(problemInstance, *parents[n]) > problemInstance.M)
+				parents[n]->selectedConfiguration[i] = -1;
+		}
+	}
+
+	// Initialization and evaluation of the starting population set
+	long int eval_parent;
+	for (int i = 0; i < size; i++) {
+		eval_parent = parents[i]->evaluate();
+		population.insert(parents[i]);
+	}
+}
+
+// mix between the original initializePopulation(), getHighestGainConfiguration() and getRandomConfiguration()
+void Genetic::initializePopulation3(int size)
+{
+#if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
+	srand((unsigned int)time(NULL));
+#endif
+
+	parents[0] = new Solution(*bestSolution);		// one solution is kept with the default configuration
+	int randomConfigIndex;
+    std::vector<int> usedConfigs;                  // vector with already used configurations for a parent
+
+	for (int n = 1; n < size; n++)					// P-1 solutions are initialized with the greedy algorithm
+	{
+		parents[n] = new Solution(&problemInstance);
+	    usedConfigs.clear();
+
+		for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
+
+			int A = rand() % problemInstance.nConfigs;		// generate a random value for the configuration to take for each query
+			parents[n]->selectedConfiguration[i] = A;
+			usedConfigs.push_back(A);                       // insert random configuration in the vector
+
+			if (memoryCost(problemInstance, *parents[n]) > problemInstance.M){
+				usedConfigs.pop_back();                     // remove the configuration if the memory cost with it is > M
+				if (i % 3 == 1) parents[n]->selectedConfiguration[i] = getHighestGainConfiguration(usedConfigs, i);
+				if (i % 3 == 2) parents[n]->selectedConfiguration[i] = getRandomConfiguration(usedConfigs, i);
+				else parents[n]->selectedConfiguration[i] = -1; // "backtrack" -> do not activate this configuration
+			}
+		}
+	}
+
+	// Initialization and evaluation of the starting population set
+	long int eval_parent;
+	for (int i = 0; i < size; i++) {
+		eval_parent = parents[i]->evaluate();
+		printf("2 The evaluation of parent is %ld for query %d\n", eval_parent, i);
+		for (int j = 0; j < problemInstance.nQueries; j++){
+			printf("%d", parents[i]->selectedConfiguration[j]);
+		}
+		printf("\n");
+		population.insert(parents[i]);
+	}
+}
+
+// given the configurations already used by a parent, pick one that gives the 
+// highest gain to a query
+int Genetic::getHighestGainConfiguration(std::vector<int> usedConfigs, int queryIndex)
+{
+	unsigned int maxGain = 0;
+	int maxConfig = -1;
+	for (int i = 0; i < usedConfigs.size(); i++){
+		if (problemInstance.configQueriesGain[usedConfigs[i]][queryIndex] > maxGain){
+			maxGain = problemInstance.configQueriesGain[usedConfigs[i]][queryIndex];
+			maxConfig = usedConfigs[i];
+		}
+	}
+	return maxConfig;
+}
+
+// given the configurations already used by a parent, pick one randomly (given that its gain is)
+// different from 0
+int Genetic::getRandomConfiguration(std::vector<int> usedConfigs, int queryIndex)
+{
+	for (int i = 0; i < usedConfigs.size(); i++){
+		int randomConfig = usedConfigs[rand() % usedConfigs.size()];
+		if (problemInstance.configQueriesGain[usedConfigs[rand() % usedConfigs.size()]][queryIndex] > 0){
+			return randomConfig;
+		}
+	}
+	return -1; // if none, backtrack
+}
