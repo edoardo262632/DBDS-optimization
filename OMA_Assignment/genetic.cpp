@@ -26,7 +26,7 @@ void Genetic::run(const Instance & problemInstance, const Params & parameters)
 	}
 
 	fprintf(stdout, "\nGenetic algorithm terminated succesfully!\nObjective function value = %ld\nMemory cost = %u\n",
-		bestSolution.evaluate(), memoryCost(problemInstance, bestSolution));
+		bestSolution.getObjFunctionValue(), memoryCost(problemInstance, bestSolution));
 }
 
 
@@ -54,7 +54,7 @@ void Genetic::initializePopulation(int size)
 
 	// Initialization and evaluation of the starting population set
 	for (int i = 0; i < size; i++) {
-		parents[i].evaluate();
+		parents[i].objFunctionValue = parents[i].evaluate();
 		population.insert(parents[i]);
 	}
 }
@@ -92,16 +92,16 @@ void Genetic::breedPopulation(int size)
 
 void Genetic::evaluateFitness(int size, const std::string outputFileName)
 {
-	long int current_best = bestSolution.evaluate(), val;
+	long int current_best = bestSolution.getObjFunctionValue(), val;
 	bool found_improving = false;
 	int i_best = 0;
 	
 	for (int i = 0; i < size; i++)		// offsprings.size()
 	{				
-		val = offsprings[i].evaluate();
-		if (val > current_best)
+		offsprings[i].objFunctionValue = offsprings[i].evaluate();
+		if (offsprings[i].getObjFunctionValue() > current_best)
 		{
-			current_best = val;			// update current best value
+			current_best = offsprings[i].getObjFunctionValue();			// update current best value
 			i_best = i;
 			found_improving = true;
 		}
