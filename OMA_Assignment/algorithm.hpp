@@ -17,7 +17,7 @@ public:
 protected:
 
 	Instance problemInstance;
-	Solution bestSolution;
+	Solution* bestSolution;
 
 private:
 
@@ -26,9 +26,9 @@ private:
 public:
 
 	Algorithm(Instance& inst)
-		: bestSolution(&inst),
-		problemInstance(inst)
+		: problemInstance(inst)
 	{
+		bestSolution = new Solution(&inst);
 	}
 
 	virtual void run(const Instance& problemInstance, const Params& parameters) = 0;

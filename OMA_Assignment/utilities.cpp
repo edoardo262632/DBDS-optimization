@@ -197,42 +197,42 @@ Solution::~Solution()
 
 
 long int Solution::evaluate() {
-	
-	if (objFunctionValue != LONG_MIN)
-		return objFunctionValue;
 
 	unsigned int all_gains = 0;
 	unsigned int time_spent = 0;
 	unsigned int mem = 0;
-	short int *check = (short int*)calloc(problemInstance->nConfigs, sizeof(short int));
 
 	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
-		short int x = selectedConfiguration[i];		// already setted the value to a negative one in the greedy function and swapping fase
+		short int x = selectedConfiguration[i];
 		if (x >= 0) {
-			if (check[x] == 0) {			// if it's the first time for configuration i 
-				check[x] = 1;
-
-				// iterate on the Indexes vector
-				for (unsigned int k = 0; k < problemInstance->nIndexes; k++) {
-					if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[x][k] == 1) {
-						// index k is part of configuration i and has not yet been built, so we need to build it
-						indexesToBuild[k] = 1;
-
-						// update memory usage and verify constraint
-						mem += problemInstance->indexesMemoryOccupation[k];
-						if (mem > problemInstance->M)
-							return LONG_MIN;
-						time_spent += problemInstance->indexesFixedCost[k];
-					}
+			// iterate on the Indexes vector
+			for (unsigned int k = 0; k < problemInstance->nIndexes; k++) {
+				if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[x][k] == 1) {
+					// index k is part of configuration i and has not yet been built, so we need to build it
+					indexesToBuild[k] = 1;
 				}
 			}
-			all_gains += problemInstance->configQueriesGain[x][i];	// add the contribute of the configuration with the i query
+			
+			all_gains += problemInstance->configQueriesGain[x][i];		// add the contribute of the configuration with the i query
 		}
 	}
 
-	free(check);
+	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) {
+		if (indexesToBuild[i])
+		{
+			mem += problemInstance->indexesMemoryOccupation[i];				// calculate memory cost of the given solution
+			time_spent += problemInstance->indexesFixedCost[i];
 
-	return all_gains - time_spent;
+			if (mem > problemInstance->M)
+			{
+				objFunctionValue = LONG_MIN;
+				return LONG_MIN;
+			}
+		}
+	}
+
+	objFunctionValue = all_gains - time_spent;
+	return objFunctionValue;
 }
 
 long int Solution::getObjFunctionValue() const
@@ -251,8 +251,8 @@ void Solution::writeToFile(const std::string fileName) const
 		configsServingQueries[i] = (short int*)calloc(problemInstance->nConfigs, sizeof(short int));
 
 		// set a 1 into the proper cell of the column
-		if(selectedConfiguration[i]>= 0)
-		configsServingQueries[i][selectedConfiguration[i]] = 1;
+		if (selectedConfiguration[i] >= 0)
+			configsServingQueries[i][selectedConfiguration[i]] = 1;
 	}
 
 	FILE *fl = fopen(fileName.c_str(), "w");
@@ -260,7 +260,6 @@ void Solution::writeToFile(const std::string fileName) const
 		fprintf(stderr, "Error: unable to open file %s", fileName.c_str());		
 	else
 	{
-		fprintf(stdout, "Found a new best solution with objective function value = %ld\n", objFunctionValue);
 		for (unsigned int i = 0; i < problemInstance->nConfigs; i++) {
 			for (unsigned int j = 0; j < problemInstance->nQueries; j++) {
 				fprintf(fl, "%d ", configsServingQueries[j][i]);		

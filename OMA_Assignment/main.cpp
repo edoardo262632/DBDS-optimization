@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 #include <string>
 
 using namespace std;
@@ -31,5 +30,6 @@ int main(int argc, char **argv)
 	Genetic solver = Genetic(problemInstance);
 	solver.run(problemInstance, executionParameters);
 	
+	system("pause");
 	return 0;
 }
