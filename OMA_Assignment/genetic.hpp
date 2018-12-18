@@ -5,9 +5,9 @@
 #include <set>
 #include <vector> 
 
-#define POPULATION_SIZE 50
-#define N_CROSSOVER_POINTS 4
-#define DETERMINISTIC_RANDOM_NUMBER_GENERATION true
+#define MIN_CROSSOVER_POINTS 2
+#define MAX_GENERATIONS_BEFORE_RESTART 10000
+#define DETERMINISTIC_RANDOM_NUMBER_GENERATION false
 
 class Genetic : Algorithm
 {
@@ -25,6 +25,7 @@ private:
 		}
 	};
 
+	unsigned int POPULATION_SIZE;
 	Solution** parents;
 	Solution** offsprings;
 	std::multiset<Solution*, solution_comparator> population;
@@ -33,25 +34,29 @@ private:
 
 public:
 
-	Genetic(Instance& inst)
+	Genetic(Instance* inst)
 		: Algorithm(inst),		// base class constructor
 		population(std::multiset<Solution*, solution_comparator>())
 	{
+		POPULATION_SIZE = inst->nQueries;
 		parents = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
 		offsprings = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
 	}
 
-	void run(const Instance& problemInstance, const Params& parameters);
+	Solution* run(const Params& parameters);
 
 private:
 
-	void initializePopulation(int size);
-	void breedPopulation(int size);
-	void evaluateFitness(int size, const std::string outputFileName, unsigned int gen);
-	void replacePopulation(int size);
+	void initializePopulation();
+	void breedPopulation();
+	bool evaluateFitness(const std::string outputFileName, unsigned int gen);
+	void replacePopulation();
 
 	void crossover(Solution* itemA, Solution* itemB, unsigned int N = 2);
 	void mutate(Solution* sol);
+
+	// tmp
+	Solution* generateRandomSolution();
 
 	// extra functions to initialize
 	void initializePopulation2(int size);

@@ -175,17 +175,17 @@ Solution::Solution(Instance *probInst)
 	indexesToBuild = (short int*)calloc(problemInstance->nIndexes, sizeof(short int));
 }
 
-Solution::Solution(const Solution & other)
-	: Solution(other.problemInstance)
+Solution::Solution(Solution* other)
+	: Solution(other->problemInstance)
 {
 	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
 		// copy of the support integer array
-		selectedConfiguration[i] = other.selectedConfiguration[i];
+		selectedConfiguration[i] = other->selectedConfiguration[i];
 	}
 
 	// copy of the index array
 	for (unsigned int i = 0; i < problemInstance->nIndexes; i++)
-		indexesToBuild[i] = other.indexesToBuild[i];
+		indexesToBuild[i] = other->indexesToBuild[i];
 }
 
 Solution::~Solution()
