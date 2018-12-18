@@ -246,11 +246,6 @@ void Genetic::initializePopulation3(int size)
 	long int eval_parent;
 	for (int i = 0; i < size; i++) {
 		eval_parent = parents[i]->evaluate();
-		printf("2 The evaluation of parent is %ld for query %d\n", eval_parent, i);
-		for (int j = 0; j < problemInstance.nQueries; j++){
-			printf("%d", parents[i]->selectedConfiguration[j]);
-		}
-		printf("\n");
 		population.insert(parents[i]);
 	}
 }
@@ -272,7 +267,7 @@ void Genetic::initializePopulationGreedy(int size)
 		parents[n] = new Solution(&problemInstance);
 	    usedConfigs.clear();
 
-		for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
+		for (unsigned int i = 0; i < 2*problemInstance.nQueries; i++) {
 			int j = rand() % problemInstance.nQueries;		// generate a random value for the configuration to take for each query
 
 			parents[n]->selectedConfiguration[j] = maxGainGivenQuery(j);
@@ -281,7 +276,7 @@ void Genetic::initializePopulationGreedy(int size)
 			if (memoryCost(problemInstance, *parents[n]) > problemInstance.M){
 				usedConfigs.pop_back();                     // remove the configuration if the memory cost with it is > M
 				if (i % 3 == 2) parents[n]->selectedConfiguration[j] = getHighestGainConfiguration(usedConfigs, j);
-				if (i % 2 == 1) parents[n]->selectedConfiguration[j] = getRandomConfiguration(usedConfigs, j);
+				if (i % 3 == 1) parents[n]->selectedConfiguration[j] = getRandomConfiguration(usedConfigs, j);
 				else parents[n]->selectedConfiguration[j] = -1; // "backtrack" -> do not activate this configuration
 			}
 		}
@@ -307,7 +302,6 @@ void Genetic::initializePopulationGreedy(int size)
 	long int eval_parent;
 	for (int i = 0; i < size; i++) {
 		eval_parent = parents[i]->evaluate();
-		printf("The evaluation of parent is %ld for query %d\n", eval_parent, i);
 		population.insert(parents[i]);
 	}
 }
