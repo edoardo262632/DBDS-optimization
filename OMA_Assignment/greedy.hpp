@@ -15,12 +15,12 @@ private:
 	
 public:
 
-	Greedy(Instance& inst)
+	Greedy(Instance* inst)
 		: Algorithm(inst)		// base class (Algorithm) constructor
 	{
 	}
 
-	void run(const Instance& problemInstance, const Params& parameters);
+	Solution* run(const Params& parameters);
 
 private:
 

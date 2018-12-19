@@ -20,14 +20,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="genetic.cpp" />
-    <ClCompile Include="greedy.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="algorithm.hpp" />
     <ClInclude Include="genetic.hpp" />
-    <ClInclude Include="greedy.hpp" />
     <ClInclude Include="utilities.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

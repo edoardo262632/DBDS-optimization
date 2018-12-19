@@ -66,7 +66,7 @@ private:
 public:
 
 	Solution(Instance *probInst);		// constructor of an empty feasible Solution object for a problem Instance
-	Solution(const Solution& other);	// copy constructor
+	Solution(Solution* other);			// copy constructor
 	~Solution();						// solution class destructor
 
 	long int evaluate();
