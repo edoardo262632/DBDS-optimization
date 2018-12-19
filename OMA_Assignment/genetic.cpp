@@ -74,6 +74,34 @@ void Genetic::breedPopulation()
 }
 
 
+void Genetic::logPopulation() {
+	FILE *file;
+	Instance problemInstance;
+	unsigned int cost;
+	int objFunctionValue;
+	short int *selectedConfigurations;
+	file = fopen("log.txt", "w");
+	if (file == NULL)
+		fprintf(stderr, "%s", "Error log file opening");
+	return;
+	int n = 1;
+	for (Solution* sol: population){ //I don't know if it's a good way to iterate a multiset
+		//problemInstance = ???
+		cost = memoryCost(problemInstance, sol);
+		objFunctionValue =sol->objFunctionValue;
+		selectedConfigurations = sol->selectedConfiguration;
+		fprintf(file, "Solution %d\n", n);
+		fprintf(file, "		Memory cost: %d\n", cost);
+		fprintf(file, "		Obj Function value: %d\n", objFunctionValue);
+		fprintf(file, "		Selected Configuration: ");
+		for (int i = 0; i < selectedConfigurations.size(); i++) { //Is the size right??
+			fprintf(file, "%d ", selectedConfigurations[i]);
+		}
+		n++;
+	}
+}
+
+
 bool Genetic::evaluateFitness(const std::string outputFileName, unsigned int gen)
 {
 	long int current_best = bestSolution->evaluate(), val;

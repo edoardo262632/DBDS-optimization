@@ -49,6 +49,8 @@ private:
 
 	void initializePopulation();
 	void breedPopulation();
+	void logPopulation();
+
 	bool evaluateFitness(const std::string outputFileName, unsigned int gen);
 	void replacePopulation();
 
