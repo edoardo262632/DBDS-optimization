@@ -3,12 +3,14 @@
 
 Solution* Genetic::run(const Params& parameters)
 {
-	unsigned int generation_counter = 0, last_update = 0;
+	unsigned int generation_counter, last_update;
 	long long startingTime = getCurrentTime_ms();
 
 	// INITIALIZATION
 	start:	initializePopulationGreedy(POPULATION_SIZE);
 
+	generation_counter = 0;
+	last_update = 0;
 	long long currentTime = getCurrentTime_ms();
 
 	// REPEAT UNTIL THERE'S COMPUTATIONAL TIME LEFT (OR ALGORITHM RESTART)
@@ -46,6 +48,7 @@ void Genetic::initializePopulation()
 	for (unsigned int i = 1; i < POPULATION_SIZE; i++) {		// P-1 solutions are initialized with the greedy algorithm
 		parents[i] = generateRandomSolution();
 		parents[i]->evaluate();
+		population.insert(parents[i]);
 	}
 }
 
@@ -55,7 +58,7 @@ void Genetic::breedPopulation()
 {
 	// duplicate parents before breeding, so we do not overwrite them
 	for (unsigned int i = 0; i < POPULATION_SIZE; i++) {
-		offsprings[i] = new Solution(*parents[i]);
+		offsprings[i] = new Solution(parents[i]);
 	}
 	
 	int N = rand() % 4 + MIN_CROSSOVER_POINTS;			// randomize the number of crossover points to avoid "loops" in subsequent generations
@@ -117,7 +120,7 @@ void Genetic::replacePopulation()
 	{
 		if (i < POPULATION_SIZE)
 			parents[i] = *it;
-		//else delete *it;
+		else delete *it;
 	}
 }
 
@@ -183,7 +186,7 @@ void Genetic::initializePopulation2(int size)
 	srand((unsigned int)getCurrentTime_ms());
 #endif
 
-	parents[0] = new Solution(*bestSolution);		// one solution is kept with the default configuration
+	parents[0] = new Solution(bestSolution);		// one solution is kept with the default configuration
 
 	for (int n = 1; n < size; n++)					// P-1 solutions are initialized with the greedy algorithm
 	{
@@ -214,7 +217,7 @@ void Genetic::initializePopulation3(int size)
 	srand((unsigned int)getCurrentTime_ms());
 #endif
 
-	parents[0] = new Solution(*bestSolution);		// one solution is kept with the default configuration
+	parents[0] = new Solution(bestSolution);		// one solution is kept with the default configuration
     std::vector<int> usedConfigs;                  // vector with already used configurations for a parent
 
 	for (int n = 1; n < size; n++)					// P-1 solutions are initialized with the greedy algorithm
@@ -252,7 +255,7 @@ void Genetic::initializePopulationGreedy(int size)
 	srand((unsigned int)getCurrentTime_ms());
 #endif
 	srand(1);
-	parents[0] = new Solution(*bestSolution);		// one solution is kept with the default configuration
+	parents[0] = new Solution(bestSolution);		// one solution is kept with the default configuration
     std::vector<int> usedConfigs;                  // vector with already used configurations for a parent
 
 
