@@ -123,17 +123,17 @@ Instance readInputFile(std::string fileName)
 }
 
 
-unsigned int memoryCost(const Instance& problemInstance, const Solution& solution)
+unsigned int memoryCost(const Instance* problemInstance, const Solution* solution)
 {
-	bool *b = (bool *)calloc(problemInstance.nIndexes, sizeof(bool *));
+	bool *b = (bool *)calloc(problemInstance->nIndexes, sizeof(bool *));
 	unsigned int mem = 0;
 
-	for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
-		short int x = solution.selectedConfiguration[i];
+	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
+		short int x = solution->selectedConfiguration[i];
 		if (x >= 0) {
 			// iterate on the Indexes vector
-			for (unsigned int k = 0; k < problemInstance.nIndexes; k++) {
-				if (b[k] == 0 && problemInstance.configIndexesMatrix[x][k] == 1) {
+			for (unsigned int k = 0; k < problemInstance->nIndexes; k++) {
+				if (b[k] == 0 && problemInstance->configIndexesMatrix[x][k] == 1) {
 					// index k is part of configuration i and has not yet been built, so we need to build it
 					b[k] = 1;
 				}
@@ -141,9 +141,9 @@ unsigned int memoryCost(const Instance& problemInstance, const Solution& solutio
 		}
 	}
 
-	for (unsigned int i = 0; i < problemInstance.nIndexes; i++) {
+	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) {
 		if (b[i])
-			mem += problemInstance.indexesMemoryOccupation[i];					// calculate memory cost of the given solution
+			mem += problemInstance->indexesMemoryOccupation[i];					// calculate memory cost of the given solution
 	}
 
 	return mem;

@@ -49,7 +49,7 @@ private:
 
 	void initializePopulation();
 	void breedPopulation();
-	void logPopulation();
+	void logPopulation(unsigned int generation);
 
 	bool evaluateFitness(const std::string outputFileName, unsigned int gen);
 	void replacePopulation();

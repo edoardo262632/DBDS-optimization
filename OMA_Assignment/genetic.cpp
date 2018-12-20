@@ -23,12 +23,10 @@ Solution* Genetic::run(const Params& parameters)
 		
 		currentTime = getCurrentTime_ms();		// update timestamp
 
-		//fprintf(stdout, "Succesfully trained generation %u - Seconds elapsed: %.4f\n",
-		//	generation_counter, ((float)(currentTime-startingTime)/1000));
-
 		generation_counter++;
 		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART)
 			goto start;
+			
 	}
 
 	return bestSolution;
@@ -47,7 +45,7 @@ void Genetic::initializePopulation()
 	parents[0]->evaluate();
     std::vector<int> usedConfigs;                  // vector with already used configurations for a parent
 
-	for (int n = 1; n < POPULATION_SIZE; n++)					// P-1 solutions are initialized with the greedy algorithm
+	for (unsigned int n = 1; n < POPULATION_SIZE; n++)					// P-1 solutions are initialized with the greedy algorithm
 	{
 		parents[n] = new Solution(problemInstance);          
 	    usedConfigs.clear();
@@ -57,7 +55,7 @@ void Genetic::initializePopulation()
 			parents[n]->selectedConfiguration[j] = maxGainGivenQuery(j);  // gets configuration that results in max gain for a query
 			usedConfigs.push_back(parents[n]->selectedConfiguration[j]);  // insert random configuration in the vector
 
-			if (memoryCost(*problemInstance, *parents[n]) > problemInstance->M){
+			if (memoryCost(problemInstance, parents[n]) > problemInstance->M){
 				usedConfigs.pop_back();                     // remove the configuration if the memory cost with it is > M
 				if (i % 3 == 2) parents[n]->selectedConfiguration[j] = getHighestGainConfiguration(usedConfigs, j);
 				if (i % 3 == 1) parents[n]->selectedConfiguration[j] = getRandomConfiguration(usedConfigs, j);
@@ -70,7 +68,7 @@ void Genetic::initializePopulation()
 				parents[n]->selectedConfiguration[i] = maxGainGivenQuery(i);
 				usedConfigs.push_back(parents[n]->selectedConfiguration[i]);  // insert random configuration in the vector
 
-				if (memoryCost(*problemInstance, *parents[n]) > problemInstance->M){
+				if (memoryCost(problemInstance, parents[n]) > problemInstance->M){
 					usedConfigs.pop_back();                     // remove the configuration if the memory cost with it is > M
 					if (i % 3 == 2) parents[n]->selectedConfiguration[i] = getHighestGainConfiguration(usedConfigs, i);
 					if (i % 3 == 1) parents[n]->selectedConfiguration[i] = getRandomConfiguration(usedConfigs, i);
@@ -81,7 +79,7 @@ void Genetic::initializePopulation()
 	}
 
 	// Initialization and evaluation of the starting population set
-	for (int i = 0; i < POPULATION_SIZE; i++) {
+	for (unsigned int i = 0; i < POPULATION_SIZE; i++) {
 		parents[i]->evaluate();
 		population.insert(parents[i]);
 	}
@@ -109,31 +107,28 @@ void Genetic::breedPopulation()
 }
 
 
-void Genetic::logPopulation() {
-	FILE *file;
-	Instance problemInstance;
-	unsigned int cost;
-	int objFunctionValue;
-	short int *selectedConfigurations;
-	file = fopen("log.txt", "w");
-	if (file == NULL)
-		fprintf(stderr, "%s", "Error log file opening");
-	return;
+void Genetic::logPopulation(unsigned int generation) 
+{
 	int n = 1;
-	for (Solution* sol: population){ //I don't know if it's a good way to iterate a multiset
-		//problemInstance = ???
-		cost = memoryCost(problemInstance, sol);
-		objFunctionValue =sol->objFunctionValue;
-		selectedConfigurations = sol->selectedConfiguration;
-		fprintf(file, "Solution %d\n", n);
-		fprintf(file, "		Memory cost: %d\n", cost);
-		fprintf(file, "		Obj Function value: %d\n", objFunctionValue);
-		fprintf(file, "		Selected Configuration: ");
-		for (int i = 0; i < selectedConfigurations.size(); i++) { //Is the size right??
-			fprintf(file, "%d ", selectedConfigurations[i]);
-		}
-		n++;
+	FILE *file = fopen("populationLog.txt", "w");
+	if (file == NULL)
+	{
+		fprintf(stderr, "%s", "Error writing log file\n");
+		return;
 	}
+	
+	// Iterate on the population set and log solutions to file
+	for (Solution* sol: population) {
+		fprintf(file, "Generation %u, Solution %d\n", generation, n++);
+		fprintf(file, "		Objective Function value: %ld\n", sol->getObjFunctionValue());
+		fprintf(file, "		Memory cost: %u\n", memoryCost(problemInstance, sol));
+		fprintf(file, "		Selected configurations: ");
+		for (unsigned int i = 0; i < problemInstance->nQueries; i++)
+			fprintf(file, "%d ", sol->selectedConfiguration[i]);
+		fprintf(file, "\n");
+	}
+
+	fclose(file);
 }
 
 
@@ -288,7 +283,7 @@ Solution * Genetic::generateRandomSolution()
 
 		int A = rand() % problemInstance->nConfigs;		// generate a random value for the configuration to take for each query
 		sol->selectedConfiguration[i] = A;
-		if (memoryCost(*problemInstance, *sol) > problemInstance->M)
+		if (memoryCost(problemInstance, sol) > problemInstance->M)
 			sol->selectedConfiguration[i] = -1;							// "backtrack" -> do not activate this configuration
 	};
 
