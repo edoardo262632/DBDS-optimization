@@ -7,7 +7,7 @@ Solution* Genetic::run(const Params& parameters)
 	long long startingTime = getCurrentTime_ms();
 
 	// INITIALIZATION
-	start:	initializePopulationGreedy(POPULATION_SIZE);
+	start:	initializePopulation();
 	POPULATION_SIZE = 2*problemInstance->nQueries;
 	fprintf(stdout, "new generation\n");
 
@@ -52,14 +52,50 @@ void Genetic::initializePopulation()
 	srand((unsigned int)getCurrentTime_ms());
 #endif
 
-	parents[0] = new Solution(problemInstance);			// one solution is kept with the default configuration
+	parents[0] = new Solution(bestSolution);		// one solution is kept with the default configuration
 	parents[0]->evaluate();
-	for (unsigned int i = 1; i < POPULATION_SIZE; i++) {		// P-1 solutions are initialized with the greedy algorithm
-		parents[i] = generateRandomSolution();
+	std::vector<int> usedConfigs;                  // vector with already used configurations for a parent
+
+	for (unsigned int n = 1; n < POPULATION_SIZE; n++)					// P-1 solutions are initialized with the greedy algorithm
+	{
+		parents[n] = new Solution(problemInstance);
+		usedConfigs.clear();
+		// fills the queries in a random order
+		for (unsigned int i = 0; i < 2 * problemInstance->nQueries; i++) {
+			int j = rand() % problemInstance->nQueries;		// generate a random value for the configuration to take for each query
+			parents[n]->selectedConfiguration[j] = maxGainGivenQuery(j);  // gets configuration that results in max gain for a query
+			usedConfigs.push_back(parents[n]->selectedConfiguration[j]);  // insert random configuration in the vector
+
+			if (memoryCost(problemInstance, parents[n]) > problemInstance->M) {
+				usedConfigs.pop_back();                     // remove the configuration if the memory cost with it is > M
+				if (i % 3 == 2) parents[n]->selectedConfiguration[j] = getHighestGainConfiguration(usedConfigs, j);
+				if (i % 3 == 1) parents[n]->selectedConfiguration[j] = getRandomConfiguration(usedConfigs, j);
+				else parents[n]->selectedConfiguration[j] = -1; // "backtrack" -> do not activate this configuration
+			}
+		}
+		// fills the rest of the queries from "left" to "right"
+		for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
+			if (parents[n]->selectedConfiguration[i] < 0) {
+				parents[n]->selectedConfiguration[i] = maxGainGivenQuery(i);
+				usedConfigs.push_back(parents[n]->selectedConfiguration[i]);  // insert random configuration in the vector
+
+				if (memoryCost(problemInstance, parents[n]) > problemInstance->M) {
+					usedConfigs.pop_back();                     // remove the configuration if the memory cost with it is > M
+					if (i % 3 == 2) parents[n]->selectedConfiguration[i] = getHighestGainConfiguration(usedConfigs, i);
+					if (i % 3 == 1) parents[n]->selectedConfiguration[i] = getRandomConfiguration(usedConfigs, i);
+					else parents[n]->selectedConfiguration[i] = -1; // "backtrack" -> do not activate this configuration
+				}
+			}
+		}
+	}
+
+	// Initialization and evaluation of the starting population set
+	for (unsigned int i = 0; i < POPULATION_SIZE; i++) {
 		parents[i]->evaluate();
 		population.insert(parents[i]);
 	}
 }
+
 
 
 
@@ -133,6 +169,26 @@ void Genetic::replacePopulation()
 	}
 }
 
+void Genetic::logPopulation(unsigned int generation)
+{
+	int n = 1;
+	FILE *fl = fopen("populationLog.txt", "w");
+	if (fl == NULL)
+		fprintf(stderr, "Error: unable to open file log file");
+	else
+		// Iterate on the population set and log solutions to file
+		for (Solution* sol : population) {
+			fprintf(fl, "Generation %u, Solution %d\n", generation, n++);
+			fprintf(fl, "		Objective Function value: %ld\n", sol->getObjFunctionValue());
+			fprintf(fl, "		Memory cost: %u\n", memoryCost(problemInstance, sol));
+			fprintf(fl, "		Selected configurations: ");
+			for (unsigned int i = 0; i < problemInstance->nQueries; i++)
+				fprintf(fl, "%d ", sol->selectedConfiguration[i]);
+			fprintf(fl, "\n");
+		}
+
+	fclose(fl);
+}
 
 void Genetic::crossover(Solution* itemA, Solution* itemB, unsigned int N)
 {
@@ -187,130 +243,7 @@ void Genetic::mutate(Solution* sol)
 /* ============================================================================== */
 
 
-// "smarter" version of initialize population, selecting only the usefull
-// configurations for a query instead of completely random ones
-void Genetic::initializePopulation2(int size)
-{
-#if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
-	srand((unsigned int)getCurrentTime_ms());
-#endif
 
-	parents[0] = new Solution(bestSolution);		// one solution is kept with the default configuration
-
-	for (int n = 1; n < size; n++)					// P-1 solutions are initialized with the greedy algorithm
-	{
-		parents[n] = new Solution(problemInstance);
-
-		for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
-
-			int A = rand() % problemInstance->configServingQueries[i].length; // given the configurations that serves a query, selects one randomly
-			parents[n]->selectedConfiguration[i] = problemInstance->configServingQueries[i].configs[A];
-
-			if (memoryCost(*problemInstance, *parents[n]) > problemInstance->M)
-				parents[n]->selectedConfiguration[i] = -1;
-		}
-	}
-
-	// Initialization and evaluation of the starting population set
-	long int eval_parent;
-	for (int i = 0; i < size; i++) {
-		eval_parent = parents[i]->evaluate();
-		population.insert(parents[i]);
-	}
-}
-
-// mix between the original initializePopulation(), getHighestGainConfiguration() and getRandomConfiguration()
-void Genetic::initializePopulation3(int size)
-{
-#if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
-	srand((unsigned int)getCurrentTime_ms());
-#endif
-
-	parents[0] = new Solution(bestSolution);		// one solution is kept with the default configuration
-    std::vector<int> usedConfigs;                  // vector with already used configurations for a parent
-
-	for (int n = 1; n < size; n++)					// P-1 solutions are initialized with the greedy algorithm
-	{
-		parents[n] = new Solution(problemInstance);
-	    usedConfigs.clear();
-
-		for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
-
-			int A = rand() % problemInstance->nConfigs;		// generate a random value for the configuration to take for each query
-			parents[n]->selectedConfiguration[i] = A;
-			usedConfigs.push_back(A);                       // insert random configuration in the vector
-
-			if (memoryCost(*problemInstance, *parents[n]) > problemInstance->M){
-				usedConfigs.pop_back();                     // remove the configuration if the memory cost with it is > M
-				if (i % 3 == 2) parents[n]->selectedConfiguration[i] = getHighestGainConfiguration(usedConfigs, i);
-				if (i % 3 == 1) parents[n]->selectedConfiguration[i] = getRandomConfiguration(usedConfigs, i);
-				else parents[n]->selectedConfiguration[i] = -1; // "backtrack" -> do not activate this configuration
-			}
-		}
-	}
-
-	// Initialization and evaluation of the starting population set
-	long int eval_parent;
-	for (int i = 0; i < size; i++) {
-		eval_parent = parents[i]->evaluate();
-		population.insert(parents[i]);
-	}
-}
-
-// greedily selects the configuration with highest gain given a random query
-void Genetic::initializePopulationGreedy(int size)
-{
-#if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
-	srand((unsigned int)getCurrentTime_ms());
-#endif
-	//srand(1);
-	parents[0] = new Solution(bestSolution);		// one solution is kept with the default configuration
-    std::vector<int> usedConfigs;                  // vector with already used configurations for a parent
-
-
-	for (int n = 1; n < size; n++)					// P-1 solutions are initialized with the greedy algorithm
-	{
-		parents[n] = new Solution(problemInstance);
-	    usedConfigs.clear();
-
-		for (unsigned int i = 0; i < 2*problemInstance->nQueries; i++) {
-			int j = rand() % problemInstance->nQueries;		// generate a random value for the configuration to take for each query
-
-			parents[n]->selectedConfiguration[j] = maxGainGivenQuery(j);
-			usedConfigs.push_back(parents[n]->selectedConfiguration[j]);  // insert random configuration in the vector
-
-			if (memoryCost(*problemInstance, *parents[n]) > problemInstance->M){
-				usedConfigs.pop_back();                     // remove the configuration if the memory cost with it is > M
-				if (i % 3 == 2) parents[n]->selectedConfiguration[j] = getHighestGainConfiguration(usedConfigs, j);
-				if (i % 3 == 1) parents[n]->selectedConfiguration[j] = getRandomConfiguration(usedConfigs, j);
-				else parents[n]->selectedConfiguration[j] = -1; // "backtrack" -> do not activate this configuration
-			}
-		}
-
-/* fills the rest of the configurations
-		for (unsigned int i = 0; i < problemInstance.nQueries; i++) {
-			if (parents[n]->selectedConfiguration[i] < 0)
-
-			parents[n]->selectedConfiguration[i] = maxGainGivenQuery(i);
-			usedConfigs.push_back(parents[n]->selectedConfiguration[i]);  // insert random configuration in the vector
-
-			if (memoryCost(problemInstance, *parents[n]) > problemInstance.M){
-				usedConfigs.pop_back();                     // remove the configuration if the memory cost with it is > M
-				if (i % 3 == 2) parents[n]->selectedConfiguration[i] = getHighestGainConfiguration(usedConfigs, i);
-				if (i % 2 == 1) parents[n]->selectedConfiguration[i] = getRandomConfiguration(usedConfigs, i);
-				else parents[n]->selectedConfiguration[i] = -1; // "backtrack" -> do not activate this configuration
-			}
-		}
-*/
-	}
-
-	// Initialization and evaluation of the starting population set
-	long int eval_parent;
-	for (int i = 0; i < size; i++) {
-		eval_parent = parents[i]->evaluate();
-		population.insert(parents[i]);
-	}
-}
 
 // given the configurations already used by a parent, pick one that gives the 
 // highest gain to a query
@@ -363,7 +296,7 @@ Solution * Genetic::generateRandomSolution()
 
 		int A = rand() % problemInstance->nConfigs;		// generate a random value for the configuration to take for each query
 		sol->selectedConfiguration[i] = A;
-		if (memoryCost(*problemInstance, *sol) > problemInstance->M)
+		if (memoryCost(problemInstance, sol) > problemInstance->M)
 			sol->selectedConfiguration[i] = -1;							// "backtrack" -> do not activate this configuration
 	};
 
