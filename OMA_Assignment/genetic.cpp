@@ -30,10 +30,10 @@ Solution* Genetic::run(const Params& parameters)
 
 		generation_counter++;
 
-		if (generation_counter % 5000 == 0)
+		if (generation_counter % 5000 == 0 && POPULATION_SIZE > 15 && generation_counter != 0)
 			POPULATION_SIZE -= POPULATION_SIZE / 3;
 		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART) {
-			if (generation_counter > MAX_GENERATIONS_BEFORE_RESTART)
+			if (generation_counter > 2 * MAX_GENERATIONS_BEFORE_RESTART)
 				MAX_GENERATIONS_BEFORE_RESTART = generation_counter;
 			goto start;
 		}
@@ -167,6 +167,13 @@ void Genetic::replacePopulation()
 			parents[i] = *it;
 		else delete *it;
 	}
+	/*if ((*population.begin())->getObjFunctionValue() > bestSolution->getObjFunctionValue()) {
+
+		delete bestSolution;
+		bestSolution = new Solution(*population.begin());
+		bestSolution->evaluate();
+		fprintf(stdout, "Found a new best solution with objective function value = %ld\n", bestSolution->getObjFunctionValue());
+	}*/
 }
 
 void Genetic::logPopulation(unsigned int generation)
@@ -220,7 +227,7 @@ void Genetic::mutate(Solution* sol)
 	// iterates over the genes
 	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
 		// checks if a random generated number (>= 0) is equal to 0. In this case, the mutation occurs
-		if (rand() % problemInstance->nQueries == 0)
+		if (rand() % (problemInstance->nQueries/2) == 0)
 		{
 			// 50 percent chance of a config for a query mutating to "no configurations"
 			if (rand() % 20 == 0) { // higer converge faster
