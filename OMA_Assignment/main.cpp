@@ -6,9 +6,7 @@ using namespace std;
 
 #include "utilities.hpp"
 #include "algorithm.hpp"
-#include "greedy.hpp"
 #include "genetic.hpp"
-
 
 int main(int argc, char **argv) 
 {
