@@ -49,6 +49,8 @@ private:
 
 	void initializePopulation();
 	void breedPopulation();
+	void logPopulation(unsigned int generation);
+
 	bool evaluateFitness(const std::string outputFileName, unsigned int gen);
 	void replacePopulation();
 
@@ -58,16 +60,10 @@ private:
 	// tmp
 	Solution* generateRandomSolution();
 
-	// extra functions to initialize
-	void initializePopulation2(int size);
-	void initializePopulation3(int size);
-	void initializePopulationGreedy(int size);
-
 	// auxiliary functions to set configurations for queries during initialization
 	int getRandomConfiguration(std::vector<int> usedConfigs, int queryIndex);
 	int getHighestGainConfiguration(std::vector<int> usedConfigs, int queryIndex);
 	int maxGainGivenQuery(int queryIndex);
-
 };
 
 #endif	// GENETIC_HPP

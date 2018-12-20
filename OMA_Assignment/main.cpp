@@ -6,9 +6,7 @@ using namespace std;
 
 #include "utilities.hpp"
 #include "algorithm.hpp"
-#include "greedy.hpp"
 #include "genetic.hpp"
-
 
 int main(int argc, char **argv) 
 {
@@ -31,7 +29,7 @@ int main(int argc, char **argv)
 	Solution* sol = solver.run(executionParameters);
 	
 	fprintf(stdout, "\nAlgorithm execution terminated succesfully!\nObjective function value = %ld\nMemory cost = %u\n\n",
-		sol->getObjFunctionValue(), memoryCost(problemInstance, *sol));
+		sol->getObjFunctionValue(), memoryCost(&problemInstance, sol));
 
 	system("pause");
 	return 0;

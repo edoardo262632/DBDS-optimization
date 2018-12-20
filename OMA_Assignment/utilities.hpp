@@ -54,7 +54,6 @@ public:
 
 	short int *indexesToBuild;					// b vector
 	short int *selectedConfiguration;			// compact integer representation of the solution matrix
-	
 
 private:
 
@@ -84,7 +83,7 @@ private:
 
 Params parseCommandLine (int argc, char* argv[]);
 Instance readInputFile (std::string fileName);
-unsigned int memoryCost(const Instance& problemInstance, const Solution& solution);
+unsigned int memoryCost(const Instance* problemInstance, const Solution* solution);
 long long getCurrentTime_ms();
 
 #endif // UTILITIES_HPP
