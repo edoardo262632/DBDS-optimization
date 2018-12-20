@@ -6,7 +6,7 @@
 #include <vector> 
 
 #define MIN_CROSSOVER_POINTS 2
-#define MAX_GENERATIONS_BEFORE_RESTART 10000
+
 #define DETERMINISTIC_RANDOM_NUMBER_GENERATION false
 
 class Genetic : Algorithm
@@ -24,7 +24,7 @@ private:
 			return lhs->getObjFunctionValue() > rhs->getObjFunctionValue();
 		}
 	};
-
+	unsigned int MAX_GENERATIONS_BEFORE_RESTART = 10000;
 	unsigned int POPULATION_SIZE;
 	Solution** parents;
 	Solution** offsprings;
@@ -38,7 +38,7 @@ public:
 		: Algorithm(inst),		// base class constructor
 		population(std::multiset<Solution*, solution_comparator>())
 	{
-		POPULATION_SIZE = inst->nQueries;
+		POPULATION_SIZE = 2*inst->nQueries;
 		parents = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
 		offsprings = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
 	}

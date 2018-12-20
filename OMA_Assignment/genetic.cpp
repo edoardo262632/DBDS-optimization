@@ -8,6 +8,8 @@ Solution* Genetic::run(const Params& parameters)
 
 	// INITIALIZATION
 	start:	initializePopulationGreedy(POPULATION_SIZE);
+	POPULATION_SIZE = 2*problemInstance->nQueries;
+	fprintf(stdout, "new generation\n");
 
 	generation_counter = 0;
 	last_update = 0;
@@ -27,8 +29,15 @@ Solution* Genetic::run(const Params& parameters)
 		//	generation_counter, ((float)(currentTime-startingTime)/1000));
 
 		generation_counter++;
-		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART)
+
+		if (generation_counter % 5000 == 0)
+			POPULATION_SIZE -= POPULATION_SIZE / 3;
+		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART) {
+			if (generation_counter > MAX_GENERATIONS_BEFORE_RESTART)
+				MAX_GENERATIONS_BEFORE_RESTART = generation_counter;
 			goto start;
+		}
+			
 	}
 
 	return bestSolution;
@@ -136,9 +145,9 @@ void Genetic::crossover(Solution* itemA, Solution* itemB, unsigned int N)
 				break;
 
 			// swap items between the 2 solutions
-			temp = itemA->selectedConfiguration[j];
-			itemA->selectedConfiguration[j] = itemB->selectedConfiguration[j];
-			itemB->selectedConfiguration[j] = temp;
+			temp = itemA->selectedConfiguration[i+j];
+			itemA->selectedConfiguration[i+j] = itemB->selectedConfiguration[i+j];
+			itemB->selectedConfiguration[i+j] = temp;
 		}
 	}
 
@@ -158,7 +167,7 @@ void Genetic::mutate(Solution* sol)
 		if (rand() % problemInstance->nQueries == 0)
 		{
 			// 50 percent chance of a config for a query mutating to "no configurations"
-			if (rand() % 2 == 0) {
+			if (rand() % 20 == 0) { // higer converge faster
 				sol->selectedConfiguration[i] = -1;
 			}
 			// 50 percent chance of a config for a query mutating to any other config that serves this query
@@ -254,7 +263,7 @@ void Genetic::initializePopulationGreedy(int size)
 #if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
 	srand((unsigned int)getCurrentTime_ms());
 #endif
-	srand(1);
+	//srand(1);
 	parents[0] = new Solution(bestSolution);		// one solution is kept with the default configuration
     std::vector<int> usedConfigs;                  // vector with already used configurations for a parent
 
@@ -345,6 +354,9 @@ int Genetic::maxGainGivenQuery(int queryIndex)
 }
 
 Solution * Genetic::generateRandomSolution()
+
+
+
 {
 	Solution* sol = new Solution(problemInstance);
 	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {

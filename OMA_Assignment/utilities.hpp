@@ -54,11 +54,11 @@ public:
 
 	short int *indexesToBuild;					// b vector
 	short int *selectedConfiguration;			// compact integer representation of the solution matrix
-	long int objFunctionValue;
+	
 
 private:
 
-	
+	long int objFunctionValue;
 	Instance *problemInstance;
 	
 	// --- METHODS ---
