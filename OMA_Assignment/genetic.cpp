@@ -110,25 +110,22 @@ void Genetic::breedPopulation()
 void Genetic::logPopulation(unsigned int generation) 
 {
 	int n = 1;
-	FILE *file = fopen("populationLog.txt", "w");
-	if (file == NULL)
-	{
-		fprintf(stderr, "%s", "Error writing log file\n");
-		return;
-	}
-	
+	FILE *fl = fopen("populationLog.txt", "w");
+	if (fl == NULL)
+		fprintf(stderr, "Error: unable to open file log file");
+	else	
 	// Iterate on the population set and log solutions to file
 	for (Solution* sol: population) {
-		fprintf(file, "Generation %u, Solution %d\n", generation, n++);
-		fprintf(file, "		Objective Function value: %ld\n", sol->getObjFunctionValue());
-		fprintf(file, "		Memory cost: %u\n", memoryCost(problemInstance, sol));
-		fprintf(file, "		Selected configurations: ");
+		fprintf(fl, "Generation %u, Solution %d\n", generation, n++);
+		fprintf(fl, "		Objective Function value: %ld\n", sol->getObjFunctionValue());
+		fprintf(fl, "		Memory cost: %u\n", memoryCost(problemInstance, sol));
+		fprintf(fl, "		Selected configurations: ");
 		for (unsigned int i = 0; i < problemInstance->nQueries; i++)
-			fprintf(file, "%d ", sol->selectedConfiguration[i]);
-		fprintf(file, "\n");
+			fprintf(fl, "%d ", sol->selectedConfiguration[i]);
+		fprintf(fl, "\n");
 	}
 
-	fclose(file);
+	fclose(fl);
 }
 
 
