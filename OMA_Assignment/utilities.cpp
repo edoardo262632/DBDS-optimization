@@ -50,8 +50,9 @@ Instance readInputFile(std::string fileName)
 	fl = fopen(fileName.c_str(), "r");
 	if (fl == NULL) 
 	{
-		fprintf(stderr, "Encountered an error when attempting to open and read file '%s'\n", fileName.c_str());
-		return Instance();
+		fprintf(stderr, "Encountered an error when attempting to open and read file '%s'\n\n", fileName.c_str());
+		system("pause");
+		exit(EXIT_FAILURE);
 	}
 
 	int l = fscanf(fl, "%*s%u",&instance.nQueries);
@@ -59,7 +60,7 @@ Instance readInputFile(std::string fileName)
 	l += fscanf(fl, "%*s%u",&instance.nConfigs);
 	l += fscanf(fl, "%*s%u",&instance.M);
 	if (l != 4) {
-		fprintf(stderr, "Error in the file format\n");
+		fprintf(stderr, "Error in the instance file format\n");
 		return Instance();
 	}
 	

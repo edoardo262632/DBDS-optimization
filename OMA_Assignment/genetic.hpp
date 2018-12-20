@@ -50,9 +50,7 @@ private:
 	void initializePopulation();
 	void breedPopulation();
 	void logPopulation(unsigned int generation);
-
-	bool evaluateFitness(const std::string outputFileName, unsigned int gen);
-	void replacePopulation();
+	bool replacePopulationByFitness(const std::string outputFileName, unsigned int gen);
 
 	void crossover(Solution* itemA, Solution* itemB, unsigned int N = 2);
 	void mutate(Solution* sol);
