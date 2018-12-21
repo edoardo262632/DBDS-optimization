@@ -3,7 +3,7 @@
 
 Solution* Genetic::run(const Params& parameters)
 {
-	unsigned int generation_counter, last_update;
+	unsigned int last_update;
 	long long startingTime = getCurrentTime_ms();
 
 	// INITIALIZATION
