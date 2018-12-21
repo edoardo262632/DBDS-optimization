@@ -3,14 +3,13 @@
 
 Solution* Genetic::run(const Params& parameters)
 {
-	unsigned int generation_counter, last_update;
+	unsigned int last_update;
 	long long startingTime = getCurrentTime_ms();
-	LocalSearch *refiner= new LocalSearch(problemInstance);
 
 	// INITIALIZATION
 	start:	initializePopulation();
 	POPULATION_SIZE = 2*problemInstance->nQueries;
-	fprintf(stdout, "new generation\n");
+	fprintf(stdout, "(Re)starting the algorithm...\n");
 
 	generation_counter = 0;
 	last_update = 0;
@@ -20,22 +19,17 @@ Solution* Genetic::run(const Params& parameters)
 	while (currentTime - startingTime < parameters.timeLimit)
 	{
 		breedPopulation();
-		if (evaluateFitness(parameters.outputFileName, generation_counter))
+		if (replacePopulationByFitness(parameters.outputFileName, generation_counter))
 			last_update = generation_counter;
-		replacePopulation();
 		
-		currentTime = getCurrentTime_ms();		// update timestamp
-
-		//fprintf(stdout, "Succesfully trained generation %u - Seconds elapsed: %.4f\n",
-		//	generation_counter, ((float)(currentTime-startingTime)/1000));
-
+		currentTime = getCurrentTime_ms();		// update timestamp and generation number
 		generation_counter++;
 
-		if (generation_counter % 5000 == 0 && POPULATION_SIZE > 15 && generation_counter != 0) {
-			localSearch(refiner,parameters);
-			POPULATION_SIZE -= POPULATION_SIZE / 3;
-		}
+		// dynamic population size according to generation counter
+		if (generation_counter != 0 && generation_counter % 5000 == 0 && POPULATION_SIZE > 15)
+			POPULATION_SIZE -= POPULATION_SIZE / 5;
 
+		// multistart if stuck in local optima
 		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART) {
 			if (generation_counter > 2 * MAX_GENERATIONS_BEFORE_RESTART)
 				MAX_GENERATIONS_BEFORE_RESTART = generation_counter;
@@ -58,9 +52,9 @@ void Genetic::initializePopulation()
 
 	parents[0] = new Solution(bestSolution);		// one solution is kept with the default configuration
 	parents[0]->evaluate();
-	std::vector<int> usedConfigs;                  // vector with already used configurations for a parent
+	std::vector<int> usedConfigs;					// vector with already used configurations for a parent
 
-	for (unsigned int n = 1; n < POPULATION_SIZE; n++)					// P-1 solutions are initialized with the greedy algorithm
+	for (unsigned int n = 1; n < POPULATION_SIZE; n++)				// P-1 solutions are initialized with the greedy algorithm
 	{
 		parents[n] = new Solution(problemInstance);
 		usedConfigs.clear();
@@ -101,6 +95,7 @@ void Genetic::initializePopulation()
 }
 
 
+
 void Genetic::breedPopulation()
 {
 	// duplicate parents before breeding, so we do not overwrite them
@@ -121,44 +116,31 @@ void Genetic::breedPopulation()
 }
 
 
-bool Genetic::evaluateFitness(const std::string outputFileName, unsigned int gen)
+bool Genetic::replacePopulationByFitness(const std::string outputFileName, unsigned int gen)
 {
-	long int current_best = bestSolution->evaluate(), val;
-	bool found_improving = false;
-	int i_best = 0;
-	
-	for (unsigned int i = 0; i < POPULATION_SIZE; i++)		// offsprings.size()
-	{
-		val = offsprings[i]->evaluate();
-		if (val > current_best)
-		{
-			current_best = val;			// update current best value
-			i_best = i;
-			found_improving = true;
-		}
-	}
+	bool updatedBest = false;
 
-	if (found_improving)
-	{
-		delete bestSolution;
-		bestSolution = new Solution(offsprings[i_best]);		// Update the best solution found so far and log it to file/console
-		bestSolution->evaluate();
-		bestSolution->writeToFile(outputFileName);
-		fprintf(stdout, "Found a new best solution with objective function value = %ld (Generation #%u)\n", current_best, gen);
-	}
-	return found_improving;
-}
-
-
-void Genetic::replacePopulation()
-{
 	// substitute the old population with the current parents and offsprings
 	population.clear();
 
 	for (unsigned int i = 0; i < POPULATION_SIZE; i++)
 	{ 
 		population.insert(parents[i]);
+
+		offsprings[i]->evaluate();
 		population.insert(offsprings[i]);
+	}
+
+	// check if the best solution in the population is better than the current best
+	if ((*population.begin())->getObjFunctionValue() > bestSolution->getObjFunctionValue()) 
+	{
+		delete bestSolution;
+		bestSolution = new Solution(*population.begin());		// Update the best solution found so far and log it to file/console
+		bestSolution->evaluate();
+		bestSolution->writeToFile(outputFileName);
+		fprintf(stdout, "Found a new best solution with objective function value = %ld (Generation #%u)\n",
+			bestSolution->getObjFunctionValue(), gen);
+		updatedBest = true;
 	}
 
 	// select the best POPULATION_SIZE elements to use as parents
@@ -169,13 +151,8 @@ void Genetic::replacePopulation()
 			parents[i] = *it;
 		else delete *it;
 	}
-	/*if ((*population.begin())->getObjFunctionValue() > bestSolution->getObjFunctionValue()) {
 
-		delete bestSolution;
-		bestSolution = new Solution(*population.begin());
-		bestSolution->evaluate();
-		fprintf(stdout, "Found a new best solution with objective function value = %ld\n", bestSolution->getObjFunctionValue());
-	}*/
+	return updatedBest;
 }
 
 
@@ -184,18 +161,22 @@ void Genetic::logPopulation(unsigned int generation)
 	int n = 1;
 	FILE *fl = fopen("populationLog.txt", "w");
 	if (fl == NULL)
+	{
 		fprintf(stderr, "Error: unable to open file log file");
-	else
-		// Iterate on the population set and log solutions to file
-		for (Solution* sol : population) {
-			fprintf(fl, "Generation %u, Solution %d\n", generation, n++);
-			fprintf(fl, "		Objective Function value: %ld\n", sol->getObjFunctionValue());
-			fprintf(fl, "		Memory cost: %u\n", memoryCost(problemInstance, sol));
-			fprintf(fl, "		Selected configurations: ");
-			for (unsigned int i = 0; i < problemInstance->nQueries; i++)
-				fprintf(fl, "%d ", sol->selectedConfiguration[i]);
-			fprintf(fl, "\n");
-		}
+		return;
+	}
+
+	// Iterate on the population set and log solutions to file
+	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
+	for (unsigned int i = 0; it != population.end() && i < POPULATION_SIZE; ++it, ++i) {
+		fprintf(fl, "Generation %u, Solution %d\n", generation, n++);
+		fprintf(fl, "		Objective Function value: %ld\n", (*it)->getObjFunctionValue());
+		fprintf(fl, "		Memory cost: %u\n", memoryCost(problemInstance, *it));
+		fprintf(fl, "		Selected configurations: ");
+		for (unsigned int i = 0; i < problemInstance->nQueries; i++)
+			fprintf(fl, "%d ", (*it)->selectedConfiguration[i]);
+		fprintf(fl, "\n");
+	}
 
 	fclose(fl);
 }
@@ -225,16 +206,53 @@ void Genetic::mutate(Solution* sol)
 {
 	short int randomConfigIndex;
 #if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
-	srand ((unsigned int)getCurrentTime_ms());		// initialize random seed for rand()
+	srand((unsigned int)getCurrentTime_ms());		// initialize random seed for rand()
 #endif
+
+	//Choose probability
+	if (generation_counter < 9000) {
+		raiseMutateProbability = (rand() % 100) < 10;
+	}
+
+	else if (generation_counter < 10000) {
+		raiseMutateProbability = (rand() % 100) < 20;
+	}
+
+	else if (generation_counter < 11000) {
+		raiseMutateProbability = (rand() % 100) < 30;
+	}
+
+	else if (generation_counter < 12000) {
+		raiseMutateProbability = (rand() % 100) < 40;
+	}
+
+	else if (generation_counter < 13000) {
+		raiseMutateProbability = (rand() % 100) < 50;
+	}
+
+	else if (generation_counter < 14000) {
+		raiseMutateProbability = (rand() % 100) < 60;
+	}
+
+	else if (generation_counter < 15000) {
+		raiseMutateProbability = (rand() % 100) < 70;
+	}
+
+	else if (generation_counter < 16000) {
+		raiseMutateProbability = (rand() % 100) < 80;
+	}
+
+	else {
+		raiseMutateProbability = (rand() % 100) < 90;
+	}
 
 	// iterates over the genes
 	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
 		// checks if a random generated number (>= 0) is equal to 0. In this case, the mutation occurs
-		if (rand() % (problemInstance->nQueries/2) == 0)
+		if (rand() % (problemInstance->nQueries / 2) == 0)
 		{
 			// 50 percent chance of a config for a query mutating to "no configurations"
-			if (rand() % 20 == 0) { // higer converge faster
+			if (raiseMutateProbability) { // lower probability of a 0 makes the solutions converge faster
 				sol->selectedConfiguration[i] = -1;
 			}
 			// 50 percent chance of a config for a query mutating to any other config that serves this query
@@ -247,26 +265,11 @@ void Genetic::mutate(Solution* sol)
 }
 
 
-void Genetic::localSearch(LocalSearch* refiner, const Params& parameters){
-	
-	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
-	std::multiset<Solution*, solution_comparator> local;
 
-	Solution* tmp;
-	for (int i=0; it != population.end(), i < POPULATION_SIZE; ++it,i++)
-	{
-		refiner->setStartingPoint(*it);
-		population.insert(refiner->run(parameters));
-	}
-	population.clear();
-	population = local;
-
-}
 
 
 /* ============================================================================== */
 /* ============================================================================== */
-
 
 
 
