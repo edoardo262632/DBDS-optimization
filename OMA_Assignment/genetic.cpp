@@ -5,6 +5,7 @@ Solution* Genetic::run(const Params& parameters)
 {
 	unsigned int last_update;
 	long long startingTime = getCurrentTime_ms();
+	LocalSearch* refiner = new LocalSearch(problemInstance);
 
 	// INITIALIZATION
 	start:	initializePopulation();
@@ -21,6 +22,13 @@ Solution* Genetic::run(const Params& parameters)
 		breedPopulation();
 		if (replacePopulationByFitness(parameters.outputFileName, generation_counter))
 			last_update = generation_counter;
+
+		// run a local search to sepcialize the population if it's not improving
+		/*if (generation_counter - last_update > 100)
+		{
+			last_update = generation_counter;
+			localSearch(refiner, parameters);
+		}*/
 		
 		currentTime = getCurrentTime_ms();		// update timestamp and generation number
 		generation_counter++;
@@ -156,7 +164,7 @@ bool Genetic::replacePopulationByFitness(const std::string outputFileName, unsig
 }
 
 
-void Genetic::logPopulation(unsigned int generation)
+void Genetic::logPopulation()
 {
 	int n = 1;
 	FILE *fl = fopen("populationLog.txt", "w");
@@ -169,7 +177,7 @@ void Genetic::logPopulation(unsigned int generation)
 	// Iterate on the population set and log solutions to file
 	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
 	for (unsigned int i = 0; it != population.end() && i < POPULATION_SIZE; ++it, ++i) {
-		fprintf(fl, "Generation %u, Solution %d\n", generation, n++);
+		fprintf(fl, "Generation %u, Solution %d\n", generation_counter, n++);
 		fprintf(fl, "		Objective Function value: %ld\n", (*it)->getObjFunctionValue());
 		fprintf(fl, "		Memory cost: %u\n", memoryCost(problemInstance, *it));
 		fprintf(fl, "		Selected configurations: ");
@@ -209,56 +217,28 @@ void Genetic::mutate(Solution* sol)
 	srand((unsigned int)getCurrentTime_ms());		// initialize random seed for rand()
 #endif
 
-	//Choose probability
-	if (generation_counter < 9000) {
-		raiseMutateProbability = (rand() % 100) < 10;
-	}
-
-	else if (generation_counter < 10000) {
-		raiseMutateProbability = (rand() % 100) < 20;
-	}
-
-	else if (generation_counter < 11000) {
-		raiseMutateProbability = (rand() % 100) < 30;
-	}
-
-	else if (generation_counter < 12000) {
-		raiseMutateProbability = (rand() % 100) < 40;
-	}
-
-	else if (generation_counter < 13000) {
-		raiseMutateProbability = (rand() % 100) < 50;
-	}
-
-	else if (generation_counter < 14000) {
-		raiseMutateProbability = (rand() % 100) < 60;
-	}
-
-	else if (generation_counter < 15000) {
-		raiseMutateProbability = (rand() % 100) < 70;
-	}
-
-	else if (generation_counter < 16000) {
-		raiseMutateProbability = (rand() % 100) < 80;
-	}
-
-	else {
-		raiseMutateProbability = (rand() % 100) < 90;
-	}
+	// Choose probability dynamically based on generation counter
+	// Going from an initial split of 90% zero / 10% non-zero to a 10% zero / 90% non-zero
+	// in steps of 5% between generation 1000 to 9000
+	int probability = 5 * (int)(generation_counter / 500);
+	if (probability < 10)
+		probability = 10;
+	else if (probability > 90)
+		probability = 90;
 
 	// iterates over the genes
 	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
 		// checks if a random generated number (>= 0) is equal to 0. In this case, the mutation occurs
 		if (rand() % (problemInstance->nQueries / 2) == 0)
 		{
-			// 50 percent chance of a config for a query mutating to "no configurations"
-			if (raiseMutateProbability) { // lower probability of a 0 makes the solutions converge faster
-				sol->selectedConfiguration[i] = -1;
-			}
-			// 50 percent chance of a config for a query mutating to any other config that serves this query
-			else {
+			// chance of choosing another config that servers this query
+			if (rand() % 100 < 90) {
 				randomConfigIndex = rand() % problemInstance->configServingQueries[i].length;
 				sol->selectedConfiguration[i] = problemInstance->configServingQueries[i].configs[randomConfigIndex];
+			} 
+			// chance of this query being served by "no configuration"
+			else {
+				sol->selectedConfiguration[i] = -1;
 			}
 		}
 	}
@@ -267,18 +247,21 @@ void Genetic::mutate(Solution* sol)
 
 void Genetic::localSearch(LocalSearch* refiner, const Params& parameters) {
 
+	printf("Running local search...\n");
 	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
-	std::multiset<Solution*, solution_comparator> local;
-
+	std::multiset<Solution*, solution_comparator> newPopulation;
 	Solution* tmp;
-	for (int i = 0; it != population.end(), i < POPULATION_SIZE; ++it, i++)
+
+	for (unsigned int i = 0; it != population.end(), i < POPULATION_SIZE; ++it, i++)
 	{
 		refiner->setStartingPoint(*it);
-		population.insert(refiner->run(parameters));
+		tmp = new Solution(refiner->run(parameters));
+		tmp->evaluate();
+		newPopulation.insert(tmp);
 	}
-	population.clear();
-	population = local;
 
+	population.clear();
+	population = newPopulation;
 }
 
 

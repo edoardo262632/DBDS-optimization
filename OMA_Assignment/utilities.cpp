@@ -184,14 +184,15 @@ Solution::Solution(Solution* other)
 		selectedConfiguration[i] = other->selectedConfiguration[i];
 	}
 
-	// copy of the index array
-	for (unsigned int i = 0; i < problemInstance->nIndexes; i++)
+	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) {
+		// copy of the indexesToBuild array
 		indexesToBuild[i] = other->indexesToBuild[i];
+	}
 }
 
 Solution::~Solution()
 {
-	// free all previously allocated heap memory
+	// free previously allocated heap memory
 	free(selectedConfiguration);
 	free(indexesToBuild);
 }
@@ -202,6 +203,9 @@ long int Solution::evaluate() {
 	unsigned int all_gains = 0;
 	unsigned int time_spent = 0;
 	unsigned int mem = 0;
+	
+	for (unsigned int i = 0; i < problemInstance->nIndexes; i++)
+		indexesToBuild[i] = 0;
 
 	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
 		short int x = selectedConfiguration[i];
