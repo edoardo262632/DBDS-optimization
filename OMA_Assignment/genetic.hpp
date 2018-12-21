@@ -2,6 +2,7 @@
 #define GENETIC_HPP
 
 #include "algorithm.hpp"
+#include "localsearch.hpp"
 #include <set>
 #include <vector> 
 
@@ -56,6 +57,7 @@ private:
 
 	void crossover(Solution* itemA, Solution* itemB, unsigned int N = 2);
 	void mutate(Solution* sol);
+	void localSearch(LocalSearch* refiner, const Params& parameters);
 
 	// tmp
 	Solution* generateRandomSolution();

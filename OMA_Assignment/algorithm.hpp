@@ -3,6 +3,7 @@
 
 #include "utilities.hpp"
 
+
 /*
 ** Algorithm provides a generic interface for an algorithm's implementation,
 ** in order to achieve modularity and freedom of exchanging the algorithm in use for testing and tweaking purposes

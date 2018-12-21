@@ -7,6 +7,8 @@ using namespace std;
 #include "utilities.hpp"
 #include "algorithm.hpp"
 #include "genetic.hpp"
+#include "localsearch.hpp"
+
 
 int main(int argc, char **argv) 
 {

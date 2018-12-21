@@ -5,6 +5,7 @@ Solution* Genetic::run(const Params& parameters)
 {
 	unsigned int generation_counter, last_update;
 	long long startingTime = getCurrentTime_ms();
+	LocalSearch *refiner= new LocalSearch(problemInstance);
 
 	// INITIALIZATION
 	start:	initializePopulation();
@@ -30,8 +31,11 @@ Solution* Genetic::run(const Params& parameters)
 
 		generation_counter++;
 
-		if (generation_counter % 5000 == 0 && POPULATION_SIZE > 15 && generation_counter != 0)
+		if (generation_counter % 5000 == 0 && POPULATION_SIZE > 15 && generation_counter != 0) {
+			localSearch(refiner,parameters);
 			POPULATION_SIZE -= POPULATION_SIZE / 3;
+		}
+
 		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART) {
 			if (generation_counter > 2 * MAX_GENERATIONS_BEFORE_RESTART)
 				MAX_GENERATIONS_BEFORE_RESTART = generation_counter;
@@ -95,8 +99,6 @@ void Genetic::initializePopulation()
 		population.insert(parents[i]);
 	}
 }
-
-
 
 
 void Genetic::breedPopulation()
@@ -176,6 +178,7 @@ void Genetic::replacePopulation()
 	}*/
 }
 
+
 void Genetic::logPopulation(unsigned int generation)
 {
 	int n = 1;
@@ -196,6 +199,7 @@ void Genetic::logPopulation(unsigned int generation)
 
 	fclose(fl);
 }
+
 
 void Genetic::crossover(Solution* itemA, Solution* itemB, unsigned int N)
 {
@@ -243,7 +247,21 @@ void Genetic::mutate(Solution* sol)
 }
 
 
+void Genetic::localSearch(LocalSearch* refiner, const Params& parameters){
+	
+	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
+	std::multiset<Solution*, solution_comparator> local;
 
+	Solution* tmp;
+	for (int i=0; it != population.end(), i < POPULATION_SIZE; ++it,i++)
+	{
+		refiner->setStartingPoint(*it);
+		population.insert(refiner->run(parameters));
+	}
+	population.clear();
+	population = local;
+
+}
 
 
 /* ============================================================================== */
@@ -294,9 +312,6 @@ int Genetic::maxGainGivenQuery(int queryIndex)
 }
 
 Solution * Genetic::generateRandomSolution()
-
-
-
 {
 	Solution* sol = new Solution(problemInstance);
 	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
