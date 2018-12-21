@@ -206,16 +206,53 @@ void Genetic::mutate(Solution* sol)
 {
 	short int randomConfigIndex;
 #if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
-	srand ((unsigned int)getCurrentTime_ms());		// initialize random seed for rand()
+	srand((unsigned int)getCurrentTime_ms());		// initialize random seed for rand()
 #endif
+
+	//Choose probability
+	if (generation_counter < 9000) {
+		raiseMutateProbability = (rand() % 100) < 10;
+	}
+
+	else if (generation_counter < 10000) {
+		raiseMutateProbability = (rand() % 100) < 20;
+	}
+
+	else if (generation_counter < 11000) {
+		raiseMutateProbability = (rand() % 100) < 30;
+	}
+
+	else if (generation_counter < 12000) {
+		raiseMutateProbability = (rand() % 100) < 40;
+	}
+
+	else if (generation_counter < 13000) {
+		raiseMutateProbability = (rand() % 100) < 50;
+	}
+
+	else if (generation_counter < 14000) {
+		raiseMutateProbability = (rand() % 100) < 60;
+	}
+
+	else if (generation_counter < 15000) {
+		raiseMutateProbability = (rand() % 100) < 70;
+	}
+
+	else if (generation_counter < 16000) {
+		raiseMutateProbability = (rand() % 100) < 80;
+	}
+
+	else {
+		raiseMutateProbability = (rand() % 100) < 90;
+	}
 
 	// iterates over the genes
 	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
 		// checks if a random generated number (>= 0) is equal to 0. In this case, the mutation occurs
-		if (rand() % (problemInstance->nQueries/2) == 0)
+		if (rand() % (problemInstance->nQueries / 2) == 0)
 		{
 			// 50 percent chance of a config for a query mutating to "no configurations"
-			if (rand() % 20 == 0) { // lower probability of a 0 makes the solutions converge faster
+			if (raiseMutateProbability) { // lower probability of a 0 makes the solutions converge faster
 				sol->selectedConfiguration[i] = -1;
 			}
 			// 50 percent chance of a config for a query mutating to any other config that serves this query
