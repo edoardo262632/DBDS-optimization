@@ -29,6 +29,7 @@ private:
 	Solution** parents;
 	Solution** offsprings;
 	std::multiset<Solution*, solution_comparator> population;
+	bool raiseMutateProbability = (rand() % 100) < 10;
 
 	// ====== METHODS ======
 
