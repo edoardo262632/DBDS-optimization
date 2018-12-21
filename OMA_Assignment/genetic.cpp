@@ -265,7 +265,21 @@ void Genetic::mutate(Solution* sol)
 }
 
 
+void Genetic::localSearch(LocalSearch* refiner, const Params& parameters) {
 
+	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
+	std::multiset<Solution*, solution_comparator> local;
+
+	Solution* tmp;
+	for (int i = 0; it != population.end(), i < POPULATION_SIZE; ++it, i++)
+	{
+		refiner->setStartingPoint(*it);
+		population.insert(refiner->run(parameters));
+	}
+	population.clear();
+	population = local;
+
+}
 
 
 /* ============================================================================== */
