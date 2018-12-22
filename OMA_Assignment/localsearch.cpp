@@ -16,13 +16,13 @@ Solution* LocalSearch::run(const Params& parameters)
 	short int original;
 
 	//iterate over the queries 
-	for (int j = 0; j < problemInstance->nQueries; j++) {
+	for (unsigned int j = 0; j < problemInstance->nQueries; j++) {
 		original = startingPoint->selectedConfiguration[j]; //save the previous configuration to reset the value if it dosen't improve
 
 		// iterate over all serving configuration for that queries
-		for (int k = 0; k < problemInstance->configServingQueries[j].length; k++) {
+		for (unsigned int k = 0; k < problemInstance->configServingQueries[j].length; k++) {
 			startingPoint->selectedConfiguration[j] = problemInstance->configServingQueries[j].configs[k];
-			int val = startingPoint->evaluate();
+			long int val = startingPoint->evaluate();
 			if (val > prev) {
 				find = true;
 				break;

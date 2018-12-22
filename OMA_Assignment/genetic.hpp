@@ -30,7 +30,6 @@ private:
 	Solution** parents;
 	Solution** offsprings;
 	std::multiset<Solution*, solution_comparator> population;
-	bool raiseMutateProbability = (rand() % 100) < 10;
 	unsigned int generation_counter;
 	
 	// ====== METHODS ======
@@ -52,7 +51,7 @@ private:
 
 	void initializePopulation();
 	void breedPopulation();
-	void logPopulation(unsigned int generation);
+	void logPopulation();
 	bool replacePopulationByFitness(const std::string outputFileName, unsigned int gen);
 
 	void crossover(Solution* itemA, Solution* itemB, unsigned int N = 2);
