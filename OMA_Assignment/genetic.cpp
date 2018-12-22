@@ -274,7 +274,7 @@ void Genetic::localSearch(LocalSearch* refiner, const Params& parameters) {
 	for (int i = 0; it != population.end(), i < POPULATION_SIZE; ++it, i++)
 	{
 		refiner->setStartingPoint(*it);
-		population.insert(refiner->run(parameters));
+		local.insert(refiner->run(parameters));
 	}
 	population.clear();
 	population = local;
