@@ -34,8 +34,11 @@ Solution* Genetic::run(const Params& parameters)
 		generation_counter++;
 
 		// dynamic population size according to generation counter
-		if (generation_counter != 0 && generation_counter % 5000 == 0 && POPULATION_SIZE > 15)
+		if (generation_counter != 0 && generation_counter % 5000 == 0 && POPULATION_SIZE > 15) {
 			POPULATION_SIZE -= POPULATION_SIZE / 5;
+			localSearch(refiner, parameters);
+		}
+
 
 		// multistart if stuck in local optima
 		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART) {
