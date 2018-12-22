@@ -4,6 +4,7 @@
 Solution* Genetic::run(const Params& parameters)
 {
 	unsigned int last_update;
+	bool ranSearchAfterLastUpdate;
 	long long startingTime = getCurrentTime_ms();
 	LocalSearch* refiner = new LocalSearch(problemInstance);
 
@@ -12,6 +13,7 @@ Solution* Genetic::run(const Params& parameters)
 	POPULATION_SIZE = 2*problemInstance->nQueries;
 	fprintf(stdout, "(Re)starting the algorithm...\n");
 
+	ranSearchAfterLastUpdate = false;
 	generation_counter = 0;
 	last_update = 0;
 	long long currentTime = getCurrentTime_ms();
@@ -21,24 +23,25 @@ Solution* Genetic::run(const Params& parameters)
 	{
 		breedPopulation();
 		if (replacePopulationByFitness(parameters.outputFileName, generation_counter))
+		{
+			ranSearchAfterLastUpdate = false;
 			last_update = generation_counter;
+		}
+			
 
 		// run a local search to sepcialize the population if it's not improving
-		/*if (generation_counter - last_update > 100)
+		if (generation_counter - last_update > 100 && !ranSearchAfterLastUpdate)
 		{
-			last_update = generation_counter;
+			ranSearchAfterLastUpdate = true;
 			localSearch(refiner, parameters);
-		}*/
+		}
 		
 		currentTime = getCurrentTime_ms();		// update timestamp and generation number
 		generation_counter++;
 
 		// dynamic population size according to generation counter
-		if (generation_counter != 0 && generation_counter % 5000 == 0 && POPULATION_SIZE > 15) {
+		if (generation_counter != 0 && generation_counter % 5000 == 0 && POPULATION_SIZE > 15)
 			POPULATION_SIZE -= POPULATION_SIZE / 5;
-			localSearch(refiner, parameters);
-		}
-
 
 		// multistart if stuck in local optima
 		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART) {
@@ -109,6 +112,15 @@ void Genetic::initializePopulation()
 
 void Genetic::breedPopulation()
 {
+	// select the best POPULATION_SIZE elements to use as parents
+	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
+	for (unsigned int i = 0; it != population.end(); ++it, ++i)
+	{
+		if (i < POPULATION_SIZE)
+			parents[i] = *it;
+		else delete *it;
+	}
+
 	// duplicate parents before breeding, so we do not overwrite them
 	for (unsigned int i = 0; i < POPULATION_SIZE; i++) {
 		offsprings[i] = new Solution(parents[i]);
@@ -152,15 +164,6 @@ bool Genetic::replacePopulationByFitness(const std::string outputFileName, unsig
 		fprintf(stdout, "Found a new best solution with objective function value = %ld (Generation #%u)\n",
 			bestSolution->getObjFunctionValue(), gen);
 		updatedBest = true;
-	}
-
-	// select the best POPULATION_SIZE elements to use as parents
-	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
-	for (unsigned int i = 0; it != population.end(); ++it, ++i)
-	{
-		if (i < POPULATION_SIZE)
-			parents[i] = *it;
-		else delete *it;
 	}
 
 	return updatedBest;
@@ -248,9 +251,9 @@ void Genetic::mutate(Solution* sol)
 }
 
 
-void Genetic::localSearch(LocalSearch* refiner, const Params& parameters) {
-
-	printf("Running local search...\n");
+void Genetic::localSearch(LocalSearch* refiner, const Params& parameters) 
+{
+	printf("Running local search...");
 	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
 	std::multiset<Solution*, solution_comparator> newPopulation;
 	Solution* tmp;
@@ -265,6 +268,7 @@ void Genetic::localSearch(LocalSearch* refiner, const Params& parameters) {
 
 	population.clear();
 	population = newPopulation;
+	printf(" done\n");
 }
 
 
