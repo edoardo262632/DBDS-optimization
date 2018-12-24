@@ -53,6 +53,7 @@ private:
 	void breedPopulation();
 	void logPopulation();
 	bool replacePopulationByFitness(const std::string outputFileName, unsigned int gen);
+	void replaceLowerHalfPopulation();
 
 	void crossover(Solution* itemA, Solution* itemB, unsigned int N = 2);
 	void mutate(Solution* sol);
