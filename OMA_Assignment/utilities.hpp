@@ -38,7 +38,8 @@ typedef struct
 	unsigned int *indexesFixedCost;			// f vector
 	unsigned int *indexesMemoryOccupation;	// m vector
 	unsigned int **configQueriesGain;		// g matrix
-	UsefulConfigs *configServingQueries;	// additional data structure
+	UsefulConfigs *queriesWithGain;			// #Configuration vectors  
+	UsefulConfigs *configServingQueries;	// #Queries vectors  
 } Instance;
 
 

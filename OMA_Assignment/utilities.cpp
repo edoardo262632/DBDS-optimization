@@ -94,29 +94,50 @@ Instance readInputFile(std::string fileName)
 
 	// alloc and read the CONFIGURATION_QUERIES_GAIN
 	instance.configQueriesGain = (unsigned int **)malloc(instance.nConfigs * sizeof(unsigned int*));
+	
 	// alloc additional support data structure
-	instance.configServingQueries = (UsefulConfigs*)malloc(instance.nQueries * sizeof(UsefulConfigs));
+	instance.configServingQueries = (UsefulConfigs*)malloc(instance.nQueries * sizeof(UsefulConfigs));	 	instance.configServingQueries = (UsefulConfigs*)malloc(instance.nQueries * sizeof(UsefulConfigs));
+	instance.queriesWithGain = (UsefulConfigs*)malloc(instance.nConfigs * sizeof(UsefulConfigs));
+
+	// set all length of configServingQueries to 0
 	for (unsigned int j = 0; j < instance.nQueries; j++)
 		instance.configServingQueries[j].length = 0;
+
+	// set all length of queriesWithGain to 0
+	for (unsigned int j = 0; j < instance.nConfigs; j++)
+		instance.queriesWithGain[j].length = 0;
 
 	for (unsigned int i = 0; i < instance.nConfigs; i++) {
 		instance.configQueriesGain[i] = (unsigned int*)malloc(instance.nQueries * sizeof(unsigned int));
 		for (unsigned int j = 0; j < instance.nQueries; j++) {
 			fscanf(fl, "%u", &instance.configQueriesGain[i][j]);
 			// count number of non-zero elements
-			if (instance.configQueriesGain[i][j] > 0) instance.configServingQueries[j].length++;
+			if (instance.configQueriesGain[i][j] > 0) {
+				instance.configServingQueries[j].length++;
+				instance.queriesWithGain[i].length++;
+			}
 		}
 	}
 
 	fclose(fl);
 
-	// population of the additional support data structure
+	// population of the configServingQueries data Structure
 	for (unsigned int i = 0; i < instance.nQueries; i++) {
 		unsigned int k = 0;
 		instance.configServingQueries[i].configs = (unsigned int*)calloc(instance.configServingQueries[i].length,sizeof(unsigned int));
 		for (unsigned int j = 0; j < instance.nConfigs; j++) {
 			if (instance.configQueriesGain[j][i] > 0)
 				instance.configServingQueries[i].configs[k++] = j;
+		}
+	}
+
+	// population of the configServingQueries data Structure
+	for (unsigned int i = 0; i < instance.nConfigs; i++) {
+		unsigned int k = 0;
+		instance.queriesWithGain[i].configs = (unsigned int*)calloc(instance.queriesWithGain[i].length, sizeof(unsigned int));
+		for (unsigned int j = 0; j < instance.nQueries; j++) {
+			if (instance.configQueriesGain[i][j] > 0)
+				instance.queriesWithGain[i].configs[k++] = j;
 		}
 	}
 
