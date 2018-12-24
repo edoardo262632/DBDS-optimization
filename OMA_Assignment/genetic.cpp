@@ -137,6 +137,24 @@ void Genetic::breedPopulation()
 	}
 }
 
+void Genetic::replaceLowerHalfPopulation()
+{
+	std::multiset<Solution*, solution_comparator>::reverse_iterator rit;
+
+	int populationSize = population.size();
+	int i;
+
+	// iterates starting in the end of the population
+	// and deletes elements of the population in the lower half
+	for (i = 0, rit = population.rbegin(); i < populationSize*3/4; i++) 
+	{	
+		delete * rit;
+		population.erase(std::next(rit).base());
+	}
+	// inserts random solution to the lower half of the population
+	for (int i = 0; i < populationSize/2; i++)
+		population.insert(generateRandomSolution());
+}
 
 bool Genetic::replacePopulationByFitness(const std::string outputFileName, unsigned int gen)
 {
