@@ -10,7 +10,6 @@ Solution* Genetic::run(const Params& parameters)
 
 	// INITIALIZATION
 	start:	initializePopulation();
-	POPULATION_SIZE = 2*problemInstance->nQueries;
 	fprintf(stdout, "(Re)starting the algorithm...\n");
 
 	ranSearchAfterLastUpdate = false;
@@ -30,7 +29,7 @@ Solution* Genetic::run(const Params& parameters)
 			
 
 		// run a local search to sepcialize the population if it's not improving
-		if (generation_counter - last_update > 100 && !ranSearchAfterLastUpdate)
+		if (generation_counter - last_update > 500 && !ranSearchAfterLastUpdate)
 		{
 			ranSearchAfterLastUpdate = true;
 			localSearch(refiner, parameters);
