@@ -145,33 +145,6 @@ Instance readInputFile(std::string fileName)
 }
 
 
-unsigned int memoryCost(const Instance* problemInstance, const Solution* solution)
-{
-	bool *b = (bool *)calloc(problemInstance->nIndexes, sizeof(bool *));
-	unsigned int mem = 0;
-
-	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
-		short int x = solution->selectedConfiguration[i];
-		if (x >= 0) {
-			// iterate on the Indexes vector
-			for (unsigned int k = 0; k < problemInstance->nIndexes; k++) {
-				if (b[k] == 0 && problemInstance->configIndexesMatrix[x][k] == 1) {
-					// index k is part of configuration i and has not yet been built, so we need to build it
-					b[k] = 1;
-				}
-			}
-		}
-	}
-
-	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) {
-		if (b[i])
-			mem += problemInstance->indexesMemoryOccupation[i];					// calculate memory cost of the given solution
-	}
-
-	return mem;
-}
-
-
 long long getCurrentTime_ms()		// returns system time in milliseconds
 {
 	return std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -260,6 +233,36 @@ long int Solution::evaluate() {
 	objFunctionValue = all_gains - time_spent;
 	return objFunctionValue;
 }
+
+
+unsigned int Solution::memoryCost()
+{
+	unsigned int mem = 0;
+	for (unsigned int i = 0; i < problemInstance->nIndexes; i++)
+		indexesToBuild[i] = 0;
+
+	for (unsigned int i = 0; i < problemInstance->nQueries; i++) 
+	{
+		short int x = selectedConfiguration[i];
+		if (x >= 0) {
+			// iterate on the Indexes vector
+			for (unsigned int k = 0; k < problemInstance->nIndexes; k++) {
+				if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[x][k] == 1) {
+					// index k is part of configuration i and has not yet been built, so we need to build it
+					indexesToBuild[k] = 1;
+				}
+			}
+		}
+	}
+
+	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) {
+		if (indexesToBuild[i])
+			mem += problemInstance->indexesMemoryOccupation[i];				// calculate memory cost of the given solution
+	}
+
+	return mem;
+}
+
 
 long int Solution::getObjFunctionValue() const
 {

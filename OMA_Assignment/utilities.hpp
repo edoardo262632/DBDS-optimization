@@ -70,6 +70,7 @@ public:
 	~Solution();						// solution class destructor
 
 	long int evaluate();
+	unsigned int memoryCost();
 	long int getObjFunctionValue() const;
 	void writeToFile(const std::string fileName) const;
 	
@@ -84,7 +85,6 @@ private:
 
 Params parseCommandLine (int argc, char* argv[]);
 Instance readInputFile (std::string fileName);
-unsigned int memoryCost(const Instance* problemInstance, const Solution* solution);
 long long getCurrentTime_ms();
 
 #endif // UTILITIES_HPP

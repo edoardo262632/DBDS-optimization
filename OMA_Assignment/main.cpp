@@ -31,7 +31,7 @@ int main(int argc, char **argv)
 	Solution* sol = solver.run(executionParameters);
 	
 	fprintf(stdout, "\nAlgorithm execution terminated succesfully!\nObjective function value = %ld\nMemory cost = %u\n\n",
-		sol->getObjFunctionValue(), memoryCost(&problemInstance, sol));
+		sol->getObjFunctionValue(), sol->memoryCost());
 
 	system("pause");
 	return 0;
