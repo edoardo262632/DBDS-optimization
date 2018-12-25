@@ -141,6 +141,32 @@ Instance readInputFile(std::string fileName)
 		}
 	}
 
+	// calculation of average gain per memory unit
+	unsigned int totalMemory = 0, totalGains = 0;
+	for (unsigned int j = 0; j < instance.nConfigs; j++)
+	{
+		unsigned int cnt = 0, configMem = 0;
+
+		for (unsigned int i = 0; i < instance.nIndexes; i++)
+		{
+			if (instance.configIndexesMatrix[j][i] != 0)
+				configMem += instance.indexesMemoryOccupation[i];
+		}
+
+		for (unsigned int i = 0; i < instance.nQueries; i++)
+		{
+			if (instance.configQueriesGain[i][j] != 0)
+			{
+				cnt++;
+				totalGains += instance.configQueriesGain[i][j];
+			}
+		}
+
+		totalMemory += (cnt * configMem);
+	}
+
+	instance.avgGainPerMemoryUnit = ((float)totalGains / (float)totalMemory);
+
 	return instance;
 }
 
@@ -162,6 +188,7 @@ long long getCurrentTime_ms()		// returns system time in milliseconds
 
 Solution::Solution(Instance *probInst)
 	: objFunctionValue(LONG_MIN),
+	fitnessValue(0),
 	problemInstance(probInst)
 {	
 	selectedConfiguration = (short int*) malloc(problemInstance->nQueries * sizeof(short int));
@@ -192,8 +219,8 @@ Solution::~Solution()
 }
 
 
-long int Solution::evaluate() {
-
+long int Solution::evaluate() 
+{
 	unsigned int all_gains = 0;
 	unsigned int time_spent = 0;
 	unsigned int mem = 0;
@@ -216,21 +243,22 @@ long int Solution::evaluate() {
 		}
 	}
 
-	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) {
+	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) 
+	{
 		if (indexesToBuild[i])
 		{
-			mem += problemInstance->indexesMemoryOccupation[i];				// calculate memory cost of the given solution
 			time_spent += problemInstance->indexesFixedCost[i];
-
-			if (mem > problemInstance->M)
-			{
-				objFunctionValue = LONG_MIN;
-				return LONG_MIN;
-			}
+			mem += problemInstance->indexesMemoryOccupation[i];
 		}
 	}
 
-	objFunctionValue = all_gains - time_spent;
+	bool feasible = mem < problemInstance->M;
+	objFunctionValue = feasible ? all_gains - time_spent : LONG_MIN;
+
+	// update fitness value
+	fitnessValue = (all_gains - time_spent) - 
+		(feasible ? 0 : (mem - problemInstance->M));		// penalise memory infeasibility
+
 	return objFunctionValue;
 }
 
@@ -267,6 +295,11 @@ unsigned int Solution::memoryCost()
 long int Solution::getObjFunctionValue() const
 {
 	return objFunctionValue;
+}
+
+long int Solution::getFitnessValue() const
+{
+	return fitnessValue;
 }
 
 

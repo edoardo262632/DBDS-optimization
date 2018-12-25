@@ -40,6 +40,7 @@ typedef struct
 	unsigned int **configQueriesGain;		// g matrix
 	UsefulConfigs *queriesWithGain;			// #Configuration vectors  
 	UsefulConfigs *configServingQueries;	// #Queries vectors  
+	float avgGainPerMemoryUnit;
 } Instance;
 
 
@@ -58,9 +59,12 @@ public:
 private:
 
 	short int *indexesToBuild;					// b vector
-	long int objFunctionValue;
 	Instance *problemInstance;
-	
+		
+	long int objFunctionValue;
+	long int fitnessValue;
+
+
 	// --- METHODS ---
 
 public:
@@ -72,6 +76,7 @@ public:
 	long int evaluate();
 	unsigned int memoryCost();
 	long int getObjFunctionValue() const;
+	long int getFitnessValue() const;
 	void writeToFile(const std::string fileName) const;
 	
 private:

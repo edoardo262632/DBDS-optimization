@@ -7,11 +7,13 @@ Solution* Genetic::run(const Params& parameters)
 	bool ranSearchAfterLastUpdate;
 	long long startingTime = getCurrentTime_ms();
 	LocalSearch* refiner = new LocalSearch(problemInstance);
+	outputFileName = parameters.outputFileName;
 
 	// INITIALIZATION
-	start:	initializePopulation();
-	fprintf(stdout, "(Re)starting the algorithm...\n");
-
+	start:	fprintf(stdout, "(Re)starting the algorithm...\n"); 
+	POPULATION_SIZE = 2 * problemInstance->nQueries;
+	initializePopulation();
+	
 	ranSearchAfterLastUpdate = false;
 	generation_counter = 0;
 	last_update = 0, last_population_refresh = 0;
@@ -28,11 +30,11 @@ Solution* Genetic::run(const Params& parameters)
 		}
 		
 		// inject new random solutions in the population if it's in a stale state
-		if (generation_counter - last_update > 100 && generation_counter - last_population_refresh > 100)
-		{
-			last_population_refresh = generation_counter;
-			replaceLowerHalfPopulation();
-		}
+		//if (generation_counter - last_update > 100 && generation_counter - last_population_refresh > 100)
+		//{
+		//	last_population_refresh = generation_counter;
+		//	replaceLowerHalfPopulation();
+		//}
 
 		// run a local search to specialize the population if it's not improving
 		if (generation_counter - last_update > 500 && !ranSearchAfterLastUpdate)
@@ -111,6 +113,8 @@ void Genetic::initializePopulation()
 		parents[i]->evaluate();
 		population.insert(parents[i]);
 	}
+
+	checkImprovingSolutions(parents, POPULATION_SIZE);
 }
 
 
@@ -159,19 +163,8 @@ bool Genetic::replacePopulationByFitness(const std::string outputFileName, unsig
 		population.insert(offsprings[i]);
 	}
 
-	// check if the best solution in the population is better than the current best
-	if ((*population.begin())->getObjFunctionValue() > bestSolution->getObjFunctionValue()) 
-	{
-		delete bestSolution;
-		bestSolution = new Solution(*population.begin());		// Update the best solution found so far and log it to file/console
-		bestSolution->evaluate();
-		bestSolution->writeToFile(outputFileName);
-		fprintf(stdout, "Found a new best solution with objective function value = %ld (Generation #%u)\n",
-			bestSolution->getObjFunctionValue(), gen);
-		updatedBest = true;
-	}
 
-	return updatedBest;
+	return checkImprovingSolutions(offsprings, POPULATION_SIZE);
 }
 
 
@@ -229,13 +222,14 @@ void Genetic::mutate(Solution* sol)
 #endif
 
 	// Choose probability dynamically based on generation counter
-	// Going from an initial split of 90% zero / 10% non-zero to a 10% zero / 90% non-zero
+	// Going from an initial split of 10% zero / 90% non-zero to a 90% zero / 10% non-zero 
 	// in steps of 5% between generation 1000 to 9000
-	int probability = 5 * (int)(generation_counter / 500);
+	int probability = 100 - 5 * (int)(generation_counter / 500);
 	if (probability < 10)
 		probability = 10;
 	else if (probability > 90)
 		probability = 90;
+
 
 	// iterates over the genes
 	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
@@ -243,7 +237,7 @@ void Genetic::mutate(Solution* sol)
 		if (rand() % (problemInstance->nQueries / 2) == 0)
 		{
 			// chance of choosing another config that servers this query
-			if (rand() % 100 < 90) {
+			if (rand() % 100 < probability) {
 				randomConfigIndex = rand() % problemInstance->configServingQueries[i].length;
 				sol->selectedConfiguration[i] = problemInstance->configServingQueries[i].configs[randomConfigIndex];
 			} 
@@ -283,13 +277,12 @@ void Genetic::localSearch(LocalSearch* refiner, const Params& parameters)
 
 void Genetic::replaceLowerHalfPopulation()
 {
-	std::multiset<Solution*, solution_comparator>::iterator it;
+	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
 	std::multiset<Solution*, solution_comparator> newPopulation;
-	unsigned int i;
 
 	// iterates starting in the end of the population
 	// and deletes elements of the population in the lower half
-	for (i = 0, it = population.begin(); it != population.end(); i++, it++)
+	for (unsigned int i = 0; it != population.end(); i++, it++)
 	{
 		if (i < POPULATION_SIZE / 2)
 		{
@@ -303,10 +296,38 @@ void Genetic::replaceLowerHalfPopulation()
 
 	// inserts random solution to the lower half of the population
 	for (unsigned int i = 0; i < POPULATION_SIZE / 2; i++)
-	{
 		population.insert(generateRandomSolution());
-	}
 }
+
+
+bool Genetic::checkImprovingSolutions(Solution** candidates, int size)
+{
+	bool updatedBest = false;
+	Solution* newBest = bestSolution;
+
+	// check if there's a better solution in the candidates than the current best
+	for (int i = 0; i < size; i++)
+	{
+		if (candidates[i]->getObjFunctionValue() > newBest->getObjFunctionValue())
+		{
+			updatedBest = true;
+			newBest = candidates[i];
+		}
+	}
+
+	if (updatedBest)
+	{
+		delete bestSolution;
+		bestSolution = new Solution(newBest);		// Update the best solution found so far and log it to file/console
+		bestSolution->evaluate();
+		bestSolution->writeToFile(outputFileName);
+		fprintf(stdout, "Found a new best solution with objective function value = %ld (Generation #%u)\n",
+			bestSolution->getObjFunctionValue(), generation_counter);
+	}
+
+	return updatedBest;
+}
+
 
 /* ============================================================================== */
 /* ============================================================================== */
@@ -357,12 +378,13 @@ int Genetic::maxGainGivenQuery(int queryIndex)
 Solution * Genetic::generateRandomSolution()
 {
 	Solution* sol = new Solution(problemInstance);
-	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
-
+	for (unsigned int i = 0; i < problemInstance->nQueries; i++) 
+	{
+		int j = rand() % problemInstance->nQueries;		// randomly select a query to modify
 		int A = rand() % problemInstance->nConfigs;		// generate a random value for the configuration to take for each query
-		sol->selectedConfiguration[i] = A;
+		sol->selectedConfiguration[j] = A;
 		if (sol->memoryCost() > problemInstance->M)
-			sol->selectedConfiguration[i] = -1;							// "backtrack" -> do not activate this configuration
+			sol->selectedConfiguration[j] = -1;							// "backtrack" -> do not activate this configuration
 	};
 
 	sol->evaluate();
