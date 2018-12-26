@@ -252,7 +252,7 @@ void Genetic::mutate(Solution* sol)
 	// iterates over the genes
 	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
 		// checks if a random generated number (>= 0) is equal to 0. In this case, the mutation occurs
-		if (rand() % (problemInstance->nQueries / 2) == 0)
+		if (rand() % problemInstance->nQueries  == 0)
 		{
 			// chance of choosing another config that servers this query
 			if (rand() % 100 < 90) {
