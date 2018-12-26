@@ -40,6 +40,7 @@ typedef struct
 	unsigned int **configQueriesGain;		// g matrix
 	UsefulConfigs *queriesWithGain;			// #Configuration vectors  
 	UsefulConfigs *configServingQueries;	// #Queries vectors  
+	float avgGainPerMemoryUnit;
 } Instance;
 
 
@@ -58,9 +59,12 @@ public:
 private:
 
 	short int *indexesToBuild;					// b vector
-	long int objFunctionValue;
 	Instance *problemInstance;
-	
+		
+	long int objFunctionValue;
+	long int fitnessValue;
+
+
 	// --- METHODS ---
 
 public:
@@ -70,7 +74,9 @@ public:
 	~Solution();						// solution class destructor
 
 	long int evaluate();
+	unsigned int memoryCost();
 	long int getObjFunctionValue() const;
+	long int getFitnessValue() const;
 	void writeToFile(const std::string fileName) const;
 	
 private:
@@ -84,7 +90,6 @@ private:
 
 Params parseCommandLine (int argc, char* argv[]);
 Instance readInputFile (std::string fileName);
-unsigned int memoryCost(const Instance* problemInstance, const Solution* solution);
 long long getCurrentTime_ms();
 
 #endif // UTILITIES_HPP

@@ -141,34 +141,33 @@ Instance readInputFile(std::string fileName)
 		}
 	}
 
-	return instance;
-}
+	// calculation of average gain per memory unit
+	unsigned int totalMemory = 0, totalGains = 0;
+	for (unsigned int j = 0; j < instance.nConfigs; j++)
+	{
+		unsigned int cnt = 0, configMem = 0;
 
+		for (unsigned int i = 0; i < instance.nIndexes; i++)
+		{
+			if (instance.configIndexesMatrix[j][i] != 0)
+				configMem += instance.indexesMemoryOccupation[i];
+		}
 
-unsigned int memoryCost(const Instance* problemInstance, const Solution* solution)
-{
-	bool *b = (bool *)calloc(problemInstance->nIndexes, sizeof(bool *));
-	unsigned int mem = 0;
-
-	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
-		short int x = solution->selectedConfiguration[i];
-		if (x >= 0) {
-			// iterate on the Indexes vector
-			for (unsigned int k = 0; k < problemInstance->nIndexes; k++) {
-				if (b[k] == 0 && problemInstance->configIndexesMatrix[x][k] == 1) {
-					// index k is part of configuration i and has not yet been built, so we need to build it
-					b[k] = 1;
-				}
+		for (unsigned int i = 0; i < instance.nQueries; i++)
+		{
+			if (instance.configQueriesGain[i][j] != 0)
+			{
+				cnt++;
+				totalGains += instance.configQueriesGain[i][j];
 			}
 		}
+
+		totalMemory += (cnt * configMem);
 	}
 
-	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) {
-		if (b[i])
-			mem += problemInstance->indexesMemoryOccupation[i];					// calculate memory cost of the given solution
-	}
+	instance.avgGainPerMemoryUnit = ((float)totalGains / (float)totalMemory);
 
-	return mem;
+	return instance;
 }
 
 
@@ -189,6 +188,7 @@ long long getCurrentTime_ms()		// returns system time in milliseconds
 
 Solution::Solution(Instance *probInst)
 	: objFunctionValue(LONG_MIN),
+	fitnessValue(0),
 	problemInstance(probInst)
 {	
 	selectedConfiguration = (short int*) malloc(problemInstance->nQueries * sizeof(short int));
@@ -219,8 +219,8 @@ Solution::~Solution()
 }
 
 
-long int Solution::evaluate() {
-
+long int Solution::evaluate() 
+{
 	unsigned int all_gains = 0;
 	unsigned int time_spent = 0;
 	unsigned int mem = 0;
@@ -243,27 +243,63 @@ long int Solution::evaluate() {
 		}
 	}
 
-	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) {
+	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) 
+	{
 		if (indexesToBuild[i])
 		{
-			mem += problemInstance->indexesMemoryOccupation[i];				// calculate memory cost of the given solution
 			time_spent += problemInstance->indexesFixedCost[i];
+			mem += problemInstance->indexesMemoryOccupation[i];
+		}
+	}
 
-			if (mem > problemInstance->M)
-			{
-				objFunctionValue = LONG_MIN;
-				return LONG_MIN;
+	bool feasible = mem < problemInstance->M;
+	objFunctionValue = feasible ? all_gains - time_spent : LONG_MIN;
+
+	// update fitness value
+	fitnessValue = (all_gains - time_spent) - 
+		(feasible ? 0 : (mem - problemInstance->M));		// penalise memory infeasibility
+
+	return objFunctionValue;
+}
+
+
+unsigned int Solution::memoryCost()
+{
+	unsigned int mem = 0;
+	for (unsigned int i = 0; i < problemInstance->nIndexes; i++)
+		indexesToBuild[i] = 0;
+
+	for (unsigned int i = 0; i < problemInstance->nQueries; i++) 
+	{
+		short int x = selectedConfiguration[i];
+		if (x >= 0) {
+			// iterate on the Indexes vector
+			for (unsigned int k = 0; k < problemInstance->nIndexes; k++) {
+				if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[x][k] == 1) {
+					// index k is part of configuration i and has not yet been built, so we need to build it
+					indexesToBuild[k] = 1;
+				}
 			}
 		}
 	}
 
-	objFunctionValue = all_gains - time_spent;
-	return objFunctionValue;
+	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) {
+		if (indexesToBuild[i])
+			mem += problemInstance->indexesMemoryOccupation[i];				// calculate memory cost of the given solution
+	}
+
+	return mem;
 }
+
 
 long int Solution::getObjFunctionValue() const
 {
 	return objFunctionValue;
+}
+
+long int Solution::getFitnessValue() const
+{
+	return fitnessValue;
 }
 
 

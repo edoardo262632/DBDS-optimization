@@ -18,9 +18,9 @@ Solution* LocalSearch::run(const Params& parameters)
 	short int query;
 
 
-	for (int i = 0; i < problemInstance->nQueries; i++) {
+	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
 		vett[i] = startingPoint->selectedConfiguration[i];
-		for (int j = 0; j < problemInstance->nIndexes; j++) {
+		for (unsigned int j = 0; j < problemInstance->nIndexes; j++) {
 			if (vett[i] > 0)
 				if (problemInstance->configIndexesMatrix[vett[i]][j] && b[j] == 0) {
 					b[j] = 1;
@@ -30,11 +30,11 @@ Solution* LocalSearch::run(const Params& parameters)
 		}
 	}
 
-	for (int i = 0; i < problemInstance->nConfigs; i++) {
+	for (unsigned int i = 0; i < problemInstance->nConfigs; i++) {
 		prov = 0;
 		cost = 0;
 		gain = 0;
-		for (int j = 0; j < problemInstance->nIndexes; j++) {
+		for (unsigned int j = 0; j < problemInstance->nIndexes; j++) {
 			if (problemInstance->configIndexesMatrix[i][j] && b[j] == 0) {
 				b[j] = 1;
 				prov += problemInstance->indexesMemoryOccupation[j];
@@ -43,7 +43,7 @@ Solution* LocalSearch::run(const Params& parameters)
 		}
 		if (prov + mem <= problemInstance->M) { // if the solution is still feasible
 			// set all avaible queries with gain > 0 to this configuration
-			for (int j = 0; j < problemInstance->queriesWithGain[i].length; j++) {
+			for (unsigned int j = 0; j < problemInstance->queriesWithGain[i].length; j++) {
 				query = problemInstance->queriesWithGain[i].configs[j];
 				if (startingPoint->selectedConfiguration[query] < 0) {
 					startingPoint->selectedConfiguration[query] = i;
@@ -55,7 +55,7 @@ Solution* LocalSearch::run(const Params& parameters)
 				break;
 			}
 			else {
-				for (int j = 0; j < problemInstance->nQueries; j++)
+				for (unsigned int j = 0; j < problemInstance->nQueries; j++)
 					startingPoint->selectedConfiguration[j] = vett[j];
 			}
 		}
