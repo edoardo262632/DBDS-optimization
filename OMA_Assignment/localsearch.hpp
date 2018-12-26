@@ -2,6 +2,7 @@
 #define LOCALSEARCH_HPP
 
 #include "algorithm.hpp"
+#include <set>
 
 
 class LocalSearch : Algorithm

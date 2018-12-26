@@ -39,7 +39,6 @@ Solution* Genetic::run(const Params& parameters)
 		//}
 
 
-
 		// run a local search to specialize the population if it's not improving
 		if (generation_counter - last_update > 500 && !ranSearchAfterLastUpdate)
 		{
