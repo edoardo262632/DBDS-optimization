@@ -67,6 +67,7 @@ private:
 	int getHighestGainConfiguration(std::vector<int> usedConfigs, int queryIndex);
 	int maxGainGivenQuery(int queryIndex);
 	Solution* generateRandomSolution();
+	void initializePopulation2();
 };
 
 #endif	// GENETIC_HPP

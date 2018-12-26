@@ -13,6 +13,7 @@ Solution* Genetic::run(const Params& parameters)
 	start:	fprintf(stdout, "(Re)starting the algorithm...\n"); 
 	POPULATION_SIZE = 2 * problemInstance->nQueries;
 	initializePopulation();
+	logPopulation();
 	
 	ranSearchAfterLastUpdate = false;
 	generation_counter = 0;
@@ -23,18 +24,21 @@ Solution* Genetic::run(const Params& parameters)
 	while (currentTime - startingTime < parameters.timeLimit)
 	{
 		breedPopulation();
+
 		if (replacePopulationByFitness(parameters.outputFileName, generation_counter))
 		{
 			ranSearchAfterLastUpdate = false;
 			last_update = generation_counter;
 		}
-		
+
 		// inject new random solutions in the population if it's in a stale state
 		//if (generation_counter - last_update > 100 && generation_counter - last_population_refresh > 100)
 		//{
 		//	last_population_refresh = generation_counter;
 		//	replaceLowerHalfPopulation();
 		//}
+
+
 
 		// run a local search to specialize the population if it's not improving
 		if (generation_counter - last_update > 500 && !ranSearchAfterLastUpdate)
@@ -121,7 +125,7 @@ void Genetic::initializePopulation()
 
 void Genetic::breedPopulation()
 {
-	// select the best POPULATION_SIZE elements to use as parents
+	 // select the best POPULATION_SIZE elements to use as parents
 	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
 	for (unsigned int i = 0; it != population.end(); ++it, ++i)
 	{
@@ -137,12 +141,13 @@ void Genetic::breedPopulation()
 	
 	int N = rand() % 4 + MIN_CROSSOVER_POINTS;			// randomize the number of crossover points to avoid "loops" in subsequent generations
 	// apply crossover operator on pairs of parents
-	for (unsigned int i = 0; i < POPULATION_SIZE / 2; i++) {
-		crossover(offsprings[i], offsprings[POPULATION_SIZE-i-1], N);
+	for (unsigned int i = 0; i < POPULATION_SIZE / 4; i++) {
+		crossover(offsprings[i], offsprings[POPULATION_SIZE/2-i-1], N);
 	}
-	
+
+
 	// apply mutation operator on all offsprings
-	for (unsigned int i = 0; i < POPULATION_SIZE; i++) {
+	for (unsigned int i = 0; i < POPULATION_SIZE ; i++) {
 		mutate(offsprings[i]);
 	}
 }
@@ -163,6 +168,25 @@ bool Genetic::replacePopulationByFitness(const std::string outputFileName, unsig
 		population.insert(offsprings[i]);
 	}
 
+	//std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
+	//std::multiset<Solution*, solution_comparator> newPopulation;
+
+	//// iterates starting in the end of the population
+	//// and deletes elements of the population in the lower half
+	//for (unsigned int i = 0; it != population.end(); i++, it++)
+	//{
+	//	if (i < POPULATION_SIZE) {
+	//		newPopulation.insert((*it));
+	//	} else	{
+	//		
+	//		mutate(*it);
+	//		newPopulation.insert(*it);
+	//	}
+	//		
+	//}
+
+	//population.clear();
+	//population = newPopulation;
 
 	return checkImprovingSolutions(offsprings, POPULATION_SIZE);
 }
@@ -174,7 +198,7 @@ void Genetic::logPopulation()
 	FILE *fl = fopen("populationLog.txt", "w");
 	if (fl == NULL)
 	{
-		fprintf(stderr, "Error: unable to open file log file");
+		fprintf(stderr, "Error: unable to open file log file\n");
 		return;
 	}
 
@@ -385,8 +409,66 @@ Solution * Genetic::generateRandomSolution()
 		sol->selectedConfiguration[j] = A;
 		if (sol->memoryCost() > problemInstance->M)
 			sol->selectedConfiguration[j] = -1;							// "backtrack" -> do not activate this configuration
+		else
+			for (int x = 0; x < problemInstance->queriesWithGain[A].length; x++)
+				if (sol->selectedConfiguration[problemInstance->queriesWithGain[A].configs[x]] == -1)
+					sol->selectedConfiguration[problemInstance->queriesWithGain[A].configs[x]] = A;
 	};
 
 	sol->evaluate();
 	return sol;
+}
+
+
+void Genetic::initializePopulation2()
+{
+#if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
+	srand((unsigned int)getCurrentTime_ms());
+#endif
+
+	parents[0] = new Solution(bestSolution);		// one solution is kept with the default configuration
+	parents[0]->evaluate();
+	std::vector<int> usedConfigs;					// vector with already used configurations for a parent
+	int *b = (int *)calloc(problemInstance->nIndexes, sizeof(int));
+	int mem, prev;
+
+	for (int k = 1; k < POPULATION_SIZE; k++) {
+		mem = 0;
+		parents[k] = new Solution(problemInstance);
+		usedConfigs.clear();
+		for (int i = 0; i < problemInstance->nIndexes; i++)
+			b[i] = 0;
+		for (int i = 0; i < problemInstance->nQueries; i++) {
+			if (parents[k]->selectedConfiguration[i] == -1) {
+				int n = rand() % problemInstance->configServingQueries[i].length;
+				int conf = problemInstance->configServingQueries[i].configs[n];
+				prev = mem;
+				for (int j = 0; j < problemInstance->nIndexes; j++) {
+					if (problemInstance->configIndexesMatrix[conf][j] && b[j] == 0) {
+						mem += problemInstance->indexesMemoryOccupation[j];
+					}
+				}
+				if (mem < problemInstance->M) {
+					for (int j = 0; j < problemInstance->nIndexes; j++) {
+						if (problemInstance->configIndexesMatrix[conf][j] && b[j] == 0) {
+							b[j] = 1;
+						}
+					}
+					for (int x = 0; x < problemInstance->queriesWithGain[conf].length; x++)
+						if (parents[k]->selectedConfiguration[problemInstance->queriesWithGain[conf].configs[x]] == -1)
+							parents[k]->selectedConfiguration[problemInstance->queriesWithGain[conf].configs[x]] = conf;
+				}
+				else {//  backtrack
+					mem = prev;
+				}
+			}
+		}
+	}
+
+
+	// Initialization and evaluation of the starting population set
+	for (unsigned int i = 0; i < POPULATION_SIZE; i++) {
+		parents[i]->evaluate();
+		population.insert(parents[i]);
+	}
 }
