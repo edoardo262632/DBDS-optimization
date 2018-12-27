@@ -140,8 +140,8 @@ void Genetic::breedPopulation()
 	
 	int N = rand() % 4 + MIN_CROSSOVER_POINTS;			// randomize the number of crossover points to avoid "loops" in subsequent generations
 	// apply crossover operator on pairs of parents
-	for (unsigned int i = 0; i < POPULATION_SIZE / 4; i++) {
-		crossover(offsprings[i], offsprings[POPULATION_SIZE/2-i-1], N);
+	for (unsigned int i = 0; i < POPULATION_SIZE / 2; i++) {
+		crossover(offsprings[i], offsprings[POPULATION_SIZE-i-1], N);
 	}
 
 

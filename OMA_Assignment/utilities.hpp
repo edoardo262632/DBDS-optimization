@@ -62,7 +62,7 @@ private:
 	Instance *problemInstance;
 		
 	long int objFunctionValue;
-	long int fitnessValue;
+	float fitnessValue;
 
 
 	// --- METHODS ---

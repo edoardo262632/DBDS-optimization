@@ -155,10 +155,10 @@ Instance readInputFile(std::string fileName)
 
 		for (unsigned int i = 0; i < instance.nQueries; i++)
 		{
-			if (instance.configQueriesGain[i][j] != 0)
+			if (instance.configQueriesGain[j][i] != 0)
 			{
 				cnt++;
-				totalGains += instance.configQueriesGain[i][j];
+				totalGains += instance.configQueriesGain[j][i];
 			}
 		}
 
@@ -257,7 +257,7 @@ long int Solution::evaluate()
 
 	// update fitness value
 	fitnessValue = (all_gains - time_spent) - 
-		(feasible ? 0 : (mem - problemInstance->M));		// penalise memory infeasibility
+		(feasible ? 0 : (float) problemInstance->avgGainPerMemoryUnit*(mem - problemInstance->M));		// penalise memory infeasibility
 
 	return objFunctionValue;
 }

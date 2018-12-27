@@ -1,0 +1,400 @@
+Generation 0, Solution 1
+		Objective Function value: 1707
+		Memory cost: 36783
+		Selected configurations: 88 138 -1 -1 260 321 308 -1 138 173 41 -1 -1 260 -1 -1 173 -1 278 260 -1 -1 138 -1 -1 -1 308 -1 260 88 88 260 173 -1 -1 -1 -1 114 -1 138 260 -1 491 88 238 -1 114 173 -1 41 
+Generation 0, Solution 2
+		Objective Function value: 1565
+		Memory cost: 37477
+		Selected configurations: 88 -1 209 -1 260 -1 308 -1 138 -1 -1 336 -1 260 -1 -1 -1 -1 278 260 -1 -1 209 209 -1 323 308 -1 21 88 323 323 209 -1 336 -1 491 114 -1 336 323 -1 491 138 -1 -1 114 -1 -1 -1 
+Generation 0, Solution 3
+		Objective Function value: 1244
+		Memory cost: 37355
+		Selected configurations: 88 114 -1 -1 260 -1 308 -1 -1 173 -1 173 -1 260 22 -1 173 -1 -1 260 -1 22 -1 -1 -1 -1 308 303 22 88 308 -1 -1 -1 -1 -1 -1 114 -1 22 -1 114 -1 -1 -1 119 114 173 -1 -1 
+Generation 0, Solution 4
+		Objective Function value: 1177
+		Memory cost: 37110
+		Selected configurations: 88 -1 -1 -1 260 321 308 -1 126 -1 -1 3 -1 260 -1 -1 -1 3 278 260 -1 -1 -1 -1 -1 -1 308 -1 459 88 -1 1 -1 459 278 -1 -1 114 126 260 -1 -1 -1 126 238 -1 114 -1 -1 -1 
+Generation 0, Solution 5
+		Objective Function value: 1175
+		Memory cost: 37295
+		Selected configurations: 323 -1 209 -1 260 -1 308 -1 -1 -1 -1 336 -1 260 22 -1 -1 3 278 260 -1 22 -1 209 -1 -1 308 -1 209 -1 323 278 -1 -1 336 -1 -1 114 -1 -1 -1 -1 -1 -1 336 -1 114 -1 -1 -1 
+Generation 0, Solution 6
+		Objective Function value: 1136
+		Memory cost: 36308
+		Selected configurations: 88 -1 -1 75 260 -1 308 -1 308 -1 114 336 -1 260 -1 375 -1 -1 278 260 -1 -1 336 -1 -1 -1 308 -1 260 88 323 336 -1 -1 336 -1 375 114 -1 -1 -1 -1 491 -1 -1 -1 114 -1 -1 -1 
+Generation 0, Solution 7
+		Objective Function value: 1114
+		Memory cost: 37123
+		Selected configurations: -1 260 209 -1 260 -1 -1 -1 -1 173 -1 336 239 260 -1 -1 173 -1 -1 260 -1 -1 336 209 -1 -1 -1 -1 209 -1 323 -1 360 -1 336 -1 -1 114 -1 -1 -1 -1 -1 -1 -1 -1 114 173 -1 260 
+Generation 0, Solution 8
+		Objective Function value: 1088
+		Memory cost: 36593
+		Selected configurations: -1 336 -1 75 260 -1 308 -1 -1 173 173 336 -1 260 -1 375 173 -1 -1 260 323 -1 -1 -1 -1 -1 308 -1 308 -1 323 -1 336 -1 336 308 -1 114 -1 -1 -1 -1 336 -1 -1 -1 114 173 -1 -1 
+Generation 0, Solution 9
+		Objective Function value: 1084
+		Memory cost: 37456
+		Selected configurations: -1 238 -1 -1 260 321 308 -1 -1 173 260 -1 239 260 -1 375 173 -1 278 260 -1 -1 308 -1 -1 -1 308 -1 375 -1 -1 238 -1 -1 -1 -1 -1 114 -1 -1 344 -1 -1 -1 238 119 114 173 -1 278 
+Generation 0, Solution 10
+		Objective Function value: 1066
+		Memory cost: 37245
+		Selected configurations: 260 -1 209 -1 260 321 308 -1 41 -1 41 336 -1 260 -1 -1 -1 -1 -1 260 -1 -1 10 209 -1 336 308 -1 21 -1 -1 260 -1 -1 336 -1 10 -1 -1 -1 -1 -1 -1 -1 10 -1 -1 -1 -1 41 
+Generation 0, Solution 11
+		Objective Function value: 1060
+		Memory cost: 37388
+		Selected configurations: 88 -1 -1 75 260 -1 308 -1 -1 -1 238 -1 -1 260 -1 375 260 -1 278 260 -1 -1 344 -1 -1 378 308 303 491 88 -1 344 303 -1 378 -1 -1 114 -1 -1 344 88 491 -1 238 -1 114 -1 -1 -1 
+Generation 0, Solution 12
+		Objective Function value: 1059
+		Memory cost: 37081
+		Selected configurations: -1 -1 -1 75 260 321 308 -1 -1 -1 41 -1 -1 260 -1 375 -1 -1 278 260 -1 -1 260 -1 -1 -1 308 -1 491 -1 -1 238 -1 459 260 -1 -1 114 -1 308 -1 -1 491 -1 238 -1 114 -1 -1 41 
+Generation 0, Solution 13
+		Objective Function value: 1046
+		Memory cost: 36518
+		Selected configurations: 88 138 -1 -1 260 321 -1 -1 138 173 41 -1 -1 260 -1 -1 173 3 -1 260 135 -1 -1 -1 -1 -1 -1 -1 -1 88 -1 173 -1 -1 3 -1 -1 -1 -1 260 -1 -1 -1 -1 238 -1 3 173 -1 41 
+Generation 0, Solution 14
+		Objective Function value: 1042
+		Memory cost: 36450
+		Selected configurations: 88 -1 -1 -1 260 321 308 -1 -1 -1 260 -1 239 260 -1 375 -1 -1 -1 260 -1 -1 344 -1 -1 -1 308 303 321 88 -1 239 260 459 -1 -1 -1 114 459 239 344 -1 -1 -1 238 -1 114 -1 -1 88 
+Generation 0, Solution 15
+		Objective Function value: 980
+		Memory cost: 37302
+		Selected configurations: -1 -1 -1 -1 -1 321 308 41 -1 -1 41 114 -1 -1 -1 375 -1 3 -1 -1 375 -1 128 -1 -1 -1 308 -1 41 -1 -1 1 -1 -1 -1 41 10 114 126 -1 344 -1 -1 126 238 -1 114 -1 -1 41 
+Generation 0, Solution 16
+		Objective Function value: 802
+		Memory cost: 37045
+		Selected configurations: 88 -1 209 -1 260 321 308 -1 -1 -1 -1 308 -1 260 -1 -1 -1 -1 -1 260 135 -1 -1 209 -1 260 308 -1 88 88 -1 260 -1 -1 -1 150 -1 114 321 -1 -1 150 -1 -1 -1 -1 114 -1 -1 -1 
+Generation 0, Solution 17
+		Objective Function value: 794
+		Memory cost: 35952
+		Selected configurations: 88 -1 -1 -1 260 -1 308 278 -1 -1 -1 -1 -1 260 -1 -1 -1 -1 278 260 135 -1 -1 -1 -1 135 308 -1 114 88 323 135 -1 -1 -1 332 -1 114 -1 332 -1 -1 491 -1 -1 -1 114 -1 -1 -1 
+Generation 0, Solution 18
+		Objective Function value: 761
+		Memory cost: 37105
+		Selected configurations: -1 -1 209 75 260 -1 308 -1 -1 -1 -1 -1 -1 260 -1 375 -1 -1 -1 260 135 -1 -1 209 -1 238 308 -1 308 -1 -1 -1 360 -1 135 308 -1 114 -1 -1 344 -1 -1 -1 238 -1 114 -1 -1 -1 
+Generation 0, Solution 19
+		Objective Function value: -2147483648
+		Memory cost: 37500
+		Selected configurations: 308 -1 209 -1 260 -1 308 -1 344 -1 -1 336 -1 260 -1 -1 -1 -1 -1 260 -1 -1 -1 209 -1 -1 308 -1 336 308 -1 -1 -1 -1 336 -1 -1 114 126 -1 344 -1 -1 126 -1 -1 114 -1 -1 -1 
+Generation 0, Solution 20
+		Objective Function value: 620
+		Memory cost: 37117
+		Selected configurations: 88 131 -1 -1 260 -1 308 -1 -1 -1 -1 -1 -1 260 -1 -1 -1 -1 -1 260 88 -1 -1 -1 488 378 308 114 21 88 -1 -1 -1 -1 21 -1 -1 114 -1 -1 -1 -1 -1 -1 238 -1 114 -1 -1 -1 
+Generation 0, Solution 21
+		Objective Function value: 594
+		Memory cost: 37273
+		Selected configurations: 88 114 -1 -1 -1 -1 -1 -1 -1 173 -1 336 -1 -1 -1 -1 173 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 88 -1 -1 -1 -1 336 -1 88 114 126 -1 -1 -1 -1 126 -1 88 114 173 -1 -1 
+Generation 0, Solution 22
+		Objective Function value: 593
+		Memory cost: 37415
+		Selected configurations: 88 173 -1 75 -1 -1 -1 -1 -1 173 -1 336 -1 336 -1 -1 173 3 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 88 -1 -1 -1 -1 336 -1 126 126 126 -1 -1 -1 -1 126 88 -1 173 173 -1 -1 
+Generation 0, Solution 23
+		Objective Function value: 590
+		Memory cost: 37415
+		Selected configurations: -1 321 209 -1 -1 321 308 -1 -1 173 -1 -1 239 -1 22 22 173 -1 -1 -1 -1 22 238 209 22 -1 308 -1 209 -1 -1 239 360 -1 209 -1 -1 173 -1 22 -1 209 22 -1 238 -1 -1 173 -1 -1 
+Generation 0, Solution 24
+		Objective Function value: 563
+		Memory cost: 37388
+		Selected configurations: -1 -1 -1 -1 -1 -1 -1 128 138 -1 41 22 -1 -1 22 -1 -1 3 278 -1 -1 22 128 -1 -1 -1 -1 -1 -1 -1 -1 41 -1 459 128 -1 10 3 126 41 22 -1 -1 126 238 -1 22 -1 -1 41 
+Generation 0, Solution 25
+		Objective Function value: 529
+		Memory cost: 36870
+		Selected configurations: -1 -1 209 -1 -1 -1 308 -1 -1 -1 -1 336 -1 -1 22 -1 -1 -1 336 -1 -1 22 -1 209 -1 22 308 -1 21 -1 323 -1 -1 -1 336 -1 -1 21 126 -1 -1 22 -1 126 238 -1 -1 -1 -1 -1 
+Generation 0, Solution 26
+		Objective Function value: 525
+		Memory cost: 36917
+		Selected configurations: -1 -1 209 -1 -1 -1 -1 184 -1 -1 -1 336 -1 -1 22 -1 -1 -1 -1 -1 -1 22 128 209 488 336 -1 -1 21 -1 -1 488 -1 -1 336 21 -1 114 -1 184 21 184 -1 -1 -1 -1 114 128 -1 -1 
+Generation 0, Solution 27
+		Objective Function value: 523
+		Memory cost: 37388
+		Selected configurations: -1 131 209 -1 -1 -1 -1 -1 -1 -1 41 336 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 41 209 -1 -1 -1 -1 21 -1 323 -1 -1 -1 336 -1 10 114 -1 -1 -1 -1 -1 -1 -1 -1 114 -1 -1 41 
+Generation 0, Solution 28
+		Objective Function value: 522
+		Memory cost: 37405
+		Selected configurations: 88 -1 -1 75 491 321 308 -1 -1 88 278 -1 -1 308 88 375 -1 3 278 -1 -1 -1 126 -1 -1 -1 308 -1 308 88 -1 1 -1 -1 -1 -1 -1 88 126 308 -1 -1 491 126 -1 -1 491 -1 -1 -1 
+Generation 0, Solution 29
+		Objective Function value: 522
+		Memory cost: 37394
+		Selected configurations: -1 -1 209 -1 -1 321 308 -1 -1 -1 -1 336 -1 -1 22 -1 336 3 -1 -1 -1 22 -1 209 -1 321 308 -1 21 -1 -1 321 -1 -1 336 -1 -1 -1 22 -1 -1 308 321 -1 238 119 21 321 -1 -1 
+Generation 0, Solution 30
+		Objective Function value: 497
+		Memory cost: 37190
+		Selected configurations: 260 -1 -1 -1 260 -1 -1 -1 138 -1 41 -1 -1 260 -1 -1 -1 3 238 260 138 -1 -1 -1 -1 -1 -1 -1 -1 -1 126 1 41 -1 41 -1 -1 41 126 126 184 184 -1 126 238 -1 260 -1 -1 41 
+Generation 0, Solution 31
+		Objective Function value: 467
+		Memory cost: 37467
+		Selected configurations: -1 -1 209 -1 -1 -1 -1 336 -1 -1 -1 336 -1 -1 22 375 -1 -1 -1 -1 -1 22 128 209 488 336 -1 -1 21 336 323 209 -1 -1 336 -1 184 -1 -1 -1 344 184 -1 -1 336 -1 -1 -1 -1 -1 
+Generation 0, Solution 32
+		Objective Function value: 458
+		Memory cost: 37331
+		Selected configurations: 88 491 -1 -1 239 -1 -1 -1 -1 173 -1 88 239 -1 22 173 173 -1 -1 -1 -1 22 173 -1 -1 378 -1 -1 -1 88 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 344 -1 491 -1 -1 119 -1 173 -1 239 
+Generation 0, Solution 33
+		Objective Function value: 454
+		Memory cost: 36515
+		Selected configurations: -1 135 -1 -1 260 321 -1 -1 -1 173 -1 -1 239 260 22 459 173 -1 -1 260 135 22 239 -1 -1 260 -1 -1 -1 -1 22 459 -1 459 -1 -1 -1 173 -1 -1 -1 -1 135 -1 -1 -1 -1 173 -1 260 
+Generation 0, Solution 34
+		Objective Function value: 438
+		Memory cost: 36923
+		Selected configurations: 88 336 209 -1 -1 -1 -1 -1 138 173 -1 336 239 -1 -1 -1 173 -1 -1 -1 -1 -1 336 209 -1 336 -1 -1 21 88 -1 -1 -1 -1 336 -1 -1 -1 -1 -1 -1 -1 -1 209 239 -1 -1 173 -1 209 
+Generation 0, Solution 35
+		Objective Function value: 437
+		Memory cost: 36407
+		Selected configurations: -1 -1 209 -1 260 -1 308 344 -1 -1 -1 336 -1 260 -1 -1 -1 -1 -1 260 135 -1 -1 209 -1 135 308 -1 344 209 -1 -1 -1 -1 336 -1 332 209 -1 332 344 -1 -1 -1 209 -1 -1 -1 -1 -1 
+Generation 0, Solution 36
+		Objective Function value: 419
+		Memory cost: 37453
+		Selected configurations: -1 114 -1 -1 -1 321 -1 -1 -1 173 -1 336 -1 -1 -1 -1 173 301 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 321 -1 -1 336 114 -1 114 -1 -1 -1 -1 -1 -1 -1 -1 114 173 301 -1 
+Generation 0, Solution 37
+		Objective Function value: 398
+		Memory cost: 37032
+		Selected configurations: 303 -1 209 -1 260 -1 308 -1 -1 -1 -1 -1 -1 260 -1 -1 209 -1 -1 260 135 -1 -1 209 -1 -1 308 303 459 -1 -1 -1 -1 459 -1 -1 -1 114 -1 -1 -1 -1 -1 -1 238 -1 114 -1 -1 -1 
+Generation 0, Solution 38
+		Objective Function value: 373
+		Memory cost: 37478
+		Selected configurations: -1 -1 -1 -1 -1 321 308 -1 321 -1 -1 -1 239 -1 22 -1 -1 -1 -1 -1 -1 22 360 -1 -1 378 308 -1 114 -1 -1 308 360 -1 -1 -1 10 114 -1 -1 -1 -1 -1 -1 238 -1 114 -1 -1 308 
+Generation 0, Solution 39
+		Objective Function value: 368
+		Memory cost: 37209
+		Selected configurations: 88 -1 -1 -1 260 -1 -1 -1 -1 -1 -1 336 -1 260 -1 -1 336 -1 -1 260 -1 -1 -1 -1 -1 -1 -1 -1 -1 88 323 1 -1 -1 336 -1 -1 88 126 -1 -1 -1 -1 126 -1 119 -1 -1 -1 -1 
+Generation 0, Solution 40
+		Objective Function value: 362
+		Memory cost: 37116
+		Selected configurations: 88 488 488 75 239 -1 -1 -1 -1 173 -1 -1 239 173 22 75 173 -1 -1 -1 -1 22 22 -1 488 239 -1 -1 -1 88 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 491 -1 -1 119 -1 173 -1 491 
+Generation 0, Solution 41
+		Objective Function value: 313
+		Memory cost: 37371
+		Selected configurations: -1 -1 -1 -1 308 321 308 -1 -1 -1 -1 336 -1 -1 -1 -1 -1 -1 278 -1 278 -1 336 -1 488 336 308 -1 21 -1 323 238 -1 -1 336 323 -1 114 -1 488 -1 -1 491 -1 238 -1 114 -1 -1 -1 
+Generation 0, Solution 42
+		Objective Function value: 251
+		Memory cost: 37440
+		Selected configurations: 278 260 -1 -1 260 -1 -1 239 -1 173 -1 -1 239 260 -1 278 173 -1 278 260 260 -1 128 -1 -1 -1 -1 -1 -1 -1 -1 114 -1 -1 -1 -1 -1 114 -1 332 -1 -1 239 -1 -1 -1 114 173 -1 260 
+Generation 0, Solution 43
+		Objective Function value: 235
+		Memory cost: 36748
+		Selected configurations: 88 -1 -1 -1 -1 -1 -1 41 138 -1 41 1 -1 -1 -1 -1 -1 3 -1 -1 -1 -1 128 -1 -1 41 -1 -1 21 88 -1 1 -1 -1 -1 -1 -1 114 -1 -1 41 -1 41 21 238 -1 114 -1 -1 41 
+Generation 0, Solution 44
+		Objective Function value: 229
+		Memory cost: 36587
+		Selected configurations: 88 -1 209 -1 260 321 -1 -1 -1 -1 41 150 -1 260 -1 -1 -1 -1 -1 260 -1 -1 -1 209 -1 -1 -1 -1 -1 88 88 209 -1 -1 -1 150 -1 -1 -1 -1 -1 -1 -1 -1 -1 41 -1 -1 -1 41 
+Generation 0, Solution 45
+		Objective Function value: 218
+		Memory cost: 37261
+		Selected configurations: -1 -1 -1 -1 -1 321 308 -1 138 -1 41 -1 -1 -1 -1 -1 -1 3 -1 -1 135 -1 -1 -1 488 138 308 -1 308 -1 -1 301 -1 -1 41 -1 -1 488 308 308 -1 -1 -1 138 238 -1 -1 -1 301 41 
+Generation 0, Solution 46
+		Objective Function value: 214
+		Memory cost: 37297
+		Selected configurations: 88 173 -1 -1 -1 -1 308 88 -1 173 173 -1 239 -1 -1 375 173 -1 -1 -1 -1 88 128 -1 -1 378 308 -1 128 88 -1 -1 88 -1 -1 -1 -1 -1 -1 -1 344 -1 378 -1 -1 378 344 173 -1 -1 
+Generation 0, Solution 47
+		Objective Function value: 202
+		Memory cost: 36571
+		Selected configurations: -1 173 209 75 -1 -1 -1 144 -1 173 144 -1 -1 144 -1 375 173 -1 -1 -1 -1 -1 -1 209 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 173 126 -1 -1 -1 144 126 173 -1 209 173 -1 -1 
+Generation 0, Solution 48
+		Objective Function value: 177
+		Memory cost: 35708
+		Selected configurations: -1 131 209 -1 -1 -1 -1 -1 -1 173 41 -1 -1 -1 -1 -1 173 -1 -1 -1 -1 -1 -1 209 -1 -1 173 -1 -1 -1 -1 1 -1 -1 -1 150 -1 -1 -1 -1 -1 -1 131 -1 131 -1 -1 173 -1 41 
+Generation 0, Solution 49
+		Objective Function value: 171
+		Memory cost: 36822
+		Selected configurations: -1 -1 209 -1 -1 -1 -1 336 -1 -1 -1 336 239 -1 22 -1 -1 3 -1 -1 -1 22 3 209 -1 -1 -1 -1 -1 -1 323 -1 -1 -1 336 -1 -1 -1 -1 332 -1 -1 -1 -1 209 -1 323 -1 -1 -1 
+Generation 0, Solution 50
+		Objective Function value: 162
+		Memory cost: 37367
+		Selected configurations: 1 -1 209 -1 260 -1 -1 -1 -1 -1 -1 -1 -1 260 -1 -1 303 -1 -1 260 135 -1 -1 209 488 1 -1 303 -1 -1 -1 1 -1 -1 -1 -1 -1 114 -1 -1 -1 -1 -1 -1 260 -1 114 -1 -1 -1 
+Generation 0, Solution 51
+		Objective Function value: 160
+		Memory cost: 36607
+		Selected configurations: 88 131 -1 -1 -1 -1 308 -1 138 -1 41 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 488 378 308 -1 88 88 -1 -1 -1 -1 332 -1 -1 -1 -1 332 131 378 -1 238 238 -1 -1 -1 -1 41 
+Generation 0, Solution 52
+		Objective Function value: 157
+		Memory cost: 36858
+		Selected configurations: -1 -1 -1 -1 260 -1 -1 -1 138 -1 -1 -1 239 260 -1 -1 -1 -1 184 260 -1 -1 128 -1 -1 -1 114 -1 -1 -1 -1 239 -1 -1 114 150 -1 114 -1 -1 260 184 -1 260 238 -1 114 -1 -1 239 
+Generation 0, Solution 53
+		Objective Function value: 152
+		Memory cost: 37403
+		Selected configurations: -1 -1 -1 -1 336 321 -1 -1 323 -1 -1 336 239 -1 -1 -1 -1 -1 278 -1 -1 -1 459 -1 -1 -1 -1 -1 -1 -1 323 459 -1 459 336 114 -1 114 -1 -1 -1 -1 491 -1 -1 -1 114 -1 -1 336 
+Generation 0, Solution 54
+		Objective Function value: 147
+		Memory cost: 37198
+		Selected configurations: -1 -1 209 -1 -1 -1 308 -1 -1 -1 -1 336 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 209 -1 378 308 -1 209 -1 -1 -1 360 459 336 -1 -1 209 -1 308 -1 -1 -1 -1 238 -1 -1 -1 301 -1 
+Generation 0, Solution 55
+		Objective Function value: 110
+		Memory cost: 37142
+		Selected configurations: -1 -1 209 -1 260 -1 -1 -1 -1 -1 135 -1 -1 260 -1 375 -1 -1 -1 260 135 -1 -1 209 -1 126 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 375 126 -1 -1 -1 -1 126 209 -1 135 -1 301 -1 
+Generation 0, Solution 56
+		Objective Function value: 110
+		Memory cost: 36805
+		Selected configurations: 88 -1 -1 -1 -1 -1 308 88 -1 -1 -1 -1 -1 -1 -1 -1 128 -1 -1 -1 -1 -1 128 -1 -1 -1 308 303 21 88 -1 -1 -1 -1 -1 -1 -1 126 126 -1 -1 -1 21 126 -1 88 -1 -1 -1 -1 
+Generation 0, Solution 57
+		Objective Function value: 110
+		Memory cost: 36413
+		Selected configurations: -1 131 209 -1 -1 -1 -1 -1 323 -1 -1 336 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 209 -1 -1 -1 -1 -1 -1 323 1 -1 -1 336 150 -1 114 -1 -1 -1 -1 -1 -1 -1 -1 114 -1 -1 -1 
+Generation 0, Solution 58
+		Objective Function value: 104
+		Memory cost: 36751
+		Selected configurations: 88 131 -1 75 -1 -1 -1 -1 138 -1 -1 -1 -1 -1 22 -1 344 -1 -1 -1 -1 22 -1 -1 344 -1 -1 -1 88 88 -1 344 360 -1 -1 -1 -1 88 344 -1 344 184 -1 138 -1 119 -1 -1 -1 -1 
+Generation 0, Solution 59
+		Objective Function value: 103
+		Memory cost: 37253
+		Selected configurations: -1 173 209 -1 -1 -1 308 -1 -1 173 308 -1 -1 -1 -1 375 173 -1 -1 -1 -1 -1 308 209 -1 378 308 -1 10 -1 -1 -1 -1 -1 10 -1 10 -1 -1 -1 -1 -1 -1 -1 238 -1 173 173 -1 -1 
+Generation 0, Solution 60
+		Objective Function value: 86
+		Memory cost: 37229
+		Selected configurations: -1 131 -1 75 -1 321 -1 -1 -1 173 -1 -1 -1 173 -1 -1 173 -1 -1 -1 -1 -1 -1 -1 -1 378 -1 -1 -1 -1 -1 321 -1 -1 -1 114 -1 114 -1 -1 -1 75 114 -1 -1 -1 114 173 -1 -1 
+Generation 0, Solution 61
+		Objective Function value: 70
+		Memory cost: 36427
+		Selected configurations: -1 360 -1 -1 260 -1 -1 260 -1 173 332 -1 -1 260 -1 375 173 -1 -1 260 -1 -1 332 -1 -1 -1 -1 -1 491 -1 -1 -1 360 332 -1 -1 -1 360 -1 332 -1 -1 491 -1 -1 -1 332 173 -1 -1 
+Generation 0, Solution 62
+		Objective Function value: 67
+		Memory cost: 37477
+		Selected configurations: 144 -1 -1 -1 260 321 -1 144 -1 -1 260 -1 -1 260 -1 375 -1 -1 -1 260 -1 -1 -1 -1 -1 321 -1 -1 21 -1 -1 321 -1 459 -1 -1 -1 114 -1 -1 -1 -1 -1 -1 -1 -1 114 -1 -1 -1 
+Generation 0, Solution 63
+		Objective Function value: 65
+		Memory cost: 37056
+		Selected configurations: 88 -1 209 -1 375 -1 308 -1 138 -1 88 88 -1 -1 -1 375 -1 -1 278 -1 -1 -1 209 209 -1 -1 308 -1 209 88 -1 308 209 -1 -1 -1 -1 -1 -1 -1 375 -1 491 209 278 -1 375 -1 301 -1 
+Generation 0, Solution 64
+		Objective Function value: 63
+		Memory cost: 36661
+		Selected configurations: -1 131 209 75 -1 -1 -1 75 -1 -1 21 336 -1 21 -1 375 -1 -1 -1 -1 -1 -1 -1 209 -1 375 -1 -1 21 -1 323 -1 -1 -1 336 -1 -1 -1 -1 332 -1 -1 -1 -1 336 -1 75 -1 -1 -1 
+Generation 0, Solution 65
+		Objective Function value: 20
+		Memory cost: 37054
+		Selected configurations: -1 -1 209 75 -1 -1 -1 -1 -1 -1 336 336 239 209 -1 375 -1 -1 -1 -1 -1 -1 128 209 -1 209 -1 239 21 239 -1 -1 -1 -1 336 150 336 -1 -1 -1 344 -1 -1 -1 -1 -1 -1 -1 -1 128 
+Generation 0, Solution 66
+		Objective Function value: 15
+		Memory cost: 37360
+		Selected configurations: 88 -1 209 75 -1 -1 -1 -1 138 -1 -1 -1 -1 88 22 -1 -1 -1 -1 -1 -1 22 88 209 -1 -1 -1 -1 -1 88 -1 -1 -1 -1 -1 -1 10 -1 -1 -1 344 -1 344 22 -1 88 -1 -1 -1 -1 
+Generation 0, Solution 67
+		Objective Function value: 12
+		Memory cost: 37492
+		Selected configurations: -1 378 209 75 -1 -1 -1 -1 -1 173 -1 -1 239 173 -1 375 173 -1 -1 -1 -1 -1 75 209 -1 378 -1 -1 -1 -1 -1 -1 -1 -1 -1 150 -1 -1 -1 -1 344 -1 -1 -1 378 -1 75 173 -1 209 
+Generation 0, Solution 68
+		Objective Function value: 0
+		Memory cost: 0
+		Selected configurations: -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
+Generation 0, Solution 69
+		Objective Function value: -275
+		Memory cost: 36227
+		Selected configurations: -1 -1 209 75 -1 -1 308 144 -1 -1 332 -1 344 332 -1 375 -1 -1 -1 -1 -1 -1 -1 209 -1 -1 308 -1 375 -1 -1 -1 360 -1 -1 -1 -1 332 -1 332 344 -1 -1 -1 308 -1 332 -1 -1 -1 
+Generation 0, Solution 70
+		Objective Function value: -599
+		Memory cost: 37254
+		Selected configurations: -1 -1 209 -1 -1 -1 -1 -1 -1 -1 41 -1 -1 -1 -1 -1 -1 -1 278 -1 -1 -1 -1 209 488 41 41 -1 -1 -1 -1 1 -1 -1 -1 -1 -1 -1 -1 -1 1 184 -1 -1 -1 -1 -1 -1 -1 41 
+Generation 0, Solution 71
+		Objective Function value: -1133
+		Memory cost: 36814
+		Selected configurations: -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 323 -1 -1 -1 -1 -1 -1 -1 488 119 -1 303 119 -1 323 -1 360 -1 -1 -1 -1 119 -1 -1 344 -1 -1 -1 -1 119 -1 -1 -1 -1 
+Generation 0, Solution 72
+		Objective Function value: -74
+		Memory cost: 36671
+		Selected configurations: -1 -1 209 -1 308 -1 308 375 -1 -1 308 -1 -1 -1 -1 375 -1 -1 278 -1 -1 -1 332 209 -1 -1 308 -1 209 -1 -1 308 360 -1 -1 -1 -1 114 -1 332 -1 -1 491 -1 -1 -1 114 -1 -1 -1 
+Generation 0, Solution 73
+		Objective Function value: -65
+		Memory cost: 37188
+		Selected configurations: -1 131 -1 -1 260 -1 -1 -1 -1 -1 41 -1 -1 260 -1 -1 -1 -1 -1 260 -1 -1 -1 -1 -1 -1 323 -1 -1 -1 323 -1 -1 -1 260 150 10 -1 -1 260 -1 -1 -1 -1 238 -1 -1 -1 -1 41 
+Generation 0, Solution 74
+		Objective Function value: -57
+		Memory cost: 37122
+		Selected configurations: 88 131 -1 -1 -1 -1 308 -1 -1 -1 -1 336 239 -1 -1 -1 -1 -1 -1 -1 -1 -1 131 -1 -1 -1 308 -1 238 88 323 -1 -1 -1 336 -1 -1 -1 -1 -1 -1 -1 88 -1 238 -1 -1 -1 -1 131 
+Generation 0, Solution 75
+		Objective Function value: -301
+		Memory cost: 37042
+		Selected configurations: -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 22 -1 278 -1 278 -1 135 22 -1 -1 -1 22 -1 -1 -1 -1 323 22 -1 459 -1 -1 -1 323 126 -1 -1 -1 -1 126 -1 119 -1 -1 -1 -1 
+Generation 0, Solution 76
+		Objective Function value: -215
+		Memory cost: 37086
+		Selected configurations: -1 -1 209 -1 209 -1 -1 -1 -1 -1 -1 336 -1 -1 22 -1 -1 -1 -1 -1 -1 22 336 209 -1 -1 -1 -1 -1 -1 -1 -1 360 459 336 -1 22 -1 -1 209 -1 -1 491 -1 22 -1 -1 -1 -1 -1 
+Generation 0, Solution 77
+		Objective Function value: -151
+		Memory cost: 37085
+		Selected configurations: 88 -1 209 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 22 -1 119 -1 -1 -1 -1 22 -1 209 -1 378 -1 -1 -1 88 -1 -1 -1 -1 -1 -1 -1 -1 -1 119 -1 -1 378 -1 -1 119 -1 209 301 -1 
+Generation 0, Solution 78
+		Objective Function value: -95
+		Memory cost: 37485
+		Selected configurations: -1 131 209 -1 -1 -1 -1 -1 -1 -1 41 41 -1 -1 -1 -1 119 -1 -1 -1 -1 -1 209 209 -1 -1 -1 -1 41 -1 119 -1 360 -1 -1 -1 10 131 -1 -1 -1 -1 131 -1 -1 119 -1 -1 301 41 
+Generation 0, Solution 79
+		Objective Function value: -473
+		Memory cost: 36572
+		Selected configurations: 88 -1 -1 -1 -1 -1 308 144 -1 -1 308 308 -1 -1 -1 375 -1 -1 -1 -1 -1 -1 -1 -1 -1 378 308 -1 344 88 -1 -1 -1 -1 -1 -1 -1 -1 144 -1 344 -1 -1 -1 -1 119 144 -1 -1 -1 
+Generation 0, Solution 80
+		Objective Function value: -383
+		Memory cost: 36433
+		Selected configurations: -1 -1 184 -1 -1 -1 308 -1 -1 -1 -1 336 239 -1 -1 -1 -1 -1 -1 -1 -1 -1 308 -1 -1 -1 308 -1 336 -1 -1 184 -1 308 336 -1 10 -1 -1 -1 184 184 -1 -1 -1 -1 -1 -1 -1 336 
+Generation 0, Solution 81
+		Objective Function value: -354
+		Memory cost: 36952
+		Selected configurations: -1 -1 -1 -1 -1 -1 -1 -1 336 -1 -1 336 336 -1 -1 -1 -1 -1 -1 -1 -1 -1 332 -1 488 323 -1 -1 323 -1 323 -1 360 -1 336 -1 10 -1 -1 332 -1 -1 -1 -1 238 -1 -1 -1 -1 -1 
+Generation 0, Solution 82
+		Objective Function value: -19
+		Memory cost: 37451
+		Selected configurations: -1 -1 -1 -1 260 -1 308 360 -1 1 -1 -1 239 260 22 -1 -1 -1 -1 260 -1 22 -1 -1 -1 -1 308 -1 260 -1 260 1 360 -1 -1 -1 -1 -1 -1 332 -1 -1 -1 -1 -1 -1 -1 -1 -1 22 
+Generation 0, Solution 83
+		Objective Function value: -251
+		Memory cost: 36657
+		Selected configurations: -1 -1 209 -1 -1 -1 308 -1 -1 -1 41 -1 -1 -1 -1 -1 -1 -1 -1 -1 344 -1 -1 209 -1 -1 308 -1 308 -1 -1 1 -1 -1 -1 -1 -1 -1 -1 -1 344 184 -1 -1 209 -1 -1 -1 -1 41 
+Generation 0, Solution 84
+		Objective Function value: -138
+		Memory cost: 36162
+		Selected configurations: -1 -1 209 -1 -1 -1 -1 344 138 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 135 -1 128 209 -1 126 -1 -1 -1 138 -1 -1 -1 -1 -1 209 -1 114 126 -1 344 -1 -1 126 -1 -1 114 -1 -1 -1 
+Generation 0, Solution 85
+		Objective Function value: -473
+		Memory cost: 37285
+		Selected configurations: -1 -1 209 -1 -1 -1 -1 -1 -1 -1 -1 -1 239 -1 22 -1 -1 -1 278 -1 -1 22 -1 209 -1 -1 -1 -1 -1 -1 -1 301 -1 22 -1 -1 -1 -1 -1 -1 22 184 -1 -1 -1 -1 -1 278 301 209 
+Generation 0, Solution 86
+		Objective Function value: -361
+		Memory cost: 36656
+		Selected configurations: -1 10 -1 -1 -1 -1 -1 -1 -1 173 -1 -1 -1 -1 -1 -1 173 -1 -1 -1 10 -1 173 -1 -1 378 -1 -1 -1 -1 -1 1 -1 -1 -1 -1 10 173 126 126 -1 -1 -1 126 -1 119 -1 173 -1 -1 
+Generation 0, Solution 87
+		Objective Function value: -1
+		Memory cost: 37245
+		Selected configurations: -1 -1 -1 -1 260 -1 -1 -1 -1 -1 -1 336 -1 260 22 -1 260 -1 -1 260 135 22 -1 -1 -1 378 -1 303 -1 -1 -1 -1 -1 -1 336 -1 -1 22 -1 -1 -1 -1 260 -1 -1 119 -1 -1 -1 -1 
+Generation 0, Solution 88
+		Objective Function value: -240
+		Memory cost: 37431
+		Selected configurations: 88 -1 75 75 -1 -1 -1 -1 138 -1 -1 336 -1 344 -1 -1 -1 3 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 88 -1 -1 -1 -1 336 -1 -1 -1 -1 -1 344 -1 75 336 -1 -1 336 -1 301 -1 
+Generation 0, Solution 89
+		Objective Function value: -18
+		Memory cost: 37141
+		Selected configurations: 88 -1 144 75 459 -1 -1 144 -1 -1 -1 -1 -1 459 -1 -1 -1 3 -1 -1 459 -1 75 -1 -1 -1 -1 -1 -1 88 -1 -1 -1 459 -1 88 -1 114 -1 -1 -1 -1 491 -1 -1 88 114 -1 -1 -1 
+Generation 0, Solution 90
+		Objective Function value: -136
+		Memory cost: 35383
+		Selected configurations: -1 -1 -1 -1 260 -1 -1 144 -1 -1 -1 336 -1 260 -1 -1 323 -1 -1 260 -1 -1 128 -1 -1 -1 -1 303 -1 -1 323 -1 -1 -1 336 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
+Generation 0, Solution 91
+		Objective Function value: -419
+		Memory cost: 37497
+		Selected configurations: 88 -1 -1 -1 -1 -1 308 144 -1 -1 308 -1 -1 -1 88 375 -1 -1 278 -1 -1 -1 -1 -1 -1 -1 308 -1 150 88 -1 150 -1 459 -1 150 -1 -1 -1 88 -1 -1 308 -1 238 308 150 -1 -1 -1 
+Generation 0, Solution 92
+		Objective Function value: -178
+		Memory cost: 36813
+		Selected configurations: -1 -1 209 -1 -1 -1 308 144 -1 -1 -1 -1 459 -1 22 -1 -1 -1 -1 -1 -1 22 -1 209 -1 -1 308 -1 22 -1 -1 -1 360 459 -1 -1 -1 22 -1 332 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
+Generation 0, Solution 93
+		Objective Function value: -90
+		Memory cost: 36898
+		Selected configurations: 88 131 -1 -1 -1 -1 -1 -1 -1 -1 41 -1 -1 -1 -1 -1 -1 3 -1 -1 -1 -1 -1 -1 131 -1 -1 -1 41 88 -1 -1 360 -1 -1 -1 -1 301 -1 332 -1 -1 -1 -1 -1 -1 3 -1 301 41 
+Generation 0, Solution 94
+		Objective Function value: -157
+		Memory cost: 37434
+		Selected configurations: -1 -1 209 -1 491 -1 -1 -1 -1 -1 -1 336 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 323 209 -1 336 -1 323 21 -1 323 -1 360 -1 336 150 -1 209 -1 -1 -1 -1 491 -1 360 -1 -1 -1 -1 -1 
+Generation 0, Solution 95
+		Objective Function value: -88
+		Memory cost: 36768
+		Selected configurations: 323 -1 -1 -1 -1 -1 -1 138 138 -1 -1 336 239 -1 22 -1 -1 -1 -1 -1 -1 22 128 -1 -1 -1 -1 -1 22 -1 323 -1 360 -1 336 -1 -1 22 -1 -1 22 -1 -1 336 138 -1 -1 -1 301 -1 
+Generation 0, Solution 96
+		Objective Function value: -10
+		Memory cost: 37283
+		Selected configurations: -1 -1 -1 -1 260 321 -1 144 138 -1 -1 -1 -1 260 -1 -1 -1 -1 -1 260 -1 -1 260 -1 -1 -1 -1 -1 -1 -1 -1 260 138 459 238 150 -1 -1 -1 -1 138 -1 491 491 238 -1 -1 -1 -1 -1 
+Generation 0, Solution 97
+		Objective Function value: -236
+		Memory cost: 36996
+		Selected configurations: -1 -1 209 -1 -1 -1 308 332 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 209 -1 -1 308 -1 332 -1 -1 332 -1 -1 -1 -1 -1 184 126 332 209 184 -1 126 -1 -1 -1 -1 -1 -1 
+Generation 0, Solution 98
+		Objective Function value: -231
+		Memory cost: 36838
+		Selected configurations: -1 -1 209 -1 491 -1 308 308 138 -1 -1 -1 -1 -1 -1 -1 -1 -1 278 -1 135 -1 332 209 -1 332 308 -1 135 -1 -1 344 -1 -1 -1 -1 -1 278 -1 332 344 -1 491 308 278 -1 -1 -1 -1 -1 
+Generation 0, Solution 99
+		Objective Function value: -172
+		Memory cost: 37109
+		Selected configurations: -1 131 -1 -1 -1 -1 -1 144 -1 -1 41 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 1 128 -1 488 488 -1 -1 -1 -1 -1 1 -1 126 -1 -1 -1 128 126 -1 -1 -1 -1 126 131 -1 -1 -1 -1 41 
+Generation 0, Solution 100
+		Objective Function value: -282
+		Memory cost: 37355
+		Selected configurations: -1 131 131 -1 -1 -1 308 -1 -1 -1 3 -1 239 -1 308 375 239 3 278 -1 -1 -1 278 -1 488 378 308 303 375 -1 -1 3 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 3 -1 278 -1 -1 -1 
