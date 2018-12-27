@@ -20,27 +20,25 @@ typedef struct
 	bool parsingError = false;
 } Params;
 
-// Data structure that holds for each query the configurations with a non-zero gain
-typedef struct
-{
-	unsigned int* configs;
-	unsigned int length;
-} UsefulConfigs;
+// Custom general-purpose array data structure
+typedef struct {
+	int* vector;
+	int length;
+} CustomArray;
 
 // Data structure used to hold the input dataset of the problem instance
 typedef struct
 {
-	unsigned int nQueries;		// |Q|
-	unsigned int nIndexes;		// |I|
-	unsigned int nConfigs;		// |C|
-	unsigned int M;							// memory
-	short int **configIndexesMatrix;		// e matrix
-	unsigned int *indexesFixedCost;			// f vector
-	unsigned int *indexesMemoryOccupation;	// m vector
-	unsigned int **configQueriesGain;		// g matrix
-	UsefulConfigs *queriesWithGain;			// #Configuration vectors  
-	UsefulConfigs *configServingQueries;	// #Queries vectors  
-	float avgGainPerMemoryUnit;
+	int nQueries;		// |Q|
+	int nIndexes;		// |I|
+	int nConfigs;		// |C|
+	int M;								 // memory
+	short int **configIndexesMatrix;	 // e matrix
+	int *indexesFixedCost;				 // f vector
+	int *indexesMemoryOccupation;		 // m vector
+	int **configQueriesGain;			 // g matrix
+	CustomArray *queriesWithGain;		 // #Configuration vectors  
+	CustomArray *configServingQueries;	 // #Queries vectors  
 } Instance;
 
 
@@ -62,7 +60,7 @@ private:
 	Instance *problemInstance;
 		
 	long int objFunctionValue;
-	float fitnessValue;
+	long int fitnessValue;
 
 
 	// --- METHODS ---
@@ -74,10 +72,11 @@ public:
 	~Solution();						// solution class destructor
 
 	long int evaluate();
-	unsigned int memoryCost();
+	int memoryCost();
 	long int getObjFunctionValue() const;
 	long int getFitnessValue() const;
 	void writeToFile(const std::string fileName) const;
+	void print(const std::string msg) const;
 	
 private:
 

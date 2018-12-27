@@ -26,13 +26,15 @@ private:
 		}
 	};
 
-	unsigned int MAX_GENERATIONS_BEFORE_RESTART = 10000;
-	unsigned int POPULATION_SIZE;
+	
 	Solution** parents;
 	Solution** offsprings;
 	std::multiset<Solution*, solution_comparator> population;
-	unsigned int generation_counter;
 	std::string outputFileName;
+	int POPULATION_SIZE;
+	unsigned int generation_counter;
+	unsigned int MAX_GENERATIONS_BEFORE_RESTART = 10000;
+	
 	
 	// ====== METHODS ======
 
@@ -58,7 +60,7 @@ private:
 	void replaceLowerHalfPopulation();
 	bool checkImprovingSolutions(Solution** candidates, int size);
 
-	void crossover(Solution* itemA, Solution* itemB, unsigned int N = 2);
+	void crossover(Solution* itemA, Solution* itemB, int N = 2);
 	void mutate(Solution* sol);
 	void localSearch(LocalSearch* refiner, const Params& parameters);
 
