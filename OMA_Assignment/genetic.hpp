@@ -7,8 +7,7 @@
 #include <vector> 
 
 #define MIN_CROSSOVER_POINTS 2
-
-#define DETERMINISTIC_RANDOM_NUMBER_GENERATION false
+#define POPULATION_SIZE_MULTIPLIER 2
 
 class Genetic : Algorithm
 {
@@ -33,7 +32,7 @@ private:
 	std::string outputFileName;
 	int POPULATION_SIZE;
 	unsigned int generation_counter;
-	unsigned int MAX_GENERATIONS_BEFORE_RESTART = 10000;
+	unsigned int MAX_GENERATIONS_BEFORE_RESTART = 1000;
 	
 	
 	// ====== METHODS ======
@@ -44,7 +43,7 @@ public:
 		: Algorithm(inst),		// base class constructor
 		population(std::multiset<Solution*, solution_comparator>())
 	{
-		POPULATION_SIZE = 2 * inst->nQueries;
+		POPULATION_SIZE = POPULATION_SIZE_MULTIPLIER * inst->nQueries;
 		parents = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
 		offsprings = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
 	}
@@ -55,9 +54,7 @@ private:
 
 	void initializePopulation();
 	void breedPopulation();
-	void logPopulation();
 	bool replacePopulationByFitness(const std::string outputFileName, unsigned int gen);
-	void replaceLowerHalfPopulation();
 	bool checkImprovingSolutions(Solution** candidates, int size);
 
 	void crossover(Solution* itemA, Solution* itemB, int N = 2);
