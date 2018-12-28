@@ -5,7 +5,7 @@
 #include <limits>
 #include <chrono>
 
-#define DEFAULT_TIMELIMIT 300*1000
+#define DEFAULT_TIMELIMIT 180*1000
 
 
 /* ============ DATA TYPES ============ */
@@ -76,7 +76,6 @@ public:
 	long int getObjFunctionValue() const;
 	long int getFitnessValue() const;
 	void writeToFile(const std::string fileName) const;
-	void print(const std::string msg) const;
 	
 private:
 

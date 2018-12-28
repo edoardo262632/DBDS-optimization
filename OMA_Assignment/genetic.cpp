@@ -11,13 +11,19 @@ Solution* Genetic::run(const Params& parameters)
 
 	// INITIALIZATION
 	start:	fprintf(stdout, "(Re)starting the algorithm...\n"); 
-	POPULATION_SIZE = 2 * problemInstance->nQueries;
+	srand((unsigned int)getCurrentTime_ms());						// initialize seed for rand()
 	initializePopulation();
-	logPopulation();
-	
+
+	/* =========================================== */
+	// Temporary, needed to see what's happening after
+	// algorithm restart, has to be removed !!
+	delete bestSolution;
+	bestSolution = new Solution(problemInstance);
+	bestSolution->evaluate();
+	/* =========================================== */
+
 	ranSearchAfterLastUpdate = false;
-	generation_counter = 0;
-	last_update = 0, last_population_refresh = 0;
+	generation_counter = 0, last_update = 0;
 	long long currentTime = getCurrentTime_ms();
 
 	// REPEAT UNTIL THERE'S COMPUTATIONAL TIME LEFT (OR ALGORITHM RESTART)
@@ -31,32 +37,23 @@ Solution* Genetic::run(const Params& parameters)
 			last_update = generation_counter;
 		}
 
-		// inject new random solutions in the population if it's in a stale state
-		//if (generation_counter - last_update > 100 && generation_counter - last_population_refresh > 100)
-		//{
-		//	last_population_refresh = generation_counter;
-		//	replaceLowerHalfPopulation();
-		//}
-
-
-		// run a local search to specialize the population if it's not improving
-		if (generation_counter - last_update > 500 && !ranSearchAfterLastUpdate)
+		// periodically run a local search to specialize the population
+		if (generation_counter - last_update > 50 && !ranSearchAfterLastUpdate)
 		{
 			ranSearchAfterLastUpdate = true;
 			localSearch(refiner, parameters);
 		}
 		
-		currentTime = getCurrentTime_ms();		// update timestamp and generation number
-		generation_counter++;
-
-		// dynamic population size according to generation counter
-		if (generation_counter % 5000 == 0 && POPULATION_SIZE > 20)
-			POPULATION_SIZE -= POPULATION_SIZE / 5;
+		
+		// dynamically reducing population size according to generation counter
+		//if ((generation_counter+1) % 100 == 0 && POPULATION_SIZE > 20)
+		//	POPULATION_SIZE -= POPULATION_SIZE / 10;
 
 		// multistart if stuck in local optima
-		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART) {
-			if (generation_counter > 1.5 * MAX_GENERATIONS_BEFORE_RESTART)
-				MAX_GENERATIONS_BEFORE_RESTART = generation_counter;
+		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART) 
+		{
+			POPULATION_SIZE = POPULATION_SIZE_MULTIPLIER * problemInstance->nQueries;
+			MAX_GENERATIONS_BEFORE_RESTART = generation_counter;
 
 			// empty the population set, remove previous solutions
 			for (std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
@@ -67,9 +64,16 @@ Solution* Genetic::run(const Params& parameters)
 			}
 			population.clear();
 
+			/*free(offsprings);
+			free(parents);
+			parents = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
+			offsprings = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));*/
+
 			goto start;
 		}
-		
+
+		currentTime = getCurrentTime_ms();		// update timestamp and generation number
+		generation_counter++;
 	}
 
 	return bestSolution;
@@ -80,11 +84,7 @@ Solution* Genetic::run(const Params& parameters)
 // Greedy generation and evaluation of the starting population set
 void Genetic::initializePopulation()
 {
-#if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
-	srand((unsigned int)getCurrentTime_ms());
-#endif
-
-	parents[0] = new Solution(bestSolution);		// one solution is kept with the default configuration
+	parents[0] = new Solution(problemInstance);		// one solution is kept with the default configuration
 	parents[0]->evaluate();
 	std::vector<int> usedConfigs;					// vector with already used configurations for a parent
 
@@ -151,7 +151,10 @@ void Genetic::breedPopulation()
 	int N = rand() % 4 + MIN_CROSSOVER_POINTS;			// randomize the number of crossover points to avoid "loops" in subsequent generations
 	// apply crossover operator on pairs of parents
 	for (int i = 0; i < POPULATION_SIZE / 2; i++) {
-		crossover(offsprings[i], offsprings[POPULATION_SIZE-i-1], N);
+		int A = rand() % POPULATION_SIZE;
+		int B = rand() % POPULATION_SIZE;
+		crossover(offsprings[A], offsprings[B], N);
+		//crossover(offsprings[i], offsprings[POPULATION_SIZE - i - 1], N);
 	}
 
 	// apply mutation operator on all offsprings
@@ -163,8 +166,6 @@ void Genetic::breedPopulation()
 
 bool Genetic::replacePopulationByFitness(const std::string outputFileName, unsigned int gen)
 {
-	bool updatedBest = false;
-
 	// substitute the old population with the current parents and offsprings
 	population.clear();
 
@@ -176,53 +177,7 @@ bool Genetic::replacePopulationByFitness(const std::string outputFileName, unsig
 		population.insert(offsprings[i]);
 	}
 
-	//std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
-	//std::multiset<Solution*, solution_comparator> newPopulation;
-
-	//// iterates starting in the end of the population
-	//// and deletes elements of the population in the lower half
-	//for (unsigned int i = 0; it != population.end(); i++, it++)
-	//{
-	//	if (i < POPULATION_SIZE) {
-	//		newPopulation.insert((*it));
-	//	} else	{
-	//		
-	//		mutate(*it);
-	//		newPopulation.insert(*it);
-	//	}
-	//		
-	//}
-
-	//population.clear();
-	//population = newPopulation;
-
 	return checkImprovingSolutions(offsprings, POPULATION_SIZE);
-}
-
-
-void Genetic::logPopulation()
-{
-	int n = 1;
-	FILE *fl = fopen("populationLog.txt", "w");
-	if (fl == NULL)
-	{
-		fprintf(stderr, "Error: unable to open file log file\n");
-		return;
-	}
-
-	// Iterate on the population set and log solutions to file
-	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
-	for (int i = 0; it != population.end() && i < POPULATION_SIZE; ++it, ++i) {
-		fprintf(fl, "Generation %u, Solution %d\n", generation_counter, n++);
-		fprintf(fl, "		Objective Function value: %ld\n", (*it)->getObjFunctionValue());
-		fprintf(fl, "		Memory cost: %u\n", (*it)->memoryCost());
-		fprintf(fl, "		Selected configurations: ");
-		for (int i = 0; i < problemInstance->nQueries; i++)
-			fprintf(fl, "%d ", (*it)->selectedConfiguration[i]);
-		fprintf(fl, "\n");
-	}
-
-	fclose(fl);
 }
 
 
@@ -249,9 +204,6 @@ void Genetic::crossover(Solution* itemA, Solution* itemB, int N)
 void Genetic::mutate(Solution* sol)
 {
 	short int randomConfigIndex;
-#if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
-	srand((unsigned int)getCurrentTime_ms());		// initialize random seed for rand()
-#endif
 
 	// Choose probability dynamically based on generation counter
 	// Going from an initial split of 10% zero / 90% non-zero to a 90% zero / 10% non-zero 
@@ -304,31 +256,6 @@ void Genetic::localSearch(LocalSearch* refiner, const Params& parameters)
 	population.clear();
 	population = newPopulation;
 	fprintf(stdout, " done\n");
-}
-
-
-void Genetic::replaceLowerHalfPopulation()
-{
-	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
-	std::multiset<Solution*, solution_comparator> newPopulation;
-
-	// iterates starting in the end of the population
-	// and deletes elements of the population in the lower half
-	for (int i = 0; it != population.end(); i++, it++)
-	{
-		if (i < POPULATION_SIZE / 2)
-		{
-			newPopulation.insert(*it);
-		}
-		else delete *it;
-	}
-
-	population.clear();
-	population = newPopulation;
-
-	// inserts random solution to the lower half of the population
-	for (int i = 0; i < POPULATION_SIZE / 2; i++)
-		population.insert(generateRandomSolution());
 }
 
 
@@ -430,11 +357,7 @@ Solution * Genetic::generateRandomSolution()
 
 void Genetic::initializePopulation2()
 {
-#if !DETERMINISTIC_RANDOM_NUMBER_GENERATION
-	srand((unsigned int)getCurrentTime_ms());
-#endif
-
-	parents[0] = new Solution(bestSolution);		// one solution is kept with the default configuration
+	parents[0] = new Solution(problemInstance);		// one solution is kept with the default configuration
 	parents[0]->evaluate();
 	std::vector<int> usedConfigs;					// vector with already used configurations for a parent
 	int *b = (int *)calloc(problemInstance->nIndexes, sizeof(int));
@@ -446,7 +369,8 @@ void Genetic::initializePopulation2()
 		usedConfigs.clear();
 		for (int i = 0; i < problemInstance->nIndexes; i++)
 			b[i] = 0;
-		for (int i = 0; i < problemInstance->nQueries; i++) {
+		for (int i = 0; i < problemInstance->nQueries; i++) 
+		{
 			if (parents[k]->selectedConfiguration[i] == -1) {
 				int n = rand() % problemInstance->configServingQueries[i].length;
 				int conf = problemInstance->configServingQueries[i].vector[n];
@@ -466,7 +390,7 @@ void Genetic::initializePopulation2()
 						if (parents[k]->selectedConfiguration[problemInstance->queriesWithGain[conf].vector[x]] == -1)
 							parents[k]->selectedConfiguration[problemInstance->queriesWithGain[conf].vector[x]] = conf;
 				}
-				else {//  backtrack
+				else {	//  backtrack
 					mem = prev;
 				}
 			}
