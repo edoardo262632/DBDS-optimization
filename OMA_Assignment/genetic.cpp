@@ -8,12 +8,13 @@ Solution* Genetic::run(const Params& parameters)
 	long long startingTime = getCurrentTime_ms();
 	LocalSearch* refiner = new LocalSearch(problemInstance);
 	outputFileName = parameters.outputFileName;
+   
 
 	// INITIALIZATION
 	start:	fprintf(stdout, "(Re)starting the algorithm...\n"); 
 	POPULATION_SIZE = 2 * problemInstance->nQueries;
 	initializePopulation();
-	logPopulation();
+
 	
 	ranSearchAfterLastUpdate = false;
 	generation_counter = 0;
@@ -23,6 +24,8 @@ Solution* Genetic::run(const Params& parameters)
 	// REPEAT UNTIL THERE'S COMPUTATIONAL TIME LEFT (OR ALGORITHM RESTART)
 	while (currentTime - startingTime < parameters.timeLimit)
 	{
+
+		long int mem = bestSolution->memoryCost();
 		breedPopulation();
 
 		if (replacePopulationByFitness(parameters.outputFileName, generation_counter))
@@ -50,8 +53,10 @@ Solution* Genetic::run(const Params& parameters)
 		generation_counter++;
 
 		// dynamic population size according to generation counter
-		if (generation_counter % 5000 == 0 && POPULATION_SIZE > 20)
+		if (generation_counter % 5000 == 0 && POPULATION_SIZE > 20) {
 			POPULATION_SIZE -= POPULATION_SIZE / 5;
+		}
+			
 
 		// multistart if stuck in local optima
 		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART) {

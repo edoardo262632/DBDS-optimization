@@ -62,7 +62,6 @@ private:
 	long int objFunctionValue;
 	long int fitnessValue;
 
-
 	// --- METHODS ---
 
 public:
