@@ -8,6 +8,7 @@
 
 #define MIN_CROSSOVER_POINTS 2
 #define POPULATION_SIZE_MULTIPLIER 2
+#define MUTATION_PROBABILITY_NONZERO 90
 
 class Genetic : Algorithm
 {

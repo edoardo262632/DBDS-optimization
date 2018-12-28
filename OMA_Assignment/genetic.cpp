@@ -11,7 +11,8 @@ Solution* Genetic::run(const Params& parameters)
 
 	// INITIALIZATION
 	start:	fprintf(stdout, "(Re)starting the algorithm...\n"); 
-	srand((unsigned int)getCurrentTime_ms());						// initialize seed for rand()
+	srand((unsigned int)getCurrentTime_ms());										// initialize seed for rand()
+	POPULATION_SIZE = POPULATION_SIZE_MULTIPLIER * problemInstance->nQueries;
 	initializePopulation();
 
 	/* =========================================== */
@@ -43,8 +44,7 @@ Solution* Genetic::run(const Params& parameters)
 			ranSearchAfterLastUpdate = true;
 			localSearch(refiner, parameters);
 		}
-		
-		
+
 		// dynamically reducing population size according to generation counter
 		//if ((generation_counter+1) % 100 == 0 && POPULATION_SIZE > 20)
 		//	POPULATION_SIZE -= POPULATION_SIZE / 10;
@@ -52,8 +52,8 @@ Solution* Genetic::run(const Params& parameters)
 		// multistart if stuck in local optima
 		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART) 
 		{
-			POPULATION_SIZE = POPULATION_SIZE_MULTIPLIER * problemInstance->nQueries;
-			MAX_GENERATIONS_BEFORE_RESTART = generation_counter;
+			if (last_update > MAX_GENERATIONS_BEFORE_RESTART)
+				MAX_GENERATIONS_BEFORE_RESTART = last_update;
 
 			// empty the population set, remove previous solutions
 			for (std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
@@ -63,11 +63,6 @@ Solution* Genetic::run(const Params& parameters)
 				it = population.erase(it);
 			}
 			population.clear();
-
-			/*free(offsprings);
-			free(parents);
-			parents = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
-			offsprings = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));*/
 
 			goto start;
 		}
@@ -88,34 +83,36 @@ void Genetic::initializePopulation()
 	parents[0]->evaluate();
 	std::vector<int> usedConfigs;					// vector with already used configurations for a parent
 
-	for (int n = 1; n < POPULATION_SIZE; n++)				// P-1 solutions are initialized with the greedy algorithm
+	for (int n = 1; n < POPULATION_SIZE; n++)			// P-1 solutions are initialized with the greedy algorithm
 	{
 		parents[n] = new Solution(problemInstance);
 		usedConfigs.clear();
+
 		// fills the queries in a random order
 		for (int i = 0; i < 2 * problemInstance->nQueries; i++) {
-			int j = rand() % problemInstance->nQueries;		// generate a random value for the configuration to take for each query
-			parents[n]->selectedConfiguration[j] = maxGainGivenQuery(j);  // gets configuration that results in max gain for a query
-			usedConfigs.push_back(parents[n]->selectedConfiguration[j]);  // insert random configuration in the vector
+			int j = rand() % problemInstance->nQueries;						// generate a random value for the query to consider
+			parents[n]->selectedConfiguration[j] = maxGainGivenQuery(j);	// gets configuration that results in max gain for a query
+			usedConfigs.push_back(parents[n]->selectedConfiguration[j]);	// insert selected configuration in the vector
 
 			if (parents[n]->memoryCost() > problemInstance->M) {
-				usedConfigs.pop_back();                     // remove the configuration if the memory cost with it is > M
+				usedConfigs.pop_back();										// remove the configuration if the memory cost with it is > M
 				if (i % 3 == 2) parents[n]->selectedConfiguration[j] = getHighestGainConfiguration(usedConfigs, j);
 				if (i % 3 == 1) parents[n]->selectedConfiguration[j] = getRandomConfiguration(usedConfigs, j);
-				else parents[n]->selectedConfiguration[j] = -1; // "backtrack" -> do not activate this configuration
+				else parents[n]->selectedConfiguration[j] = -1;				// "backtrack" -> do not activate this configuration
 			}
 		}
+
 		// fills the rest of the queries from "left" to "right"
 		for (int i = 0; i < problemInstance->nQueries; i++) {
 			if (parents[n]->selectedConfiguration[i] < 0) {
 				parents[n]->selectedConfiguration[i] = maxGainGivenQuery(i);
-				usedConfigs.push_back(parents[n]->selectedConfiguration[i]);  // insert random configuration in the vector
+				usedConfigs.push_back(parents[n]->selectedConfiguration[i]);
 
 				if (parents[n]->memoryCost() > problemInstance->M) {
-					usedConfigs.pop_back();                     // remove the configuration if the memory cost with it is > M
+					usedConfigs.pop_back();
 					if (i % 3 == 2) parents[n]->selectedConfiguration[i] = getHighestGainConfiguration(usedConfigs, i);
 					if (i % 3 == 1) parents[n]->selectedConfiguration[i] = getRandomConfiguration(usedConfigs, i);
-					else parents[n]->selectedConfiguration[i] = -1; // "backtrack" -> do not activate this configuration
+					else parents[n]->selectedConfiguration[i] = -1;
 				}
 			}
 		}
@@ -148,7 +145,7 @@ void Genetic::breedPopulation()
 		offsprings[i] = new Solution(parents[i]);
 	}
 	
-	int N = rand() % 4 + MIN_CROSSOVER_POINTS;			// randomize the number of crossover points to avoid "loops" in subsequent generations
+	int N = rand() % 4 + MIN_CROSSOVER_POINTS;			// randomize the number of crossover points 
 	// apply crossover operator on pairs of parents
 	for (int i = 0; i < POPULATION_SIZE / 2; i++) {
 		int A = rand() % POPULATION_SIZE;
@@ -205,27 +202,17 @@ void Genetic::mutate(Solution* sol)
 {
 	short int randomConfigIndex;
 
-	// Choose probability dynamically based on generation counter
-	// Going from an initial split of 10% zero / 90% non-zero to a 90% zero / 10% non-zero 
-	// in steps of 5% between generation 1000 to 9000
-	int probability = 100 - 5 * (int)(generation_counter / 500);
-	if (probability < 10)
-		probability = 10;
-	else if (probability > 90)
-		probability = 90;
-
-
 	// iterates over the genes
 	for (int i = 0; i < problemInstance->nQueries; i++) {
 		// checks if a random generated number (>= 0) is equal to 0. In this case, the mutation occurs
 		if (rand() % problemInstance->nQueries  == 0)
 		{
-			// chance of choosing another config that servers this query
-			if (rand() % 100 < probability) {
+			// 90% chance of choosing another config that servers this query
+			if (rand() % 100 < MUTATION_PROBABILITY_NONZERO) {
 				randomConfigIndex = rand() % problemInstance->configServingQueries[i].length;
 				sol->selectedConfiguration[i] = problemInstance->configServingQueries[i].vector[randomConfigIndex];
 			} 
-			// chance of this query being served by "no configuration"
+			// 10% chance of this query being served by "no configuration"
 			else {
 				sol->selectedConfiguration[i] = -1;
 			}
@@ -308,8 +295,8 @@ int Genetic::getHighestGainConfiguration(std::vector<int> usedConfigs, int query
 	return maxConfig;
 }
 
-// given the configurations already used by a parent, pick one randomly (given that its gain is)
-// different from 0
+// given the configurations already used by a parent, pick one randomly (given that its gain
+// is different from 0)
 int Genetic::getRandomConfiguration(std::vector<int> usedConfigs, int queryIndex)
 {
 	for (int i = 0; i < usedConfigs.size(); i++){
@@ -334,7 +321,7 @@ int Genetic::maxGainGivenQuery(int queryIndex)
 	return maxConfig;
 }
 
-Solution * Genetic::generateRandomSolution()
+Solution* Genetic::generateRandomSolution()
 {
 	Solution* sol = new Solution(problemInstance);
 	for (int i = 0; i < problemInstance->nQueries; i++) 
@@ -343,7 +330,7 @@ Solution * Genetic::generateRandomSolution()
 		int A = rand() % problemInstance->nConfigs;		// generate a random value for the configuration to take for each query
 		sol->selectedConfiguration[j] = A;
 		if (sol->memoryCost() > problemInstance->M)
-			sol->selectedConfiguration[j] = -1;							// "backtrack" -> do not activate this configuration
+			sol->selectedConfiguration[j] = -1;						// "backtrack" -> do not activate this configuration
 		else
 			for (int x = 0; x < problemInstance->queriesWithGain[A].length; x++)
 				if (sol->selectedConfiguration[problemInstance->queriesWithGain[A].vector[x]] == -1)
@@ -397,10 +384,11 @@ void Genetic::initializePopulation2()
 		}
 	}
 
-
 	// Initialization and evaluation of the starting population set
 	for (int i = 0; i < POPULATION_SIZE; i++) {
 		parents[i]->evaluate();
 		population.insert(parents[i]);
 	}
+
+	checkImprovingSolutions(parents, POPULATION_SIZE);
 }

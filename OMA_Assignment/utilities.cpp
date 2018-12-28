@@ -230,7 +230,7 @@ long int Solution::evaluate()
 	objFunctionValue = feasible ? all_gains - time_spent : LONG_MIN;
 
 	// update fitness value
-	fitnessValue = (all_gains - time_spent) -
+	fitnessValue = (all_gains - time_spent) - 
 		(feasible ? 0 : (mem - problemInstance->M));		// penalise infeasible solutions by their surplus memory
 
 	return objFunctionValue;
