@@ -19,6 +19,7 @@ protected:
 
 	Instance* problemInstance;
 	Solution* bestSolution;
+	Solution* localBestSolution;
 
 private:
 

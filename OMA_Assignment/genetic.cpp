@@ -12,14 +12,18 @@ Solution* Genetic::run(const Params& parameters)
 	// INITIALIZATION
 	start:	fprintf(stdout, "(Re)starting the algorithm...\n"); 
 	srand((unsigned int)getCurrentTime_ms());						// initialize seed for rand()
-	initializePopulation();
+	if (rand() % 2 == 0)
+		initializePopulation2();
+	else
+		initializePopulation();
+
 
 	/* =========================================== */
 	// Temporary, needed to see what's happening after
 	// algorithm restart, has to be removed !!
-	delete bestSolution;
-	bestSolution = new Solution(problemInstance);
-	bestSolution->evaluate();
+	delete localBestSolution;
+	localBestSolution = new Solution(problemInstance);
+	localBestSolution->evaluate();
 	/* =========================================== */
 
 	ranSearchAfterLastUpdate = false;
@@ -68,6 +72,12 @@ Solution* Genetic::run(const Params& parameters)
 			free(parents);
 			parents = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
 			offsprings = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));*/
+			if (localBestSolution->getObjFunctionValue() > bestSolution->getObjFunctionValue()) {
+				delete bestSolution;
+				bestSolution = new Solution(localBestSolution);
+				bestSolution->evaluate();
+				bestSolution->writeToFile(outputFileName);
+			}
 
 			goto start;
 		}
@@ -262,7 +272,7 @@ void Genetic::localSearch(LocalSearch* refiner, const Params& parameters)
 bool Genetic::checkImprovingSolutions(Solution** candidates, int size)
 {
 	bool updatedBest = false;
-	Solution* newBest = bestSolution;
+	Solution* newBest = localBestSolution;
 
 	// check if there's a better solution in the candidates than the current best
 	for (int i = 0; i < size; i++)
@@ -276,12 +286,11 @@ bool Genetic::checkImprovingSolutions(Solution** candidates, int size)
 
 	if (updatedBest)
 	{
-		delete bestSolution;
-		bestSolution = new Solution(newBest);		// Update the best solution found so far and log it to file/console
-		bestSolution->evaluate();
-		bestSolution->writeToFile(outputFileName);
+		delete localBestSolution;
+		localBestSolution = new Solution(newBest);		// Update the best solution found so far and log it to file/console
+		localBestSolution->evaluate();
 		fprintf(stdout, "Found a new best solution with objective function value = %ld (Generation #%u)\n",
-			bestSolution->getObjFunctionValue(), generation_counter);
+			localBestSolution->getObjFunctionValue(), generation_counter);
 	}
 
 	return updatedBest;
