@@ -68,48 +68,48 @@ Instance readInputFile(std::string fileName)
 
 	// reading the CONFIGURATION_INDEX_MATRIX
 	instance.configIndexesMatrix = (short int**) malloc(instance.nConfigs * sizeof(short int*));
-	for (unsigned int i = 0; i < instance.nConfigs; i++) {
+	for (int i = 0; i < instance.nConfigs; i++) {
 		instance.configIndexesMatrix[i] = (short int*) malloc(instance.nIndexes * sizeof(short int));
-		for (unsigned int j = 0; j < instance.nIndexes; j++) {
+		for (int j = 0; j < instance.nIndexes; j++) {
 			fscanf(fl, "%hd", &instance.configIndexesMatrix[i][j]);
 		}
 	}
 	fscanf(fl, "%*s");	// eliminate an extra row
 
 	// alloc and read vector of Fixed_Cost for each index
-	instance.indexesFixedCost = (unsigned int*) malloc (instance.nIndexes * sizeof(unsigned int));
-	for (unsigned int i = 0; i < instance.nIndexes; i++) {
+	instance.indexesFixedCost = (int*) malloc (instance.nIndexes * sizeof(int));
+	for (int i = 0; i < instance.nIndexes; i++) {
 		fscanf(fl, "%u", &instance.indexesFixedCost[i]);
 	}
 
 	fscanf(fl, "%*s"); //  eliminate an extra row
 
 	// alloc and read vector of Memory needed from every index
-	instance.indexesMemoryOccupation = (unsigned int*)malloc(instance.nIndexes * sizeof(unsigned int));
-	for (unsigned int i = 0; i < instance.nIndexes; i++) {
+	instance.indexesMemoryOccupation = (int*)malloc(instance.nIndexes * sizeof(int));
+	for (int i = 0; i < instance.nIndexes; i++) {
 		fscanf(fl, "%u", &instance.indexesMemoryOccupation[i]);
 	}
 
 	fscanf(fl, "%*s");	//  eliminate an extra row
 
 	// alloc and read the CONFIGURATION_QUERIES_GAIN
-	instance.configQueriesGain = (unsigned int **)malloc(instance.nConfigs * sizeof(unsigned int*));
+	instance.configQueriesGain = (int **)malloc(instance.nConfigs * sizeof(int*));
 	
 	// alloc additional support data structure
-	instance.configServingQueries = (UsefulConfigs*)malloc(instance.nQueries * sizeof(UsefulConfigs));	 	instance.configServingQueries = (UsefulConfigs*)malloc(instance.nQueries * sizeof(UsefulConfigs));
-	instance.queriesWithGain = (UsefulConfigs*)malloc(instance.nConfigs * sizeof(UsefulConfigs));
+	instance.configServingQueries = (CustomArray*)malloc(instance.nQueries * sizeof(CustomArray));
+	instance.queriesWithGain = (CustomArray*)malloc(instance.nConfigs * sizeof(CustomArray));
 
 	// set all length of configServingQueries to 0
-	for (unsigned int j = 0; j < instance.nQueries; j++)
+	for (int j = 0; j < instance.nQueries; j++)
 		instance.configServingQueries[j].length = 0;
 
 	// set all length of queriesWithGain to 0
-	for (unsigned int j = 0; j < instance.nConfigs; j++)
+	for (int j = 0; j < instance.nConfigs; j++)
 		instance.queriesWithGain[j].length = 0;
 
-	for (unsigned int i = 0; i < instance.nConfigs; i++) {
-		instance.configQueriesGain[i] = (unsigned int*)malloc(instance.nQueries * sizeof(unsigned int));
-		for (unsigned int j = 0; j < instance.nQueries; j++) {
+	for (int i = 0; i < instance.nConfigs; i++) {
+		instance.configQueriesGain[i] = (int*)malloc(instance.nQueries * sizeof(int));
+		for (int j = 0; j < instance.nQueries; j++) {
 			fscanf(fl, "%u", &instance.configQueriesGain[i][j]);
 			// count number of non-zero elements
 			if (instance.configQueriesGain[i][j] > 0) {
@@ -122,50 +122,24 @@ Instance readInputFile(std::string fileName)
 	fclose(fl);
 
 	// population of the configServingQueries data Structure
-	for (unsigned int i = 0; i < instance.nQueries; i++) {
-		unsigned int k = 0;
-		instance.configServingQueries[i].configs = (unsigned int*)calloc(instance.configServingQueries[i].length,sizeof(unsigned int));
-		for (unsigned int j = 0; j < instance.nConfigs; j++) {
+	for (int i = 0; i < instance.nQueries; i++) {
+		int k = 0;
+		instance.configServingQueries[i].vector = (int*)calloc(instance.configServingQueries[i].length,sizeof(int));
+		for (int j = 0; j < instance.nConfigs; j++) {
 			if (instance.configQueriesGain[j][i] > 0)
-				instance.configServingQueries[i].configs[k++] = j;
+				instance.configServingQueries[i].vector[k++] = j;
 		}
 	}
 
 	// population of the configServingQueries data Structure
-	for (unsigned int i = 0; i < instance.nConfigs; i++) {
-		unsigned int k = 0;
-		instance.queriesWithGain[i].configs = (unsigned int*)calloc(instance.queriesWithGain[i].length, sizeof(unsigned int));
-		for (unsigned int j = 0; j < instance.nQueries; j++) {
+	for (int i = 0; i < instance.nConfigs; i++) {
+		int k = 0;
+		instance.queriesWithGain[i].vector = (int*)calloc(instance.queriesWithGain[i].length, sizeof(int));
+		for (int j = 0; j < instance.nQueries; j++) {
 			if (instance.configQueriesGain[i][j] > 0)
-				instance.queriesWithGain[i].configs[k++] = j;
+				instance.queriesWithGain[i].vector[k++] = j;
 		}
 	}
-
-	// calculation of average gain per memory unit
-	unsigned int totalMemory = 0, totalGains = 0;
-	for (unsigned int j = 0; j < instance.nConfigs; j++)
-	{
-		unsigned int cnt = 0, configMem = 0;
-
-		for (unsigned int i = 0; i < instance.nIndexes; i++)
-		{
-			if (instance.configIndexesMatrix[j][i] != 0)
-				configMem += instance.indexesMemoryOccupation[i];
-		}
-
-		for (unsigned int i = 0; i < instance.nQueries; i++)
-		{
-			if (instance.configQueriesGain[j][i] != 0)
-			{
-				cnt++;
-				totalGains += instance.configQueriesGain[j][i];
-			}
-		}
-
-		totalMemory += (cnt * configMem);
-	}
-
-	instance.avgGainPerMemoryUnit = ((float)totalGains / (float)totalMemory);
 
 	return instance;
 }
@@ -192,7 +166,7 @@ Solution::Solution(Instance *probInst)
 	problemInstance(probInst)
 {	
 	selectedConfiguration = (short int*) malloc(problemInstance->nQueries * sizeof(short int));
-	for (unsigned int i = 0; i < problemInstance->nQueries; i++)
+	for (int i = 0; i < problemInstance->nQueries; i++)
 		selectedConfiguration[i] = -1;
 	indexesToBuild = (short int*)calloc(problemInstance->nIndexes, sizeof(short int));
 }
@@ -200,12 +174,12 @@ Solution::Solution(Instance *probInst)
 Solution::Solution(Solution* other)
 	: Solution(other->problemInstance)
 {
-	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
+	for (int i = 0; i < problemInstance->nQueries; i++) {
 		// copy of the support integer array
 		selectedConfiguration[i] = other->selectedConfiguration[i];
 	}
 
-	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) {
+	for (int i = 0; i < problemInstance->nIndexes; i++) {
 		// copy of the indexesToBuild array
 		indexesToBuild[i] = other->indexesToBuild[i];
 	}
@@ -221,18 +195,18 @@ Solution::~Solution()
 
 long int Solution::evaluate() 
 {
-	unsigned int all_gains = 0;
-	unsigned int time_spent = 0;
-	unsigned int mem = 0;
+	int all_gains = 0;
+	int time_spent = 0;
+	int mem = 0;
 	
-	for (unsigned int i = 0; i < problemInstance->nIndexes; i++)
+	for (int i = 0; i < problemInstance->nIndexes; i++)
 		indexesToBuild[i] = 0;
 
-	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
+	for (int i = 0; i < problemInstance->nQueries; i++) {
 		short int x = selectedConfiguration[i];
 		if (x >= 0) {
 			// iterate on the Indexes vector
-			for (unsigned int k = 0; k < problemInstance->nIndexes; k++) {
+			for (int k = 0; k < problemInstance->nIndexes; k++) {
 				if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[x][k] == 1) {
 					// index k is part of configuration i and has not yet been built, so we need to build it
 					indexesToBuild[k] = 1;
@@ -243,7 +217,7 @@ long int Solution::evaluate()
 		}
 	}
 
-	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) 
+	for (int i = 0; i < problemInstance->nIndexes; i++) 
 	{
 		if (indexesToBuild[i])
 		{
@@ -256,37 +230,32 @@ long int Solution::evaluate()
 	objFunctionValue = feasible ? all_gains - time_spent : LONG_MIN;
 
 	// update fitness value
-	float val= ((float)(all_gains - time_spent) / ((float)problemInstance->M));
-	if(!feasible)
-		val *= (float) (mem - problemInstance->M);
 	fitnessValue = (all_gains - time_spent) -
-		(feasible ? 0 : val);		// penalise memory infeasibility
+		(feasible ? 0 : (mem - problemInstance->M));		// penalise infeasible solutions by their surplus memory
 
 	return objFunctionValue;
 }
 
 
-unsigned int Solution::memoryCost()
+int Solution::memoryCost()
 {
-	unsigned int mem = 0;
-	for (unsigned int i = 0; i < problemInstance->nIndexes; i++)
+	int mem = 0;
+	for (int i = 0; i < problemInstance->nIndexes; i++)
 		indexesToBuild[i] = 0;
 
-	for (unsigned int i = 0; i < problemInstance->nQueries; i++) 
+	for (int i = 0; i < problemInstance->nQueries; i++) 
 	{
-		short int x = selectedConfiguration[i];
-		if (x >= 0) {
+		if (selectedConfiguration[i] >= 0) {
 			// iterate on the Indexes vector
-			for (unsigned int k = 0; k < problemInstance->nIndexes; k++) {
-				if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[x][k] == 1) {
+			for (int k = 0; k < problemInstance->nIndexes; k++) {
+				if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[selectedConfiguration[i]][k] == 1)
 					// index k is part of configuration i and has not yet been built, so we need to build it
 					indexesToBuild[k] = 1;
-				}
 			}
 		}
 	}
 
-	for (unsigned int i = 0; i < problemInstance->nIndexes; i++) {
+	for (int i = 0; i < problemInstance->nIndexes; i++) {
 		if (indexesToBuild[i])
 			mem += problemInstance->indexesMemoryOccupation[i];				// calculate memory cost of the given solution
 	}
@@ -311,7 +280,7 @@ void Solution::writeToFile(const std::string fileName) const
 	short int**	configsServingQueries = (short int**)malloc(problemInstance->nQueries * sizeof(short int*));
 
 	// Generate solution matrix on-the-fly before printing it
-	for (unsigned int i = 0; i < problemInstance->nQueries; i++)
+	for (int i = 0; i < problemInstance->nQueries; i++)
 	{
 		configsServingQueries[i] = (short int*)calloc(problemInstance->nConfigs, sizeof(short int));
 
@@ -325,8 +294,8 @@ void Solution::writeToFile(const std::string fileName) const
 		fprintf(stderr, "Error: unable to open file %s", fileName.c_str());		
 	else
 	{
-		for (unsigned int i = 0; i < problemInstance->nConfigs; i++) {
-			for (unsigned int j = 0; j < problemInstance->nQueries; j++) {
+		for (int i = 0; i < problemInstance->nConfigs; i++) {
+			for (int j = 0; j < problemInstance->nQueries; j++) {
 				fprintf(fl, "%d ", configsServingQueries[j][i]);		
 			}								
 			fprintf(fl, "\n");											
@@ -334,7 +303,7 @@ void Solution::writeToFile(const std::string fileName) const
 		fclose(fl);
 	}
 
-	for (unsigned int i = 0; i < problemInstance->nQueries; i++)
+	for (int i = 0; i < problemInstance->nQueries; i++)
 		free(configsServingQueries[i]);
 	free(configsServingQueries);
 }

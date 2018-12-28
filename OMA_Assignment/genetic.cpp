@@ -57,6 +57,16 @@ Solution* Genetic::run(const Params& parameters)
 		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART) {
 			if (generation_counter > 1.5 * MAX_GENERATIONS_BEFORE_RESTART)
 				MAX_GENERATIONS_BEFORE_RESTART = generation_counter;
+
+			// empty the population set, remove previous solutions
+			for (std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
+				it != population.end(); it++)
+			{
+				delete *it;
+				it = population.erase(it);
+			}
+			population.clear();
+
 			goto start;
 		}
 		
@@ -78,12 +88,12 @@ void Genetic::initializePopulation()
 	parents[0]->evaluate();
 	std::vector<int> usedConfigs;					// vector with already used configurations for a parent
 
-	for (unsigned int n = 1; n < POPULATION_SIZE; n++)				// P-1 solutions are initialized with the greedy algorithm
+	for (int n = 1; n < POPULATION_SIZE; n++)				// P-1 solutions are initialized with the greedy algorithm
 	{
 		parents[n] = new Solution(problemInstance);
 		usedConfigs.clear();
 		// fills the queries in a random order
-		for (unsigned int i = 0; i < 2 * problemInstance->nQueries; i++) {
+		for (int i = 0; i < 2 * problemInstance->nQueries; i++) {
 			int j = rand() % problemInstance->nQueries;		// generate a random value for the configuration to take for each query
 			parents[n]->selectedConfiguration[j] = maxGainGivenQuery(j);  // gets configuration that results in max gain for a query
 			usedConfigs.push_back(parents[n]->selectedConfiguration[j]);  // insert random configuration in the vector
@@ -96,7 +106,7 @@ void Genetic::initializePopulation()
 			}
 		}
 		// fills the rest of the queries from "left" to "right"
-		for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
+		for (int i = 0; i < problemInstance->nQueries; i++) {
 			if (parents[n]->selectedConfiguration[i] < 0) {
 				parents[n]->selectedConfiguration[i] = maxGainGivenQuery(i);
 				usedConfigs.push_back(parents[n]->selectedConfiguration[i]);  // insert random configuration in the vector
@@ -112,7 +122,7 @@ void Genetic::initializePopulation()
 	}
 
 	// Initialization and evaluation of the starting population set
-	for (unsigned int i = 0; i < POPULATION_SIZE; i++) {
+	for (int i = 0; i < POPULATION_SIZE; i++) {
 		parents[i]->evaluate();
 		population.insert(parents[i]);
 	}
@@ -126,7 +136,7 @@ void Genetic::breedPopulation()
 {
 	 // select the best POPULATION_SIZE elements to use as parents
 	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
-	for (unsigned int i = 0; it != population.end(); ++it, ++i)
+	for (int i = 0; it != population.end(); ++it, ++i)
 	{
 		if (i < POPULATION_SIZE)
 			parents[i] = *it;
@@ -134,19 +144,18 @@ void Genetic::breedPopulation()
 	}
 
 	// duplicate parents before breeding, so we do not overwrite them
-	for (unsigned int i = 0; i < POPULATION_SIZE; i++) {
+	for (int i = 0; i < POPULATION_SIZE; i++) {
 		offsprings[i] = new Solution(parents[i]);
 	}
 	
 	int N = rand() % 4 + MIN_CROSSOVER_POINTS;			// randomize the number of crossover points to avoid "loops" in subsequent generations
 	// apply crossover operator on pairs of parents
-	for (unsigned int i = 0; i < POPULATION_SIZE / 2; i++) {
+	for (int i = 0; i < POPULATION_SIZE / 2; i++) {
 		crossover(offsprings[i], offsprings[POPULATION_SIZE-i-1], N);
 	}
 
-
 	// apply mutation operator on all offsprings
-	for (unsigned int i = 0; i < POPULATION_SIZE ; i++) {
+	for (int i = 0; i < POPULATION_SIZE ; i++) {
 		mutate(offsprings[i]);
 	}
 }
@@ -159,7 +168,7 @@ bool Genetic::replacePopulationByFitness(const std::string outputFileName, unsig
 	// substitute the old population with the current parents and offsprings
 	population.clear();
 
-	for (unsigned int i = 0; i < POPULATION_SIZE; i++)
+	for (int i = 0; i < POPULATION_SIZE; i++)
 	{ 
 		population.insert(parents[i]);
 
@@ -203,12 +212,12 @@ void Genetic::logPopulation()
 
 	// Iterate on the population set and log solutions to file
 	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
-	for (unsigned int i = 0; it != population.end() && i < POPULATION_SIZE; ++it, ++i) {
+	for (int i = 0; it != population.end() && i < POPULATION_SIZE; ++it, ++i) {
 		fprintf(fl, "Generation %u, Solution %d\n", generation_counter, n++);
 		fprintf(fl, "		Objective Function value: %ld\n", (*it)->getObjFunctionValue());
 		fprintf(fl, "		Memory cost: %u\n", (*it)->memoryCost());
 		fprintf(fl, "		Selected configurations: ");
-		for (unsigned int i = 0; i < problemInstance->nQueries; i++)
+		for (int i = 0; i < problemInstance->nQueries; i++)
 			fprintf(fl, "%d ", (*it)->selectedConfiguration[i]);
 		fprintf(fl, "\n");
 	}
@@ -217,13 +226,13 @@ void Genetic::logPopulation()
 }
 
 
-void Genetic::crossover(Solution* itemA, Solution* itemB, unsigned int N)
+void Genetic::crossover(Solution* itemA, Solution* itemB, int N)
 {
-	unsigned int M = problemInstance->nQueries / N;
+	int M = problemInstance->nQueries / N;
 	int temp = 0;
 
-	for (unsigned int i = 0; i < problemInstance->nQueries ; i += 2*M) {
-		for (unsigned int j = 0; j < M; j++) {
+	for (int i = 0; i < problemInstance->nQueries ; i += 2*M) {
+		for (int j = 0; j < M; j++) {
 			if ((j+i) >= problemInstance->nQueries)
 				break;
 
@@ -255,14 +264,14 @@ void Genetic::mutate(Solution* sol)
 
 
 	// iterates over the genes
-	for (unsigned int i = 0; i < problemInstance->nQueries; i++) {
+	for (int i = 0; i < problemInstance->nQueries; i++) {
 		// checks if a random generated number (>= 0) is equal to 0. In this case, the mutation occurs
 		if (rand() % problemInstance->nQueries  == 0)
 		{
 			// chance of choosing another config that servers this query
 			if (rand() % 100 < probability) {
 				randomConfigIndex = rand() % problemInstance->configServingQueries[i].length;
-				sol->selectedConfiguration[i] = problemInstance->configServingQueries[i].configs[randomConfigIndex];
+				sol->selectedConfiguration[i] = problemInstance->configServingQueries[i].vector[randomConfigIndex];
 			} 
 			// chance of this query being served by "no configuration"
 			else {
@@ -280,7 +289,7 @@ void Genetic::localSearch(LocalSearch* refiner, const Params& parameters)
 	std::multiset<Solution*, solution_comparator> newPopulation;
 	Solution* tmp;
 
-	for (unsigned int i = 0; it != population.end(); ++it, i++)
+	for (int i = 0; it != population.end(); ++it, i++)
 	{
 		if (i < POPULATION_SIZE)
 		{
@@ -305,7 +314,7 @@ void Genetic::replaceLowerHalfPopulation()
 
 	// iterates starting in the end of the population
 	// and deletes elements of the population in the lower half
-	for (unsigned int i = 0; it != population.end(); i++, it++)
+	for (int i = 0; it != population.end(); i++, it++)
 	{
 		if (i < POPULATION_SIZE / 2)
 		{
@@ -318,7 +327,7 @@ void Genetic::replaceLowerHalfPopulation()
 	population = newPopulation;
 
 	// inserts random solution to the lower half of the population
-	for (unsigned int i = 0; i < POPULATION_SIZE / 2; i++)
+	for (int i = 0; i < POPULATION_SIZE / 2; i++)
 		population.insert(generateRandomSolution());
 }
 
@@ -361,7 +370,7 @@ bool Genetic::checkImprovingSolutions(Solution** candidates, int size)
 // highest gain to a query
 int Genetic::getHighestGainConfiguration(std::vector<int> usedConfigs, int queryIndex)
 {
-	unsigned int maxGain = 0;
+	int maxGain = 0;
 	int maxConfig = -1;
 	for (int i = 0; i < usedConfigs.size(); i++){
 		if (problemInstance->configQueriesGain[usedConfigs[i]][queryIndex] > maxGain){
@@ -387,12 +396,12 @@ int Genetic::getRandomConfiguration(std::vector<int> usedConfigs, int queryIndex
 
 int Genetic::maxGainGivenQuery(int queryIndex)
 {
-	unsigned int maxGain = 0;
+	int maxGain = 0;
 	int maxConfig = -1;
-	for (unsigned int i = 0; i < problemInstance->configServingQueries[queryIndex].length; i++){
-		if (problemInstance->configQueriesGain[problemInstance->configServingQueries[queryIndex].configs[i]][queryIndex] > maxGain){
-			maxGain = problemInstance->configQueriesGain[problemInstance->configServingQueries[queryIndex].configs[i]][queryIndex];
-			maxConfig = problemInstance->configServingQueries[queryIndex].configs[i];
+	for (int i = 0; i < problemInstance->configServingQueries[queryIndex].length; i++){
+		if (problemInstance->configQueriesGain[problemInstance->configServingQueries[queryIndex].vector[i]][queryIndex] > maxGain){
+			maxGain = problemInstance->configQueriesGain[problemInstance->configServingQueries[queryIndex].vector[i]][queryIndex];
+			maxConfig = problemInstance->configServingQueries[queryIndex].vector[i];
 		}
 	}
 	return maxConfig;
@@ -401,7 +410,7 @@ int Genetic::maxGainGivenQuery(int queryIndex)
 Solution * Genetic::generateRandomSolution()
 {
 	Solution* sol = new Solution(problemInstance);
-	for (unsigned int i = 0; i < problemInstance->nQueries; i++) 
+	for (int i = 0; i < problemInstance->nQueries; i++) 
 	{
 		int j = rand() % problemInstance->nQueries;		// randomly select a query to modify
 		int A = rand() % problemInstance->nConfigs;		// generate a random value for the configuration to take for each query
@@ -410,8 +419,8 @@ Solution * Genetic::generateRandomSolution()
 			sol->selectedConfiguration[j] = -1;							// "backtrack" -> do not activate this configuration
 		else
 			for (int x = 0; x < problemInstance->queriesWithGain[A].length; x++)
-				if (sol->selectedConfiguration[problemInstance->queriesWithGain[A].configs[x]] == -1)
-					sol->selectedConfiguration[problemInstance->queriesWithGain[A].configs[x]] = A;
+				if (sol->selectedConfiguration[problemInstance->queriesWithGain[A].vector[x]] == -1)
+					sol->selectedConfiguration[problemInstance->queriesWithGain[A].vector[x]] = A;
 	};
 
 	sol->evaluate();
@@ -440,7 +449,7 @@ void Genetic::initializePopulation2()
 		for (int i = 0; i < problemInstance->nQueries; i++) {
 			if (parents[k]->selectedConfiguration[i] == -1) {
 				int n = rand() % problemInstance->configServingQueries[i].length;
-				int conf = problemInstance->configServingQueries[i].configs[n];
+				int conf = problemInstance->configServingQueries[i].vector[n];
 				prev = mem;
 				for (int j = 0; j < problemInstance->nIndexes; j++) {
 					if (problemInstance->configIndexesMatrix[conf][j] && b[j] == 0) {
@@ -454,8 +463,8 @@ void Genetic::initializePopulation2()
 						}
 					}
 					for (int x = 0; x < problemInstance->queriesWithGain[conf].length; x++)
-						if (parents[k]->selectedConfiguration[problemInstance->queriesWithGain[conf].configs[x]] == -1)
-							parents[k]->selectedConfiguration[problemInstance->queriesWithGain[conf].configs[x]] = conf;
+						if (parents[k]->selectedConfiguration[problemInstance->queriesWithGain[conf].vector[x]] == -1)
+							parents[k]->selectedConfiguration[problemInstance->queriesWithGain[conf].vector[x]] = conf;
 				}
 				else {//  backtrack
 					mem = prev;
@@ -466,7 +475,7 @@ void Genetic::initializePopulation2()
 
 
 	// Initialization and evaluation of the starting population set
-	for (unsigned int i = 0; i < POPULATION_SIZE; i++) {
+	for (int i = 0; i < POPULATION_SIZE; i++) {
 		parents[i]->evaluate();
 		population.insert(parents[i]);
 	}
