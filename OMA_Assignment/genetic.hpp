@@ -26,7 +26,8 @@ private:
 		}
 	};
 
-	
+
+	Solution* localBestSolution;
 	Solution** parents;
 	Solution** offsprings;
 	std::multiset<Solution*, solution_comparator> population;
@@ -42,7 +43,8 @@ public:
 
 	Genetic(Instance* inst)
 		: Algorithm(inst),		// base class constructor
-		population(std::multiset<Solution*, solution_comparator>())
+		population(std::multiset<Solution*, solution_comparator>()),
+		localBestSolution(new Solution(inst))
 	{
 		POPULATION_SIZE = POPULATION_SIZE_MULTIPLIER * inst->nQueries;
 		parents = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
