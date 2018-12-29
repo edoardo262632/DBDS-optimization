@@ -5,31 +5,23 @@ std::mutex mtx;
 Solution* Genetic::run(const Params* parameters)
 {
 	this->parameters = parameters;
-	
-	std::thread *threadss = (std::thread *) malloc(N_THREADS * sizeof(std::thread));
 
-	// TODO: create N_THREADS threads, assign each one to a GeneticThread::run function,
-	// then wait for their termination before proceeding
-
+	// Creating multiple threads to run the algorithm in parallel
+	std::thread threadss[N_THREADS];
 	for (int i = 0; i < N_THREADS; i++)
-		threadss[i]= std::thread (&Genetic::GeneticThread::run, threads[i]);
-
-	//for (int i = 0; i < N_THREADS; i++)
-	//	threadss[i](threads[i]->run);
-	//std::thread first(threads[0]->run);
-	/*std::thread second (updateBestSolution(),bestSolution);
-	std::thread third (run);
-	std::thread fourth (run);*/
+		threadss[i] = std::thread(&Genetic::GeneticThread::run, threads[i]);
 
 	for (int i = 0; i < N_THREADS; i++)
 		threadss[i].join();
+
 	return bestSolution;
 }
 
 
 void Genetic::updateBestSolution(Solution* newBest)
 {
-	// LOCK
+	mtx.lock();		// MUTEX LOCK
+
 	if (newBest->getObjFunctionValue() > bestSolution->getObjFunctionValue())
 	{
 		delete bestSolution;
@@ -38,7 +30,8 @@ void Genetic::updateBestSolution(Solution* newBest)
 		bestSolution->writeToFile(parameters->outputFileName);
 		fprintf(stdout, "Found a new best solution with objective function value = %ld\n", bestSolution->getObjFunctionValue());
 	}
-	// UNLOCK
+
+	mtx.unlock();	// UNLOCK
 }
 
 
@@ -109,9 +102,7 @@ void Genetic::GeneticThread::run()
 		// better than the previous best across all runs
 		if (localBestSolution->getObjFunctionValue() > algorithm->bestSolution->getObjFunctionValue())
 		{
-			mtx.lock();
 			algorithm->updateBestSolution(localBestSolution);
-			mtx.unlock();
 		}
 
 		currentTime = getCurrentTime_ms();		// update timestamp and generation number
@@ -219,7 +210,6 @@ void Genetic::GeneticThread::initializePopulation2()
 
 	checkImprovingSolutions(parents, POPULATION_SIZE);
 }
-
 
 
 void Genetic::GeneticThread::breedPopulation()
@@ -338,17 +328,15 @@ void Genetic::GeneticThread::mutate(Solution* sol)
 
 void Genetic::GeneticThread::localSearch(LocalSearch* refiner)
 {
-	fprintf(stdout, "Running local search...");
 	std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
 	std::multiset<Solution*, solution_comparator> newPopulation;
-	Solution* tmp;
 
 	for (int i = 0; it != population.end(); ++it, i++)
 	{
 		if (i < POPULATION_SIZE)
 		{
 			refiner->setStartingPoint(*it);
-			tmp = new Solution(refiner->run(algorithm->parameters));
+			Solution* tmp = new Solution(refiner->run(algorithm->parameters));
 			tmp->evaluate();
 			newPopulation.insert(tmp);
 		}
@@ -357,7 +345,6 @@ void Genetic::GeneticThread::localSearch(LocalSearch* refiner)
 
 	population.clear();
 	population = newPopulation;
-	fprintf(stdout, " done\n");
 }
 
 
@@ -380,8 +367,8 @@ int Genetic::GeneticThread::getHighestGainConfiguration(std::vector<int> usedCon
 	return maxConfig;
 }
 
-// given the configurations already used by a parent, pick one randomly (given that its gain is)
-// different from 0
+// given the configurations already used by a parent, pick one randomly (given that its gain is
+// different from 0)
 int Genetic::GeneticThread::getRandomConfiguration(std::vector<int> usedConfigs, int queryIndex)
 {
 	for (int i = 0; i < usedConfigs.size(); i++) {
