@@ -54,6 +54,15 @@ Solution* Genetic::run(const Params& parameters)
 		//	POPULATION_SIZE -= POPULATION_SIZE / 10;
 
 		// multistart if stuck in local optima
+
+		if (localBestSolution->getObjFunctionValue() > bestSolution->getObjFunctionValue()) {
+			delete bestSolution;
+			bestSolution = new Solution(localBestSolution);
+			bestSolution->evaluate();
+			bestSolution->writeToFile(outputFileName);
+		}
+
+
 		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART) 
 		{
 			POPULATION_SIZE = POPULATION_SIZE_MULTIPLIER * problemInstance->nQueries;
@@ -72,12 +81,6 @@ Solution* Genetic::run(const Params& parameters)
 			free(parents);
 			parents = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
 			offsprings = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));*/
-			if (localBestSolution->getObjFunctionValue() > bestSolution->getObjFunctionValue()) {
-				delete bestSolution;
-				bestSolution = new Solution(localBestSolution);
-				bestSolution->evaluate();
-				bestSolution->writeToFile(outputFileName);
-			}
 
 			goto start;
 		}
