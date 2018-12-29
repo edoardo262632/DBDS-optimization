@@ -4,9 +4,24 @@
 Solution* Genetic::run(const Params* parameters)
 {
 	this->parameters = parameters;
+	std::thread *threadss = (std::thread *) malloc(N_THREADS * sizeof(std::thread));
 
 	// TODO: create N_THREADS threads, assign each one to a GeneticThread::run function,
 	// then wait for their termination before proceeding
+
+	std::thread first(&Genetic::GeneticThread::run, threads[0]);
+	//for (int i = 0; i < N_THREADS; i++)
+	//	threadss[i](threads[i]->run);
+	//std::thread first(threads[0]->run);
+	/*std::thread second (updateBestSolution(),bestSolution);
+	std::thread third (run);
+	std::thread fourth (run);*/
+
+	system("pause");
+	first.join();
+	//second.join();
+	//third.join();
+	//fourth.join();
 
 	return bestSolution;
 }
@@ -369,7 +384,7 @@ int Genetic::GeneticThread::getRandomConfiguration(std::vector<int> usedConfigs,
 {
 	for (int i = 0; i < usedConfigs.size(); i++) {
 		int randomConfig = usedConfigs[rand() % usedConfigs.size()];
-		if (algorithm->problemInstance->configQueriesGain[usedConfigs[randomConfig]][queryIndex] > 0) {
+		if (algorithm->problemInstance->configQueriesGain[randomConfig][queryIndex] > 0) {
 			return randomConfig;
 		}
 	}

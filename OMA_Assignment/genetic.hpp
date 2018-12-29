@@ -5,6 +5,7 @@
 #include "localsearch.hpp"
 #include <set>
 #include <vector> 
+#include <thread>  
 
 #define MIN_CROSSOVER_POINTS 2
 #define POPULATION_SIZE_MULTIPLIER 2
