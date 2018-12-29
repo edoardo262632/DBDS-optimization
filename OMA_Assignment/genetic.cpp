@@ -1,15 +1,19 @@
 #include "genetic.hpp"
 
+std::mutex mtx;
 
 Solution* Genetic::run(const Params* parameters)
 {
 	this->parameters = parameters;
+	
 	std::thread *threadss = (std::thread *) malloc(N_THREADS * sizeof(std::thread));
 
 	// TODO: create N_THREADS threads, assign each one to a GeneticThread::run function,
 	// then wait for their termination before proceeding
 
-	std::thread first(&Genetic::GeneticThread::run, threads[0]);
+	for (int i = 0; i < N_THREADS; i++)
+		threadss[i]= std::thread (&Genetic::GeneticThread::run, threads[i]);
+
 	//for (int i = 0; i < N_THREADS; i++)
 	//	threadss[i](threads[i]->run);
 	//std::thread first(threads[0]->run);
@@ -17,12 +21,8 @@ Solution* Genetic::run(const Params* parameters)
 	std::thread third (run);
 	std::thread fourth (run);*/
 
-	system("pause");
-	first.join();
-	//second.join();
-	//third.join();
-	//fourth.join();
-
+	for (int i = 0; i < N_THREADS; i++)
+		threadss[i].join();
 	return bestSolution;
 }
 
@@ -109,7 +109,9 @@ void Genetic::GeneticThread::run()
 		// better than the previous best across all runs
 		if (localBestSolution->getObjFunctionValue() > algorithm->bestSolution->getObjFunctionValue())
 		{
+			mtx.lock();
 			algorithm->updateBestSolution(localBestSolution);
+			mtx.unlock();
 		}
 
 		currentTime = getCurrentTime_ms();		// update timestamp and generation number
