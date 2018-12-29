@@ -19,7 +19,6 @@ protected:
 
 	Instance* problemInstance;
 	Solution* bestSolution;
-	Solution* localBestSolution;
 
 private:
 
@@ -32,7 +31,7 @@ public:
 		bestSolution(new Solution(inst)) 
 	{ }
 
-	virtual Solution* run(const Params& parameters) = 0;
+	virtual Solution* run(const Params* parameters) = 0;
 
 private:
 

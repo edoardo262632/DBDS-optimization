@@ -8,7 +8,7 @@ void LocalSearch::setStartingPoint(Solution* sol)
 }
 
 
-Solution* LocalSearch::run(const Params& parameters)
+Solution* LocalSearch::run(const Params* parameters)
 {
 	// First improvement local search implementation
 	// using startingPoint as the initial solution for the neighborhood generation

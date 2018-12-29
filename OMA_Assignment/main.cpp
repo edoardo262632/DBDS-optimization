@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 	
 	// Instantiate the proper class and run the algorithm
 	Genetic solver = Genetic(&problemInstance);
-	Solution* solution = solver.run(executionParameters);
+	Solution* solution = solver.run(&executionParameters);
 	
 	fprintf(stdout, "\nAlgorithm execution terminated succesfully!\nObjective function value = %ld\nMemory cost = %u\n\n",
 		solution->getObjFunctionValue(), solution->memoryCost());
