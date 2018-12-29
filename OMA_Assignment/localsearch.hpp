@@ -25,7 +25,7 @@ public:
 	{ }
 
 	void setStartingPoint(Solution* sol);
-	Solution* run(const Params& parameters);
+	Solution* run(const Params* parameters);
 
 private:
 
