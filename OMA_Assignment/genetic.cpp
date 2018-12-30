@@ -7,12 +7,12 @@ Solution* Genetic::run(const Params* parameters)
 	this->parameters = parameters;
 
 	// Creating multiple threads to run the algorithm in parallel
-	std::thread threadss[N_THREADS];
+	std::thread threads[N_THREADS];
 	for (int i = 0; i < N_THREADS; i++)
-		threadss[i] = std::thread(&Genetic::GeneticThread::run, threads[i]);
+		threads[i] = std::thread(&Genetic::GeneticThread::run, threadss[i]);
 
 	for (int i = 0; i < N_THREADS; i++)
-		threadss[i].join();
+		threads[i].join();
 
 	return bestSolution;
 }
@@ -42,8 +42,8 @@ void Genetic::GeneticThread::run()
 	LocalSearch* refiner = new LocalSearch(algorithm->problemInstance);
 
 	// INITIALIZATION
-	start:	fprintf(stdout, "(Re)starting the algorithm...\n");
-	srand((unsigned int)getCurrentTime_ms());						// initialize seed for rand()
+	start:	fprintf(stdout, "Thread %d is (re)starting the algorithm...\n", threadID);
+	srand((unsigned int)getCurrentTime_ms());				// initialize seed for rand()
 
 	/* =========================================== */
 	delete localBestSolution;
@@ -74,10 +74,6 @@ void Genetic::GeneticThread::run()
 		{
 			localSearch(refiner);
 		}
-
-		// dynamically reducing population size according to generation counter
-		//if ((generation_counter+1) % 100 == 0 && POPULATION_SIZE > 20)
-		//	POPULATION_SIZE -= POPULATION_SIZE / 10;
 
 		// multistart if stuck in local optima
 		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART)
@@ -114,8 +110,6 @@ void Genetic::GeneticThread::run()
 // Greedy generation and evaluation of the starting population set
 void Genetic::GeneticThread::initializePopulation()
 {
-	parents[0] = new Solution(algorithm->problemInstance);		// one solution is kept with the default configuration
-	parents[0]->evaluate();
 	std::vector<int> usedConfigs;					// vector with already used configurations for a parent
 
 	for (int n = 1; n < POPULATION_SIZE; n++)				// P-1 solutions are initialized with the greedy algorithm
@@ -152,6 +146,9 @@ void Genetic::GeneticThread::initializePopulation()
 	}
 
 	// Initialization and evaluation of the starting population set
+	population.clear();
+	parents[0] = new Solution(algorithm->problemInstance);				// one solution is kept with the default configuration
+
 	for (int i = 0; i < POPULATION_SIZE; i++) {
 		parents[i]->evaluate();
 		population.insert(parents[i]);
@@ -164,8 +161,6 @@ void Genetic::GeneticThread::initializePopulation()
 // Alternative greedy initialization of starting population
 void Genetic::GeneticThread::initializePopulation2()
 {
-	parents[0] = new Solution(algorithm->problemInstance);		// one solution is kept with the default configuration
-	parents[0]->evaluate();
 	int *b = (int *)calloc(algorithm->problemInstance->nIndexes, sizeof(int));
 	int mem, prev;
 
@@ -202,7 +197,12 @@ void Genetic::GeneticThread::initializePopulation2()
 		}
 	}
 
+	free(b);
+
 	// Initialization and evaluation of the starting population set
+	population.clear();
+	parents[0] = new Solution(algorithm->problemInstance);				// one solution is kept with the default configuration
+
 	for (int i = 0; i < POPULATION_SIZE; i++) {
 		parents[i]->evaluate();
 		population.insert(parents[i]);
@@ -234,7 +234,6 @@ void Genetic::GeneticThread::breedPopulation()
 		int A = rand() % POPULATION_SIZE;
 		int B = rand() % POPULATION_SIZE;
 		crossover(offsprings[A], offsprings[B], N);
-		//crossover(offsprings[i], offsprings[POPULATION_SIZE - i - 1], N);
 	}
 
 	// apply mutation operator on all offsprings

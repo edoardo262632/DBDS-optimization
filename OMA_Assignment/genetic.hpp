@@ -34,13 +34,14 @@ class Genetic : Algorithm
 
 	private:
 
+		const int threadID;
 		Genetic* algorithm;
 		Solution* localBestSolution;
 		Solution** parents;
 		Solution** offsprings;
 		std::multiset<Solution*, solution_comparator> population;
 
-		int POPULATION_SIZE;
+		const int POPULATION_SIZE;
 		unsigned int generation_counter;
 		unsigned int MAX_GENERATIONS_BEFORE_RESTART = 1000;
 
@@ -48,12 +49,12 @@ class Genetic : Algorithm
 
 	public:
 
-		GeneticThread(Genetic* caller)
-			: algorithm(caller),
+		GeneticThread(Genetic* caller, int tID)
+			: algorithm(caller), threadID(tID),
 			population(std::multiset<Solution*, solution_comparator>()),
-			localBestSolution(new Solution(algorithm->problemInstance))
+			localBestSolution(new Solution(algorithm->problemInstance)),
+			POPULATION_SIZE(POPULATION_SIZE_MULTIPLIER * algorithm->problemInstance->nQueries)
 		{
-			POPULATION_SIZE = POPULATION_SIZE_MULTIPLIER * algorithm->problemInstance->nQueries;
 			parents = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
 			offsprings = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
 		}
@@ -93,7 +94,7 @@ public:
 private:
 
 	const Params* parameters;
-	GeneticThread** threads;
+	GeneticThread** threadss;
 	
 
 	// ====== METHODS ======
@@ -103,9 +104,9 @@ public:
 	Genetic(Instance* inst)
 		: Algorithm(inst)		// base class constructor
 	{
-		threads = (GeneticThread**)malloc(N_THREADS * sizeof(GeneticThread*));
+		threadss = (GeneticThread**)malloc(N_THREADS * sizeof(GeneticThread*));
 		for (int i = 0; i < N_THREADS; i++)
-			threads[i] = new GeneticThread(this);		// instantiate thread worker classes
+			threadss[i] = new GeneticThread(this, (i+1));		// instantiate thread worker classes
 	}
 
 	Solution* run(const Params* parameters);
