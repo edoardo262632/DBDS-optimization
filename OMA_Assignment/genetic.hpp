@@ -7,6 +7,7 @@
 #include <vector> 
 #include <thread>  
 #include <mutex>
+#include <random>
 
 #define MIN_CROSSOVER_POINTS 2
 #define POPULATION_SIZE_MULTIPLIER 2
@@ -84,6 +85,9 @@ class Genetic : Algorithm
 		int getRandomConfiguration(std::vector<int> usedConfigs, int queryIndex);
 		int getHighestGainConfiguration(std::vector<int> usedConfigs, int queryIndex);
 		int maxGainGivenQuery(int queryIndex);
+
+		// Auxiliary function for randomization
+		int intRand(int max);
 	};
 
 
