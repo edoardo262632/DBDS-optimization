@@ -86,9 +86,6 @@ class Genetic : Algorithm
 		int getRandomConfiguration(std::vector<int> usedConfigs, int queryIndex);
 		int getHighestGainConfiguration(std::vector<int> usedConfigs, int queryIndex);
 		int maxGainGivenQuery(int queryIndex);
-
-		// Auxiliary function for randomization
-		int intRand(int max);
 	};
 
 
