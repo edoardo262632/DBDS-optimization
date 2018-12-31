@@ -41,6 +41,7 @@ class Genetic : Algorithm
 		Solution** parents;
 		Solution** offsprings;
 		std::multiset<Solution*, solution_comparator> population;
+		std::mt19937 random_number;
 
 		const int POPULATION_SIZE;
 		unsigned int generation_counter;

@@ -1,5 +1,7 @@
 #include "genetic.hpp"
 
+std::mutex mtx;
+
 Solution* Genetic::run(const Params* parameters)
 {
 	this->parameters = parameters;
@@ -18,6 +20,8 @@ Solution* Genetic::run(const Params* parameters)
 
 void Genetic::updateBestSolution(Solution* newBest)
 {
+	mtx.lock();		// LOCK
+
 	if (newBest->getObjFunctionValue() > bestSolution->getObjFunctionValue())
 	{
 		delete bestSolution;
@@ -26,6 +30,8 @@ void Genetic::updateBestSolution(Solution* newBest)
 		bestSolution->writeToFile(parameters->outputFileName);
 		fprintf(stdout, "Found a new best solution with objective function value = %ld\n", bestSolution->getObjFunctionValue());
 	}
+
+	mtx.unlock();	// UNLOCK
 }
 
 
@@ -37,6 +43,7 @@ void Genetic::GeneticThread::run()
 
 	// INITIALIZATION
 	start:	fprintf(stdout, "Thread %d is (re)starting the algorithm...\n", threadID);
+	random_number.seed(std::random_device{}());
 	
 	/* =========================================== */
 	delete localBestSolution;
@@ -45,7 +52,7 @@ void Genetic::GeneticThread::run()
 	/* =========================================== */
 
 	// Randomly choosing one of the 2 avaiable initializers
-	if (intRand(2) == 0)
+	if (random_number() % 2 == 0)
 		initializePopulation();
 	else initializePopulation2();
 
@@ -71,17 +78,13 @@ void Genetic::GeneticThread::run()
 		// multistart if stuck in local optima
 		if (generation_counter - last_update > MAX_GENERATIONS_BEFORE_RESTART)
 		{
-			//POPULATION_SIZE = POPULATION_SIZE_MULTIPLIER * algorithm->problemInstance->nQueries;
 			if (last_update > MAX_GENERATIONS_BEFORE_RESTART)
 				MAX_GENERATIONS_BEFORE_RESTART = last_update;
 
-			// empty the population set, remove previous solutions
-			for (std::multiset<Solution*, solution_comparator>::iterator it = population.begin();
-				it != population.end(); it++)
-			{
+			// empty the population set, delete all existing solution objects
+			std::multiset<Solution*, solution_comparator>::iterator it;
+			for (it = population.begin(); it != population.end(); it++)
 				delete *it;
-				it = population.erase(it);
-			}
 			population.clear();
 
 			goto start;
@@ -111,7 +114,7 @@ void Genetic::GeneticThread::initializePopulation()
 		usedConfigs.clear();
 		// fills the queries in a random order
 		for (int i = 0; i < 2 * algorithm->problemInstance->nQueries; i++) {
-			int j = intRand(algorithm->problemInstance->nQueries);				// generate a random value for the query to consider
+			int j = random_number() % algorithm->problemInstance->nQueries;		// generate a random value for the query to consider
 			parents[n]->selectedConfiguration[j] = maxGainGivenQuery(j);		// gets configuration that results in max gain for a query
 			usedConfigs.push_back(parents[n]->selectedConfiguration[j]);		// insert selected configuration in the vector
 
@@ -165,7 +168,7 @@ void Genetic::GeneticThread::initializePopulation2()
 		for (int i = 0; i < algorithm->problemInstance->nQueries; i++)
 		{
 			if (parents[k]->selectedConfiguration[i] == -1) {
-				int n = intRand(algorithm->problemInstance->configServingQueries[i].length);
+				int n = random_number() % algorithm->problemInstance->configServingQueries[i].length;
 				int conf = algorithm->problemInstance->configServingQueries[i].vector[n];
 				prev = mem;
 				for (int j = 0; j < algorithm->problemInstance->nIndexes; j++) {
@@ -221,11 +224,11 @@ void Genetic::GeneticThread::breedPopulation()
 		offsprings[i] = new Solution(parents[i]);
 	}
 	
-	int N = intRand(4) + MIN_CROSSOVER_POINTS;			// randomize the number of crossover points
+	int N = (random_number() % 4) + MIN_CROSSOVER_POINTS;			// randomize the number of crossover points
 	// apply crossover operator on pairs of parents
 	for (int i = 0; i < POPULATION_SIZE / 2; i++) {
-		int A = intRand(POPULATION_SIZE);
-		int B = intRand(POPULATION_SIZE);
+		int A = random_number() % POPULATION_SIZE;
+		int B = random_number() % POPULATION_SIZE;
 		crossover(offsprings[A], offsprings[B], N);
 	}
 
@@ -302,11 +305,11 @@ void Genetic::GeneticThread::mutate(Solution* sol)
 	// iterates over the genes
 	for (int i = 0; i < algorithm->problemInstance->nQueries; i++) {
 		// checks if a random generated number (>= 0) is equal to 0. In this case, the mutation occurs
-		if (intRand(algorithm->problemInstance->nQueries) == 0)
+		if (random_number() % algorithm->problemInstance->nQueries == 0)
 		{
 			// chance of choosing another config that servers this query
-			if (intRand(100) < MUTATION_PROBABILITY_NONZERO) {
-				short int randomConfigIndex = intRand(algorithm->problemInstance->configServingQueries[i].length);
+			if (random_number() % 100 < MUTATION_PROBABILITY_NONZERO) {
+				short int randomConfigIndex = random_number() % algorithm->problemInstance->configServingQueries[i].length;
 				sol->selectedConfiguration[i] = algorithm->problemInstance->configServingQueries[i].vector[randomConfigIndex];
 			} 
 			// chance of this query being served by "no configuration"
@@ -364,7 +367,7 @@ int Genetic::GeneticThread::getHighestGainConfiguration(std::vector<int> usedCon
 int Genetic::GeneticThread::getRandomConfiguration(std::vector<int> usedConfigs, int queryIndex)
 {
 	for (int i = 0; i < usedConfigs.size(); i++) {
-		int randomConfig = usedConfigs[intRand(usedConfigs.size())];
+		int randomConfig = usedConfigs[random_number() % usedConfigs.size()];
 		if (algorithm->problemInstance->configQueriesGain[randomConfig][queryIndex] > 0) {
 			return randomConfig;
 		}
@@ -384,12 +387,4 @@ int Genetic::GeneticThread::maxGainGivenQuery(int queryIndex)
 		}
 	}
 	return maxConfig;
-}
-
-// multi-thread safe way to generate random numbers
-int Genetic::GeneticThread::intRand(int max) 
-{ 
-    thread_local static std::mt19937 generator(std::random_device{}());
-    std::uniform_int_distribution<int> distribution(0,max-1);
-	return distribution(generator);
 }
