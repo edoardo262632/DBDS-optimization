@@ -1,7 +1,5 @@
 #include <stdlib.h>
-#include <stdio.h>
-#include <string>
-#include <thread>         
+#include <stdio.h>   
 
 using namespace std;
 
@@ -34,6 +32,5 @@ int main(int argc, char **argv)
 	fprintf(stdout, "\nAlgorithm execution terminated succesfully!\nObjective function value = %ld\nMemory cost = %u\n\n",
 		solution->getObjFunctionValue(), solution->memoryCost());
 
-	system("pause");
 	return 0;
 }
