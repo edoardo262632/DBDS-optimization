@@ -30,16 +30,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="algorithm.hpp">
-      <Filter>File di origine</Filter>
-    </ClInclude>
-    <ClInclude Include="utilities.hpp">
-      <Filter>File di origine</Filter>
+      <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="genetic.hpp">
-      <Filter>File di origine</Filter>
+      <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="localsearch.hpp">
-      <Filter>File di origine</Filter>
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="utilities.hpp">
+      <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
