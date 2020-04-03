@@ -1,35 +1,26 @@
-#ifndef LOCALSEARCH_HPP
-#define LOCALSEARCH_HPP
+#pragma once
 
 #include "algorithm.hpp"
-#include <set>
 
 
-class LocalSearch : Algorithm
+class LocalSearch : public Algorithm
 {
-	// ====== DATA ======
-
-public:
 
 private:
 
-	Solution* startingPoint;
+	Solution startingPoint;
 
-	// ====== METHODS ======
 
 public:
 
-	LocalSearch(Instance* inst)
-		: Algorithm(inst),		// base class constructor
-		startingPoint(new Solution(bestSolution))
-	{ }
+	LocalSearch(Instance& inst)
+		: Algorithm(inst),
+		startingPoint(Solution(bestSolution))
+	{ };
 
-	void setStartingPoint(Solution* sol);
-	Solution* run(const Params* parameters);
+	void setStartingPoint(const Solution& sol);
+	Solution run(const Parameters& parameters);
 
 private:
-
 
 };
-
-#endif	// LOCALSEARCH_HPP

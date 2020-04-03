@@ -1,123 +1,95 @@
-#ifndef GENETIC_HPP
-#define GENETIC_HPP
+#pragma once
 
-#include "algorithm.hpp"
-#include "localsearch.hpp"
 #include <set>
 #include <vector> 
 #include <thread>  
 #include <mutex>
 #include <random>
 
+#include "algorithm.hpp"
+#include "localsearch.hpp"
+
+
 #define MIN_CROSSOVER_POINTS 2
-#define POPULATION_SIZE_MULTIPLIER 2
+#define POPULATION_SIZE 100
 #define MUTATION_PROBABILITY_NONZERO 90
-#define N_THREADS 4
+#define N_THREADS 2
 
-class Genetic : Algorithm
+using namespace std;
+
+
+class Genetic : public Algorithm
 {
-	// ====== TYPES ======
-
-	// Comparator for Solution objects, to use in the population sorted set
-	struct solution_comparator {
-		bool operator() (const Solution* lhs, const Solution* rhs) const
-		{
-			return lhs->getFitnessValue() > rhs->getFitnessValue();
-		}
-	};
-
-	// Thread worker class for running multiple instances of the algorithm in parallel
+	
+	// Worker thread class for running multiple instances of the algorithm in parallel
 	class GeneticThread
 	{
-		// ====== DATA ======
 
-	public:
+		// Comparator for Solution objects, to use in the population sorted set
+		struct solution_comparator {
+			bool operator() (const Solution* lhs, const Solution* rhs) const
+			{
+				return lhs->getFitnessValue() > rhs->getFitnessValue();
+			}
+		};
 
 	private:
 
 		const int threadID;
-		Genetic* algorithm;
-		Solution* localBestSolution;
-		Solution** parents;
-		Solution** offsprings;
+		Genetic& algorithm;
+		Solution localBestSolution;
+		Solution* parents[POPULATION_SIZE] = { nullptr };
+		Solution* offsprings[POPULATION_SIZE] = { nullptr };
 		std::multiset<Solution*, solution_comparator> population;
 		std::mt19937 random_number;
 
-		const int POPULATION_SIZE;
 		unsigned int generation_counter;
 		unsigned int MAX_GENERATIONS_BEFORE_RESTART = 1000;
 
-		// ====== METHODS ======
 
 	public:
 
-		GeneticThread(Genetic* caller, int tID)
-			: algorithm(caller), threadID(tID),
-			population(std::multiset<Solution*, solution_comparator>()),
-			localBestSolution(new Solution(algorithm->problemInstance)),
-			POPULATION_SIZE(POPULATION_SIZE_MULTIPLIER * algorithm->problemInstance->nQueries)
-		{
-			parents = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
-			offsprings = (Solution**)malloc(POPULATION_SIZE * sizeof(Solution*));
-		}
+		GeneticThread(Genetic& caller, int tID);
+		~GeneticThread();
 
-		~GeneticThread()
-		{
-			free(parents);
-			free(offsprings);
-		}
-
-		void run();		// Worker thread main function
-
+		void run();		// Thread entry point
 
 	private:
 
+		// Genetic algorithm steps, implemented each by a function
 		void initializePopulation();
 		void initializePopulation2();
 		void breedPopulation();
-		bool replacePopulationByFitness();
-		bool checkImprovingSolutions(Solution** candidates, int size);
-
 		void crossover(Solution* itemA, Solution* itemB, int N = 2);
 		void mutate(Solution* sol);
-		void localSearch(LocalSearch* refiner);
+		bool replacePopulationByFitness();
+		bool checkImprovingSolutions(Solution* candidates[], int size);
+		void localSearch(LocalSearch& refiner);
 
 		// Auxiliary functions for greedy initialization
-		int getRandomConfiguration(std::vector<int> usedConfigs, int queryIndex);
-		int getHighestGainConfiguration(std::vector<int> usedConfigs, int queryIndex);
+		int getRandomConfiguration(std::vector<int>& usedConfigs, int queryIndex);
+		int getHighestGainConfiguration(std::vector<int>& usedConfigs, int queryIndex);
 		int maxGainGivenQuery(int queryIndex);
 	};
 
 
-	// ====== DATA ======
-
-public:
 
 private:
 
-	const Params* parameters;
-	GeneticThread** threadss;
+	const Parameters* parameters;
+	vector<GeneticThread> threads;
+	mutex mtx;
 	
 
-	// ====== METHODS ======
-
 public:
 
-	Genetic(Instance* inst)
-		: Algorithm(inst)		// base class constructor
-	{
-		threadss = (GeneticThread**)malloc(N_THREADS * sizeof(GeneticThread*));
-		for (int i = 0; i < N_THREADS; i++)
-			threadss[i] = new GeneticThread(this, (i+1));		// instantiate thread worker classes
-	}
+	Genetic(Instance& inst);
+	~Genetic();
 
-	Solution* run(const Params* parameters);
-
+	Solution run(const Parameters& parameters);
 
 private:
 
-	void updateBestSolution(Solution* newBest);
+	void updateBestSolution(const Solution& newBest);
 
 };
-
-#endif	// GENETIC_HPP
