@@ -1,17 +1,18 @@
 #include "utilities.hpp"
 
-using namespace std;
+#include <limits>
+#include <chrono>
+#include <exception>
 
 
-Params parseCommandLine(int argc, char *argv[])
+Parameters parseCommandLine(int argc, char *argv[])
 {	
-	Params execParams = Params();
+	Parameters execParams = Params();
 
 	if (argc != 2 && argc != 4)
 	{
-		fprintf(stderr, "Wrong command line parameters usage, expected:"
-			"\n$ODBDPsolver_OMAAL_group04.exe <instancefilename> -t <timelimit>\n");
-		execParams.parsingError = true;
+		throw exception("Wrong command line format, expected:\
+			\n$ODBDPsolver_OMAAL_group04.exe <instancefilename> -t <timelimit>");
 	}
 	else
 	{
@@ -31,9 +32,8 @@ Params parseCommandLine(int argc, char *argv[])
 			}
 			else	// Unknown parameter handling										
 			{
-				fprintf(stderr, "Unknown usage of command line parameters, expected:"
-					"\n$ODBDPsolver_OMAAL_group04.exe <instancefilename> -t <timelimit>\n");
-				execParams.parsingError = true;
+				throw exception("Command line parsing error, expected:\
+					\n$ODBDPsolver_OMAAL_group04.exe <instancefilename> -t <timelimit>");
 			}
 		}
 	}
@@ -42,154 +42,170 @@ Params parseCommandLine(int argc, char *argv[])
 }
 
 
-Instance readInputFile(std::string fileName)
-{	
-	Instance instance = Instance();
-	FILE *fl;
+long long getCurrentTime_ms()		// Returns system time in milliseconds
+{
+	using namespace chrono;
+	return duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+}
 
-	fl = fopen(fileName.c_str(), "r");
-	if (fl == NULL) 
+
+/****	INSTANCE CLASS	****/
+
+
+Instance::Instance()
+	: M(0), nConfigs(0), nQueries(0), nIndexes(0)
+{
+}
+
+Instance::~Instance()
+{
+}
+
+
+void Instance::readInputFile(const std::string& fileName)
+{
+	FILE* fl;
+	fopen_s(&fl, fileName.c_str(), "r");
+	if (fl == NULL)
 	{
-		fprintf(stderr, "Encountered an error when attempting to open and read file '%s'\n\n", fileName.c_str());
-		system("pause");
-		exit(EXIT_FAILURE);
+		throw exception(("Error when attempting to open and read file '" + fileName + "'\n").c_str());
 	}
 
-	int l = fscanf(fl, "%*s%u",&instance.nQueries);
-	l += fscanf(fl, "%*s%u",&instance.nIndexes);
-	l += fscanf(fl, "%*s%u",&instance.nConfigs);
-	l += fscanf(fl, "%*s%u",&instance.M);
-	if (l != 4) {
-		fprintf(stderr, "Error in the instance file format\n");
-		return Instance();
-	}
-	
-	fscanf(fl, "%*s");	// eliminate an extra row
+	// Read problem instance size values
+	int l = fscanf_s(fl, "%*s%u", &this->nQueries);
+	l += fscanf_s(fl, "%*s%u", &this->nIndexes);
+	l += fscanf_s(fl, "%*s%u", &this->nConfigs);
+	l += fscanf_s(fl, "%*s%u", &this->M);
 
-	// reading the CONFIGURATION_INDEX_MATRIX
-	instance.configIndexesMatrix = (short int**) malloc(instance.nConfigs * sizeof(short int*));
-	for (int i = 0; i < instance.nConfigs; i++) {
-		instance.configIndexesMatrix[i] = (short int*) malloc(instance.nIndexes * sizeof(short int));
-		for (int j = 0; j < instance.nIndexes; j++) {
-			fscanf(fl, "%hd", &instance.configIndexesMatrix[i][j]);
-		}
-	}
-	fscanf(fl, "%*s");	// eliminate an extra row
+	if (l != 4)
+		throw exception("Error in the instance file format\n");
 
-	// alloc and read vector of Fixed_Cost for each index
-	instance.indexesFixedCost = (int*) malloc (instance.nIndexes * sizeof(int));
-	for (int i = 0; i < instance.nIndexes; i++) {
-		fscanf(fl, "%u", &instance.indexesFixedCost[i]);
+	fscanf_s(fl, "%*s");	// Skip a row
+
+
+	// Read the CONFIGURATION_INDEX_MATRIX
+	configIndexesMatrix.clear();
+	configIndexesMatrix.reserve(nConfigs);
+	for (int i = 0; i < nConfigs; i++)
+	{
+		configIndexesMatrix.emplace_back(vector<short int>(nIndexes, 0));
+		for (short int j = 0; j < nIndexes; j++)
+			fscanf_s(fl, "%hd", &configIndexesMatrix[i][j]);
 	}
 
-	fscanf(fl, "%*s"); //  eliminate an extra row
+	fscanf_s(fl, "%*s");	// Skip a row
 
-	// alloc and read vector of Memory needed from every index
-	instance.indexesMemoryOccupation = (int*)malloc(instance.nIndexes * sizeof(int));
-	for (int i = 0; i < instance.nIndexes; i++) {
-		fscanf(fl, "%u", &instance.indexesMemoryOccupation[i]);
+
+	// Allocate and read fixed_cost of each index
+	indexesFixedCost = vector<int>(nIndexes, 0);
+	for (int i = 0; i < nIndexes; i++) {
+		fscanf_s(fl, "%u", &indexesFixedCost[i]);
 	}
 
-	fscanf(fl, "%*s");	//  eliminate an extra row
+	fscanf_s(fl, "%*s");	// Skip a row
 
-	// alloc and read the CONFIGURATION_QUERIES_GAIN
-	instance.configQueriesGain = (int **)malloc(instance.nConfigs * sizeof(int*));
-	
-	// alloc additional support data structure
-	instance.configServingQueries = (CustomArray*)malloc(instance.nQueries * sizeof(CustomArray));
-	instance.queriesWithGain = (CustomArray*)malloc(instance.nConfigs * sizeof(CustomArray));
 
-	// set all length of configServingQueries to 0
-	for (int j = 0; j < instance.nQueries; j++)
-		instance.configServingQueries[j].length = 0;
+	// Allocate and read memory_cost of each index
+	indexesMemoryOccupation = vector<int>(nIndexes, 0);
+	for (int i = 0; i < nIndexes; i++) {
+		fscanf_s(fl, "%u", &indexesMemoryOccupation[i]);
+	}
 
-	// set all length of queriesWithGain to 0
-	for (int j = 0; j < instance.nConfigs; j++)
-		instance.queriesWithGain[j].length = 0;
+	fscanf_s(fl, "%*s");	// Skip a row
 
-	for (int i = 0; i < instance.nConfigs; i++) {
-		instance.configQueriesGain[i] = (int*)malloc(instance.nQueries * sizeof(int));
-		for (int j = 0; j < instance.nQueries; j++) {
-			fscanf(fl, "%u", &instance.configQueriesGain[i][j]);
-			// count number of non-zero elements
-			if (instance.configQueriesGain[i][j] > 0) {
-				instance.configServingQueries[j].length++;
-				instance.queriesWithGain[i].length++;
+
+	// Allocate and read the CONFIGURATION_QUERIES_GAIN
+	configQueriesGain.clear();
+	configQueriesGain.reserve(nConfigs);
+	configServingQueries.clear();
+	configServingQueries.reserve(nQueries);
+	queriesWithGain.clear();
+	queriesWithGain.reserve(nConfigs);
+
+	for (int i = 0; i < nQueries; i++)
+		configServingQueries.emplace_back(std::vector<int>());
+
+	for (int i = 0; i < nConfigs; i++)
+		queriesWithGain.emplace_back(std::vector<int>());
+
+	for (int i = 0; i < nConfigs; i++) 
+	{
+		configQueriesGain.emplace_back(vector<int>(nQueries, 0));
+		for (int j = 0; j < nQueries; j++)
+		{
+			fscanf_s(fl, "%u", &configQueriesGain[i][j]);
+
+			// Count non-zero elements
+			if (configQueriesGain[i][j] > 0) {
+				configServingQueries[j].emplace_back(0);
+				queriesWithGain[i].emplace_back(0);
 			}
 		}
 	}
 
 	fclose(fl);
 
-	// population of the configServingQueries data Structure
-	for (int i = 0; i < instance.nQueries; i++) {
-		int k = 0;
-		instance.configServingQueries[i].vector = (int*)calloc(instance.configServingQueries[i].length,sizeof(int));
-		for (int j = 0; j < instance.nConfigs; j++) {
-			if (instance.configQueriesGain[j][i] > 0)
-				instance.configServingQueries[i].vector[k++] = j;
+
+	// Populate the configServingQueries data structure
+	for (int i = 0, k = 0; i < nQueries; i++, k = 0)
+	{
+		for (int j = 0, k = 0; j < nConfigs; j++) {
+			if (configQueriesGain[j][i] > 0)
+				configServingQueries[i][k++] = j;
 		}
 	}
 
-	// population of the configServingQueries data Structure
-	for (int i = 0; i < instance.nConfigs; i++) {
-		int k = 0;
-		instance.queriesWithGain[i].vector = (int*)calloc(instance.queriesWithGain[i].length, sizeof(int));
-		for (int j = 0; j < instance.nQueries; j++) {
-			if (instance.configQueriesGain[i][j] > 0)
-				instance.queriesWithGain[i].vector[k++] = j;
+	// Populate the queriesWithGain data structure
+	for (int i = 0, k = 0; i < nConfigs; i++, k = 0) 
+	{
+		for (int j = 0; j < nQueries; j++) {
+			if (configQueriesGain[i][j] > 0)
+				queriesWithGain[i][k++] = j;
 		}
 	}
-
-	return instance;
 }
 
 
-long long getCurrentTime_ms()		// returns system time in milliseconds
-{
-	return std::chrono::duration_cast<std::chrono::milliseconds>(
-		std::chrono::system_clock::now().time_since_epoch()
-		).count();
-}
+/****	SOLUTION CLASS	****/
 
 
-//////////////////////////////////////////////
-//
-//	Solution class implementation
-//
-//////////////////////////////////////////////
-
-
-Solution::Solution(Instance *probInst)
-	: objFunctionValue(LONG_MIN),
+Solution::Solution(Instance& probInst)
+	: objFunctionValue(0),
 	fitnessValue(0),
-	problemInstance(probInst)
+	memory(0),
+	problemInstance(probInst),
+	selectedConfigurations(vector<short>(probInst.nQueries, -1)),		// Initialize default solution
+	indexesToBuild(vector<short>(probInst.nIndexes, 0))
 {	
-	selectedConfiguration = (short int*) malloc(problemInstance->nQueries * sizeof(short int));
-	for (int i = 0; i < problemInstance->nQueries; i++)
-		selectedConfiguration[i] = -1;
-	indexesToBuild = (short int*)calloc(problemInstance->nIndexes, sizeof(short int));
 }
 
-Solution::Solution(Solution* other)
-	: Solution(other->problemInstance)
+Solution::Solution(const Solution& other)
+	: problemInstance(other.problemInstance),
+	objFunctionValue(other.objFunctionValue),
+	fitnessValue(other.fitnessValue),
+	memory(other.memory),
+	selectedConfigurations(other.selectedConfigurations),
+	indexesToBuild(vector<short>(other.problemInstance.nIndexes, 0))
 {
-	for (int i = 0; i < problemInstance->nQueries; i++) {
-		// copy of the support integer array
-		selectedConfiguration[i] = other->selectedConfiguration[i];
+}
+
+Solution& Solution::operator=(const Solution& other)
+{
+	if (this != &other)
+	{
+		this->problemInstance = other.problemInstance;
+		this->objFunctionValue = other.objFunctionValue;
+		this->fitnessValue = other.fitnessValue;
+		this->memory = other.memory;
+		this->selectedConfigurations = other.selectedConfigurations;
+		this->indexesToBuild = vector<short>(problemInstance.nIndexes, 0);
 	}
 
-	for (int i = 0; i < problemInstance->nIndexes; i++) {
-		// copy of the indexesToBuild array
-		indexesToBuild[i] = other->indexesToBuild[i];
-	}
+	return *this;
 }
 
 Solution::~Solution()
 {
-	// free previously allocated heap memory
-	free(selectedConfiguration);
-	free(indexesToBuild);
 }
 
 
@@ -197,113 +213,117 @@ long int Solution::evaluate()
 {
 	int all_gains = 0;
 	int time_spent = 0;
-	int mem = 0;
-	
-	for (int i = 0; i < problemInstance->nIndexes; i++)
-		indexesToBuild[i] = 0;
+	memory = 0;
 
-	for (int i = 0; i < problemInstance->nQueries; i++) {
-		short int x = selectedConfiguration[i];
-		if (x >= 0) {
-			// iterate on the Indexes vector
-			for (int k = 0; k < problemInstance->nIndexes; k++) {
-				if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[x][k] == 1) {
-					// index k is part of configuration i and has not yet been built, so we need to build it
-					indexesToBuild[k] = 1;
-				}
-			}
-			
-			all_gains += problemInstance->configQueriesGain[x][i];		// add the contribute of the configuration with the i query
-		}
-	}
+	std::fill(indexesToBuild.begin(), indexesToBuild.end(), 0);
 
-	for (int i = 0; i < problemInstance->nIndexes; i++) 
+	// Calculate the gains and costs of the selected configurations
+	for (int i = 0; i < problemInstance.nQueries; i++) 
 	{
-		if (indexesToBuild[i])
+		if (selectedConfigurations[i] < 0)
+			continue;
+
+		for (int k = 0; k < problemInstance.nIndexes; k++) 
 		{
-			time_spent += problemInstance->indexesFixedCost[i];
-			mem += problemInstance->indexesMemoryOccupation[i];
+			// If index k is part of configuration i and has not yet been built
+			if (problemInstance.configIndexesMatrix[selectedConfigurations[i]][k] == 1 && indexesToBuild[k] == 0) 
+			{
+				indexesToBuild[k] = 1;										// Mark it as 'used'
+				time_spent += problemInstance.indexesFixedCost[k];			// Add its time...
+				memory += problemInstance.indexesMemoryOccupation[k];		// ...and memory cost
+			}
 		}
+		// Add the gain of the chosen configuration for the current query
+		all_gains += problemInstance.configQueriesGain[selectedConfigurations[i]][i];
 	}
 
-	bool feasible = mem < problemInstance->M;
+	// Feasibility (memory constraint)
+	bool feasible = memory < problemInstance.M;
+
+	// Objective function (total gains - index cost)
 	objFunctionValue = feasible ? all_gains - time_spent : LONG_MIN;
 
-	// update fitness value
-	fitnessValue = (all_gains - time_spent) - 
-		(feasible ? 0 : (mem - problemInstance->M));		// penalise infeasible solutions by their surplus memory
+	// Fitness function = objective function (+ penalty)
+	fitnessValue = (all_gains - time_spent) -
+		(feasible ? 0 : (memory - problemInstance.M));		// Penalise infeasible solutions by their surplus memory
+
 
 	return objFunctionValue;
 }
 
 
-int Solution::memoryCost()
+int Solution::evaluateMemory()
 {
-	int mem = 0;
-	for (int i = 0; i < problemInstance->nIndexes; i++)
-		indexesToBuild[i] = 0;
+	memory = 0;
+	std::fill(indexesToBuild.begin(), indexesToBuild.end(), 0);
 
-	for (int i = 0; i < problemInstance->nQueries; i++) 
+	// Calculate memory cost of the solution
+	for (int i = 0; i < problemInstance.nQueries; i++)
 	{
-		if (selectedConfiguration[i] >= 0) {
-			// iterate on the Indexes vector
-			for (int k = 0; k < problemInstance->nIndexes; k++) {
-				if (indexesToBuild[k] == 0 && problemInstance->configIndexesMatrix[selectedConfiguration[i]][k] == 1)
-					// index k is part of configuration i and has not yet been built, so we need to build it
-					indexesToBuild[k] = 1;
+		if (selectedConfigurations[i] < 0)
+			continue;
+
+		// Find all the indexes that are required by the selected configuration
+		for (int k = 0; k < problemInstance.nIndexes; k++) 
+		{
+			// If index k belongs to configuration i and has not yet been built
+			if (problemInstance.configIndexesMatrix[selectedConfigurations[i]][k] == 1 && indexesToBuild[k] == 0)
+			{
+				indexesToBuild[k] = 1;										// Mark it as 'used'
+				memory += problemInstance.indexesMemoryOccupation[k];		// and add its memory cost to the result
 			}
 		}
 	}
 
-	for (int i = 0; i < problemInstance->nIndexes; i++) {
-		if (indexesToBuild[i])
-			mem += problemInstance->indexesMemoryOccupation[i];				// calculate memory cost of the given solution
-	}
-
-	return mem;
+	return memory;
 }
 
 
-long int Solution::getObjFunctionValue() const
+long Solution::getObjFunctionValue() const
 {
 	return objFunctionValue;
 }
 
-long int Solution::getFitnessValue() const
+long Solution::getFitnessValue() const
 {
 	return fitnessValue;
 }
 
-
-void Solution::writeToFile(const std::string fileName) const
+int Solution::getMemoryCost() const
 {
-	short int**	configsServingQueries = (short int**)malloc(problemInstance->nQueries * sizeof(short int*));
+	return memory;
+}
+
+
+void Solution::writeToFile(const std::string& fileName) const
+{
+	std::vector<std::vector<short int>> configsServingQueries;
 
 	// Generate solution matrix on-the-fly before printing it
-	for (int i = 0; i < problemInstance->nQueries; i++)
+	for (int i = 0; i < problemInstance.nQueries; i++)
 	{
-		configsServingQueries[i] = (short int*)calloc(problemInstance->nConfigs, sizeof(short int));
+		configsServingQueries.emplace_back(std::vector<short int>(problemInstance.nConfigs, 0));
 
-		// set a 1 into the proper cell of the column
-		if (selectedConfiguration[i] >= 0)
-			configsServingQueries[i][selectedConfiguration[i]] = 1;
+		// Set value of the proper cell of the column
+		if (selectedConfigurations[i] >= 0)
+			configsServingQueries[i][selectedConfigurations[i]] = 1;
 	}
 
-	FILE *fl = fopen(fileName.c_str(), "w");
+	FILE* fl;
+	fopen_s(&fl, fileName.c_str(), "w");
 	if (fl == NULL)
-		fprintf(stderr, "Error: unable to open file %s", fileName.c_str());		
-	else
 	{
-		for (int i = 0; i < problemInstance->nConfigs; i++) {
-			for (int j = 0; j < problemInstance->nQueries; j++) {
-				fprintf(fl, "%d ", configsServingQueries[j][i]);		
-			}								
-			fprintf(fl, "\n");											
+		throw exception(("Error: unable to open file '" + fileName + "'").c_str());
+	}
+	else
+	{	// Print the solution matrix on the output file
+		for (int i = 0; i < problemInstance.nConfigs; i++) 
+		{
+			for (int j = 0; j < problemInstance.nQueries; j++) {
+				fprintf_s(fl, "%d ", configsServingQueries[j][i]);
+			}
+			fprintf_s(fl, "\n");
 		}
 		fclose(fl);
 	}
-
-	for (int i = 0; i < problemInstance->nQueries; i++)
-		free(configsServingQueries[i]);
-	free(configsServingQueries);
 }

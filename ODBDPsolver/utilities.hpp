@@ -1,92 +1,91 @@
-#ifndef UTILITIES_HPP
-#define UTILITIES_HPP
+#pragma once
 
 #include <string>
-#include <limits>
-#include <chrono>
+#include <vector>
 
-#define DEFAULT_TIMELIMIT 180*1000
+#define DEFAULT_TIMELIMIT 180*1000	// ms
 
-
-/* ============ DATA TYPES ============ */
+using namespace std;
 
 
-// Wrapper structure used to hold and pass the command line execution parameters
-typedef struct
+typedef struct Params		// Wrapper structure used to hold command line execution parameters
 {
-	std::string inputFileName = std::string();
-	std::string outputFileName = std::string();		// Not a parameter, can be generated as <inputFileName>_OMAAL_group04.sol
+	string inputFileName = string();
+	string outputFileName = string();				// Generated as <inputFileName>_OMAAL_group04.sol
 	unsigned int timeLimit = DEFAULT_TIMELIMIT;
-	bool parsingError = false;
-} Params;
+} Parameters;
 
-// Custom general-purpose array data structure
-typedef struct {
-	int* vector;
-	int length;
-} CustomArray;
 
-// Data structure used to hold the input dataset of the problem instance
-typedef struct
+/* ============ FUNCTIONS ============ */
+
+
+Parameters parseCommandLine(int argc, char* argv[]);
+long long getCurrentTime_ms();
+
+
+/* ============= CLASSES ============= */
+
+
+class Instance		// Holds the input dataset of the problem instance
 {
+
+public:
+
 	int nQueries;		// |Q|
 	int nIndexes;		// |I|
 	int nConfigs;		// |C|
-	int M;								 // memory
-	short int **configIndexesMatrix;	 // e matrix
-	int *indexesFixedCost;				 // f vector
-	int *indexesMemoryOccupation;		 // m vector
-	int **configQueriesGain;			 // g matrix
-	CustomArray *queriesWithGain;		 // #Configuration vectors  
-	CustomArray *configServingQueries;	 // #Queries vectors  
-} Instance;
+	int M;				// Memory
 
+	vector<vector<short>> configIndexesMatrix;	 // e matrix
+	vector<int> indexesFixedCost;				 // f vector
+	vector<int> indexesMemoryOccupation;		 // m vector
+	vector<vector<int>> configQueriesGain;		 // g matrix
 
+	vector<vector<int>> configServingQueries;	 // #Queries vectors  
+	vector<vector<int>> queriesWithGain;		 // #Configuration vectors
 
-/* ========== CLASSES ========== */
-
-class Solution
-{
-
-	// --- DATA ---
 
 public:
 
-	short int *selectedConfiguration;			// compact integer representation of the solution matrix
+	Instance();
+	~Instance();
 
-private:
-
-	short int *indexesToBuild;					// b vector
-	Instance *problemInstance;
-		
-	long int objFunctionValue;
-	long int fitnessValue;
-
-	// --- METHODS ---
-
-public:
-
-	Solution(Instance *probInst);		// constructor of an empty feasible Solution object for a problem Instance
-	Solution(Solution* other);			// copy constructor
-	~Solution();						// solution class destructor
-
-	long int evaluate();
-	int memoryCost();
-	long int getObjFunctionValue() const;
-	long int getFitnessValue() const;
-	void writeToFile(const std::string fileName) const;
-	
-private:
-
+	void readInputFile(const std::string& fileName);	// Instance input
 
 };
 
 
 
-/* ============ FUNCTIONS ============ */
+class Solution		// Represent a possible solution for the given problem
+{
 
-Params parseCommandLine (int argc, char* argv[]);
-Instance readInputFile (std::string fileName);
-long long getCurrentTime_ms();
+public:
 
-#endif // UTILITIES_HPP
+	vector<short> selectedConfigurations;		// Compact integer representation of the solution matrix
+
+private:
+
+	vector<short> indexesToBuild;			// b vector
+	Instance& problemInstance;
+		
+	long objFunctionValue;
+	long fitnessValue;
+	int memory;
+
+
+public:
+
+	Solution(Instance& probInst);					// Constructs an empty feasible Solution for the problem Instance
+	Solution(const Solution& other);				// Copy constructor
+	Solution& operator=(const Solution& other);		// Copy-assignment operator
+	~Solution();
+
+	long evaluate();
+	int evaluateMemory();
+	long getObjFunctionValue() const;
+	long getFitnessValue() const;
+	int getMemoryCost() const;
+
+	void writeToFile(const std::string& fileName) const;	// Solution output
+	
+};

@@ -1,36 +1,36 @@
-#include <stdlib.h>
-#include <stdio.h>   
-
-using namespace std;
+#include <iostream>
+#include <exception>
 
 #include "utilities.hpp"
-#include "algorithm.hpp"
 #include "genetic.hpp"
-#include "localsearch.hpp"
 
 
-int main(int argc, char **argv) 
+int main(int argc, char **argv)
 {
-	Params executionParameters;
+	Parameters executionParameters;
 	Instance problemInstance;
 
-	executionParameters = parseCommandLine(argc, argv);
-	if (!executionParameters.parsingError)
-	{
-		problemInstance = readInputFile(executionParameters.inputFileName);
+	try
+	{	// Command line parameters parsing
+		executionParameters = parseCommandLine(argc, argv);
+
+		// Read problem instance from input file
+		problemInstance.readInputFile(executionParameters.inputFileName);
 	}
-	else 
+	catch (std::exception& e)
 	{
-		fprintf(stderr, "\nEncountered error when parsing command line parameters, aborting...\n");
-		exit (EXIT_FAILURE);
-	} 
+		std::cerr << e.what() << std::endl;
+		exit(EXIT_FAILURE);
+	}
 	
 	// Instantiate the proper class and run the algorithm
-	Genetic solver = Genetic(&problemInstance);
-	Solution* solution = solver.run(&executionParameters);
+	Genetic solver(problemInstance);
+	Solution solution = solver.run(executionParameters);
 	
-	fprintf(stdout, "\nAlgorithm execution terminated succesfully!\nObjective function value = %ld\nMemory cost = %u\n\n",
-		solution->getObjFunctionValue(), solution->memoryCost());
+	std::cout << "\nAlgorithm execution terminated succesfully!"
+		<< "\nObjective function value = " << solution.getObjFunctionValue()
+		<< "\nMemory cost = " << solution.getMemoryCost()
+		<< std::endl << std::endl;
 
 	return 0;
 }
