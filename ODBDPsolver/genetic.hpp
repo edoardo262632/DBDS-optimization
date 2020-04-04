@@ -57,8 +57,7 @@ class Genetic : public Algorithm
 	private:
 
 		// Genetic algorithm steps, implemented each by a function
-		void initializePopulation();
-		void initializePopulation2();
+		void initializePopulation(int type = 0);
 		void breedPopulation();
 		void crossover(Solution* itemA, Solution* itemB, int N = 2);
 		void mutate(Solution* sol);

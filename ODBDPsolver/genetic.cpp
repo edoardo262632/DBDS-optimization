@@ -89,9 +89,7 @@ void Genetic::GeneticThread::run()
 	long long currentTime = getCurrentTime_ms();
 
 	// Randomly choosing one of the 2 avaiable initializers
-	if (random_number() % 2 == 0)
-		initializePopulation();
-	else initializePopulation2();
+	initializePopulation(random_number() % 2);
 
 	// REPEAT UNTIL THERE'S COMPUTATIONAL TIME LEFT (OR ALGORITHM RESTART)
 	while (currentTime - startingTime < algorithm.parameters->timeLimit)
@@ -137,106 +135,130 @@ void Genetic::GeneticThread::run()
 }
 
 
-// Greedy generation and evaluation of the starting population set
-void Genetic::GeneticThread::initializePopulation()
+// Greedy generations and evaluation of the starting population set
+void Genetic::GeneticThread::initializePopulation(int type)
 {
-	std::vector<int> usedConfigs;					// vector with already used configurations for a parent
+	// The first solution is always kept with the default configuration
+	parents[0] = new Solution(algorithm.problemInstance);
 
-	for (int n = 1; n < POPULATION_SIZE; n++)				// P-1 solutions are initialized with the greedy algorithm
+	switch (type)	// Multiple initializers are available
 	{
-		parents[n] = new Solution(algorithm.problemInstance);
-		usedConfigs.clear();
-		// fills the queries in a random order
-		for (int i = 0; i < 2 * algorithm.problemInstance.nQueries; i++) {
-			int j = random_number() % algorithm.problemInstance.nQueries;		// generate a random value for the query to consider
-			parents[n]->selectedConfigurations[j] = maxGainGivenQuery(j);		// gets configuration that results in max gain for a query
-			usedConfigs.push_back(parents[n]->selectedConfigurations[j]);		// insert selected configuration in the vector
+	case 0:
+	{
+		// Vector with the set of configurations already used by a solution
+		std::vector<int> usedConfigs;			
+		usedConfigs.reserve(algorithm.problemInstance.nConfigs);
 
-			if (parents[n]->memoryCost() > algorithm.problemInstance.M) {
-				usedConfigs.pop_back();										// remove the configuration if the memory cost with it is > M
-				if (i % 3 == 2) parents[n]->selectedConfigurations[j] = getHighestGainConfiguration(usedConfigs, j);
-				if (i % 3 == 1) parents[n]->selectedConfigurations[j] = getRandomConfiguration(usedConfigs, j);
-				else parents[n]->selectedConfigurations[j] = -1;				// "backtrack" . do not activate this configuration
-			}
-		}
-		// fills the rest of the queries from "left" to "right" with the same technique
-		for (int i = 0; i < algorithm.problemInstance.nQueries; i++) {
-			if (parents[n]->selectedConfigurations[i] < 0) {
-				parents[n]->selectedConfigurations[i] = maxGainGivenQuery(i);
-				usedConfigs.push_back(parents[n]->selectedConfigurations[i]);
+		for (int n = 1; n < POPULATION_SIZE; n++)			// P-1 solutions are initialized with the greedy algorithm
+		{
+			usedConfigs.clear();
+			parents[n] = new Solution(algorithm.problemInstance);
+			
+			// Fill the queries in a random order
+			for (int i = 0; i < 2 * algorithm.problemInstance.nQueries; i++) 
+			{
+				int query = random_number() % algorithm.problemInstance.nQueries;			// Select a random query
+				parents[n]->selectedConfigurations[query] = maxGainGivenQuery(query);		// Get the best configuration for that query
+				usedConfigs.emplace_back(parents[n]->selectedConfigurations[query]);		// Keep track of the configurations used
 
-				if (parents[n]->memoryCost() > algorithm.problemInstance.M) {
-					usedConfigs.pop_back();
-					if (i % 3 == 2) parents[n]->selectedConfigurations[i] = getHighestGainConfiguration(usedConfigs, i);
-					if (i % 3 == 1) parents[n]->selectedConfigurations[i] = getRandomConfiguration(usedConfigs, i);
-					else parents[n]->selectedConfigurations[i] = -1;
+				if (parents[n]->memoryCost() > algorithm.problemInstance.M)		// Remove the configuration if it raises the memory cost > M
+				{
+					usedConfigs.pop_back();										
+					if (i % 3 == 2) parents[n]->selectedConfigurations[query] = getHighestGainConfiguration(usedConfigs, query);
+					if (i % 3 == 1) parents[n]->selectedConfigurations[query] = getRandomConfiguration(usedConfigs, query);
+					else parents[n]->selectedConfigurations[query] = -1;		// Backtrack, do not serve this query
 				}
 			}
-		}
-	}
 
-	// Initialization and evaluation of the starting population set
-	population.clear();
-	parents[0] = new Solution(algorithm.problemInstance);				// one solution is kept with the default configuration
+			// Fill the rest of the queries in order, using the same technique
+			for (int i = 0; i < algorithm.problemInstance.nQueries; i++) 
+			{
+				if (parents[n]->selectedConfigurations[i] < 0) 
+				{
+					parents[n]->selectedConfigurations[i] = maxGainGivenQuery(i);
+					usedConfigs.emplace_back(parents[n]->selectedConfigurations[i]);
 
-	for (int i = 0; i < POPULATION_SIZE; i++) {
-		parents[i]->evaluate();
-		population.insert(parents[i]);
-	}
-
-	checkImprovingSolutions(parents, POPULATION_SIZE);
-}
-
-
-// Alternative greedy initialization of starting population
-void Genetic::GeneticThread::initializePopulation2()
-{
-	int *b = (int *)calloc(algorithm.problemInstance.nIndexes, sizeof(int));
-	int mem, prev;
-
-	for (int k = 1; k < POPULATION_SIZE; k++) {
-		mem = 0;
-		parents[k] = new Solution(algorithm.problemInstance);
-		for (int i = 0; i < algorithm.problemInstance.nIndexes; i++)
-			b[i] = 0;
-		for (int i = 0; i < algorithm.problemInstance.nQueries; i++)
-		{
-			if (parents[k]->selectedConfigurations[i] == -1) {
-				int n = random_number() % algorithm.problemInstance.configServingQueries[i].size();
-				int conf = algorithm.problemInstance.configServingQueries[i][n];
-				prev = mem;
-				for (int j = 0; j < algorithm.problemInstance.nIndexes; j++) {
-					if (algorithm.problemInstance.configIndexesMatrix[conf][j] && b[j] == 0) {
-						mem += algorithm.problemInstance.indexesMemoryOccupation[j];
+					if (parents[n]->memoryCost() > algorithm.problemInstance.M) 
+					{
+						usedConfigs.pop_back();
+						if (i % 3 == 2) parents[n]->selectedConfigurations[i] = getHighestGainConfiguration(usedConfigs, i);
+						if (i % 3 == 1) parents[n]->selectedConfigurations[i] = getRandomConfiguration(usedConfigs, i);
+						else parents[n]->selectedConfigurations[i] = -1;
 					}
 				}
-				if (mem < algorithm.problemInstance.M) {
+			}
+
+			parents[n]->evaluate();		// Evaluation of the new solution
+		}
+
+		break;
+	}
+
+	case 1:
+	{
+		std::vector<int> b = std::vector<int>(algorithm.problemInstance.nIndexes, 0);
+
+		for (int n = 1; n < POPULATION_SIZE; n++) 
+		{
+			parents[n] = new Solution(algorithm.problemInstance);
+
+			for (int i = 0; i < algorithm.problemInstance.nIndexes; i++)
+				b[i] = 0;
+
+			// Examine each query in order
+			for (int i = 0, mem = 0; i < algorithm.problemInstance.nQueries; i++)
+			{
+				if (parents[n]->selectedConfigurations[i] < 0) 
+				{
+					int delta_mem = 0;
+
+					// Get a random configuration that serves the current query
+					int conf = algorithm.problemInstance.configServingQueries[i]
+						[random_number() % algorithm.problemInstance.configServingQueries[i].size()];
+
+					// Compute the additional memory cost required for activating that configuration
 					for (int j = 0; j < algorithm.problemInstance.nIndexes; j++) {
-						if (algorithm.problemInstance.configIndexesMatrix[conf][j] && b[j] == 0) {
-							b[j] = 1;
+						if (algorithm.problemInstance.configIndexesMatrix[conf][j] && b[j] == 0)
+							delta_mem += algorithm.problemInstance.indexesMemoryOccupation[j];
+					}
+
+					mem += delta_mem;	// Update solution memory cost
+
+					if (mem < algorithm.problemInstance.M)		// If the solution is still feasible...
+					{
+						// ... activate the indexes required by that configuration
+						for (int j = 0; j < algorithm.problemInstance.nIndexes; j++) {
+							if (algorithm.problemInstance.configIndexesMatrix[conf][j])
+								b[j] = 1;
+						}
+						// Use this configuration for all unserved queries that benefit from it
+						for (int k = 0; k < algorithm.problemInstance.queriesWithGain[conf].size(); k++) {
+							if (parents[n]->selectedConfigurations[algorithm.problemInstance.queriesWithGain[conf][k]] == -1)
+								parents[n]->selectedConfigurations[algorithm.problemInstance.queriesWithGain[conf][k]] = conf;
 						}
 					}
-					for (int x = 0; x < algorithm.problemInstance.queriesWithGain[conf].size(); x++)
-						if (parents[k]->selectedConfigurations[algorithm.problemInstance.queriesWithGain[conf][x]] == -1)
-							parents[k]->selectedConfigurations[algorithm.problemInstance.queriesWithGain[conf][x]] = conf;
-				}
-				else {	//  backtrack
-					mem = prev;
+					else mem -= delta_mem;		//  Backtrack, do not use this configuration for this query
 				}
 			}
+
+			parents[n]->evaluate();		// Evaluation of the new solution
 		}
+
+		break;
 	}
 
-	free(b);
+	default:
+	{
+		// Initialize the entire population with default solutions
+		for (int k = 1; k < POPULATION_SIZE; k++)
+			parents[k] = new Solution(algorithm.problemInstance);
+		break;
+	}
+	}
 
-	// Initialization and evaluation of the starting population set
+	// Initialization of the starting population set
 	population.clear();
-	parents[0] = new Solution(algorithm.problemInstance);				// one solution is kept with the default configuration
-
-	for (int i = 0; i < POPULATION_SIZE; i++) {
-		parents[i]->evaluate();
-		population.insert(parents[i]);
-	}
+	population.insert(parents, parents + POPULATION_SIZE);
 
 	checkImprovingSolutions(parents, POPULATION_SIZE);
 }
