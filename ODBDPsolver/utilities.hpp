@@ -70,6 +70,7 @@ private:
 		
 	long objFunctionValue;
 	long fitnessValue;
+	int memory;
 
 
 public:
@@ -80,9 +81,10 @@ public:
 	~Solution();
 
 	long evaluate();
-	int memoryCost();
+	int evaluateMemory();
 	long getObjFunctionValue() const;
 	long getFitnessValue() const;
+	int getMemoryCost() const;
 
 	void writeToFile(const std::string& fileName) const;	// Solution output
 	

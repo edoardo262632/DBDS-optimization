@@ -161,7 +161,7 @@ void Genetic::GeneticThread::initializePopulation(int type)
 				parents[n]->selectedConfigurations[query] = maxGainGivenQuery(query);		// Get the best configuration for that query
 				usedConfigs.emplace_back(parents[n]->selectedConfigurations[query]);		// Keep track of the configurations used
 
-				if (parents[n]->memoryCost() > algorithm.problemInstance.M)		// Remove the configuration if it raises the memory cost > M
+				if (parents[n]->evaluateMemory() > algorithm.problemInstance.M)		// Remove the configuration if it raises the memory cost > M
 				{
 					usedConfigs.pop_back();										
 					if (i % 3 == 2) parents[n]->selectedConfigurations[query] = getHighestGainConfiguration(usedConfigs, query);
@@ -178,7 +178,7 @@ void Genetic::GeneticThread::initializePopulation(int type)
 					parents[n]->selectedConfigurations[i] = maxGainGivenQuery(i);
 					usedConfigs.emplace_back(parents[n]->selectedConfigurations[i]);
 
-					if (parents[n]->memoryCost() > algorithm.problemInstance.M) 
+					if (parents[n]->evaluateMemory() > algorithm.problemInstance.M) 
 					{
 						usedConfigs.pop_back();
 						if (i % 3 == 2) parents[n]->selectedConfigurations[i] = getHighestGainConfiguration(usedConfigs, i);

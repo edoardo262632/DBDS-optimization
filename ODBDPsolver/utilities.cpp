@@ -172,6 +172,7 @@ void Instance::readInputFile(const std::string& fileName)
 Solution::Solution(Instance& probInst)
 	: objFunctionValue(0),
 	fitnessValue(0),
+	memory(0),
 	problemInstance(probInst),
 	selectedConfigurations(vector<short>(probInst.nQueries, -1)),		// Initialize default solution
 	indexesToBuild(vector<short>(probInst.nIndexes, 0))
@@ -182,6 +183,7 @@ Solution::Solution(const Solution& other)
 	: problemInstance(other.problemInstance),
 	objFunctionValue(other.objFunctionValue),
 	fitnessValue(other.fitnessValue),
+	memory(other.memory),
 	selectedConfigurations(other.selectedConfigurations),
 	indexesToBuild(vector<short>(other.problemInstance.nIndexes, 0))
 {
@@ -194,6 +196,7 @@ Solution& Solution::operator=(const Solution& other)
 		this->problemInstance = other.problemInstance;
 		this->objFunctionValue = other.objFunctionValue;
 		this->fitnessValue = other.fitnessValue;
+		this->memory = other.memory;
 		this->selectedConfigurations = other.selectedConfigurations;
 		this->indexesToBuild = vector<short>(problemInstance.nIndexes, 0);
 	}
@@ -210,81 +213,85 @@ long int Solution::evaluate()
 {
 	int all_gains = 0;
 	int time_spent = 0;
-	int mem = 0;
+	memory = 0;
 
 	std::fill(indexesToBuild.begin(), indexesToBuild.end(), 0);
 
-	for (int i = 0; i < problemInstance.nQueries; i++) {
-		short int x = selectedConfigurations[i];
-		if (x >= 0) {
-			// iterate on the Indexes vector
-			for (int k = 0; k < problemInstance.nIndexes; k++) {
-				if (indexesToBuild[k] == 0 && problemInstance.configIndexesMatrix[x][k] == 1) {
-					// index k is part of configuration i and has not yet been built, so we need to build it
-					indexesToBuild[k] = 1;
-				}
-			}
-
-			all_gains += problemInstance.configQueriesGain[x][i];		// add the contribute of the configuration with the i query
-		}
-	}
-
-	for (int i = 0; i < problemInstance.nIndexes; i++)
+	// Calculate the gains and costs of the selected configurations
+	for (int i = 0; i < problemInstance.nQueries; i++) 
 	{
-		if (indexesToBuild[i])
+		if (selectedConfigurations[i] < 0)
+			continue;
+
+		for (int k = 0; k < problemInstance.nIndexes; k++) 
 		{
-			time_spent += problemInstance.indexesFixedCost[i];
-			mem += problemInstance.indexesMemoryOccupation[i];
+			// If index k is part of configuration i and has not yet been built
+			if (problemInstance.configIndexesMatrix[selectedConfigurations[i]][k] == 1 && indexesToBuild[k] == 0) 
+			{
+				indexesToBuild[k] = 1;										// Mark it as 'used'
+				time_spent += problemInstance.indexesFixedCost[k];			// Add its time...
+				memory += problemInstance.indexesMemoryOccupation[k];		// ...and memory cost
+			}
 		}
+		// Add the gain of the chosen configuration for the current query
+		all_gains += problemInstance.configQueriesGain[selectedConfigurations[i]][i];
 	}
 
-	bool feasible = mem < problemInstance.M;
+	// Feasibility (memory constraint)
+	bool feasible = memory < problemInstance.M;
+
+	// Objective function (total gains - index cost)
 	objFunctionValue = feasible ? all_gains - time_spent : LONG_MIN;
 
-	// update fitness value
+	// Fitness function = objective function (+ penalty)
 	fitnessValue = (all_gains - time_spent) -
-		(feasible ? 0 : (mem - problemInstance.M));		// penalise infeasible solutions by their surplus memory
+		(feasible ? 0 : (memory - problemInstance.M));		// Penalise infeasible solutions by their surplus memory
+
 
 	return objFunctionValue;
 }
 
 
-// TODO: maybe integrate into a single evaluate() call and turn into getter
-int Solution::memoryCost()
+int Solution::evaluateMemory()
 {
-	int mem = 0;
-
+	memory = 0;
 	std::fill(indexesToBuild.begin(), indexesToBuild.end(), 0);
 
+	// Calculate memory cost of the solution
 	for (int i = 0; i < problemInstance.nQueries; i++)
 	{
-		if (selectedConfigurations[i] >= 0) {
-			// iterate on the Indexes vector
-			for (int k = 0; k < problemInstance.nIndexes; k++) {
-				if (indexesToBuild[k] == 0 && problemInstance.configIndexesMatrix[selectedConfigurations[i]][k] == 1)
-					// index k is part of configuration i and has not yet been built, so we need to build it
-					indexesToBuild[k] = 1;
+		if (selectedConfigurations[i] < 0)
+			continue;
+
+		// Find all the indexes that are required by the selected configuration
+		for (int k = 0; k < problemInstance.nIndexes; k++) 
+		{
+			// If index k belongs to configuration i and has not yet been built
+			if (problemInstance.configIndexesMatrix[selectedConfigurations[i]][k] == 1 && indexesToBuild[k] == 0)
+			{
+				indexesToBuild[k] = 1;										// Mark it as 'used'
+				memory += problemInstance.indexesMemoryOccupation[k];		// and add its memory cost to the result
 			}
 		}
 	}
 
-	for (int i = 0; i < problemInstance.nIndexes; i++) {
-		if (indexesToBuild[i])
-			mem += problemInstance.indexesMemoryOccupation[i];		// calculate memory cost of the given solution
-	}
-
-	return mem;
+	return memory;
 }
 
 
-long int Solution::getObjFunctionValue() const
+long Solution::getObjFunctionValue() const
 {
 	return objFunctionValue;
 }
 
-long int Solution::getFitnessValue() const
+long Solution::getFitnessValue() const
 {
 	return fitnessValue;
+}
+
+int Solution::getMemoryCost() const
+{
+	return memory;
 }
 
 

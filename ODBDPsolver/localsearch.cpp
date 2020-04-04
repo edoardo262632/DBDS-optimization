@@ -13,7 +13,7 @@ Solution LocalSearch::run(const Parameters& parameters)
 {
 	// First improvement local search implementation
 	// using startingPoint as the initial solution for the neighborhood generation
-	int mem = startingPoint.memoryCost();
+	int mem = startingPoint.getMemoryCost();
 	int extra_mem, cost, gain;
 
 	std::vector<short> original = startingPoint.selectedConfigurations;

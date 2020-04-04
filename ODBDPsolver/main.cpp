@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 	
 	std::cout << "\nAlgorithm execution terminated succesfully!"
 		<< "\nObjective function value = " << solution.getObjFunctionValue()
-		<< "\nMemory cost = " << solution.memoryCost()
+		<< "\nMemory cost = " << solution.getMemoryCost()
 		<< std::endl << std::endl;
 
 	return 0;
