@@ -85,6 +85,7 @@ void Instance::readInputFile(const std::string& fileName)
 
 	// Read the CONFIGURATION_INDEX_MATRIX
 	configIndexesMatrix.clear();
+	configIndexesMatrix.reserve(nConfigs);
 	for (int i = 0; i < nConfigs; i++)
 	{
 		configIndexesMatrix.emplace_back(vector<short int>(nIndexes, 0));
@@ -115,8 +116,11 @@ void Instance::readInputFile(const std::string& fileName)
 
 	// Allocate and read the CONFIGURATION_QUERIES_GAIN
 	configQueriesGain.clear();
+	configQueriesGain.reserve(nConfigs);
 	configServingQueries.clear();
+	configServingQueries.reserve(nQueries);
 	queriesWithGain.clear();
+	queriesWithGain.reserve(nConfigs);
 
 	for (int i = 0; i < nQueries; i++)
 		configServingQueries.emplace_back(std::vector<int>());
