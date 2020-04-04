@@ -200,10 +200,8 @@ void Genetic::GeneticThread::initializePopulation(int type)
 
 		for (int n = 1; n < POPULATION_SIZE; n++) 
 		{
+			std::fill(b.begin(), b.end(), 0);
 			parents[n] = new Solution(algorithm.problemInstance);
-
-			for (int i = 0; i < algorithm.problemInstance.nIndexes; i++)
-				b[i] = 0;
 
 			// Examine each query in order
 			for (int i = 0, mem = 0; i < algorithm.problemInstance.nQueries; i++)

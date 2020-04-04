@@ -212,8 +212,7 @@ long int Solution::evaluate()
 	int time_spent = 0;
 	int mem = 0;
 
-	for (int i = 0; i < problemInstance.nIndexes; i++)
-		indexesToBuild[i] = 0;
+	std::fill(indexesToBuild.begin(), indexesToBuild.end(), 0);
 
 	for (int i = 0; i < problemInstance.nQueries; i++) {
 		short int x = selectedConfigurations[i];
@@ -255,8 +254,7 @@ int Solution::memoryCost()
 {
 	int mem = 0;
 
-	for (int i = 0; i < problemInstance.nIndexes; i++)
-		indexesToBuild[i] = 0;
+	std::fill(indexesToBuild.begin(), indexesToBuild.end(), 0);
 
 	for (int i = 0; i < problemInstance.nQueries; i++)
 	{
